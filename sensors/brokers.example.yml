@@ -1,0 +1,17 @@
+# Example brokers configuration for the sensor simulator
+# Copy this file to brokers.yml and adjust credentials as needed.
+# You can also use JSON with an equivalent structure.
+
+- host: chi.google.com
+  port: 1883
+  username: null
+  password: null
+  tls: false
+  keepalive: 60
+
+- host: sgp.google.com
+  port: 1883
+  username: your_emqx_user
+  password: your_emqx_pass
+  tls: false
+  keepalive: 60

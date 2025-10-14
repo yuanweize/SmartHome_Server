@@ -1,8 +1,22 @@
 services:
-  homeassistant:
-    container_name: homeassistant
+  ha_mosquitto:
+    container_name: ha_mosquitto
     image: ghcr.io/home-assistant/home-assistant:stable
     volumes:
-      - ./config:/config
+      - ./config_mos:/config
     restart: unless-stopped
-    network_mode: host
+    ports:
+      - "8123:8123"
+    environment:
+      - TZ=Europe/Prague
+
+  ha_emqx:
+    container_name: ha_emqx
+    image: ghcr.io/home-assistant/home-assistant:stable
+    volumes:
+      - ./config_emqx:/config
+    restart: unless-stopped
+    ports:
+      - "8124:8123"   # maping second port for another instance
+    environment:
+      - TZ=Europe/Prague
