@@ -1,0 +1,11 @@
+services:
+  simulator:
+    build:
+      context: ..
+      dockerfile: sensors/Dockerfile
+    container_name: sensor-simulator
+    # 可按需修改参数
+    command: ["-n","100","-i","1","--payload","json","--qos","1","--ha-discovery","--config","/app/sensors/brokers.yml"]
+    volumes:
+      - ./brokers.yml:/app/sensors/brokers.yml:ro
+    restart: unless-stopped
