@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+.env
+
+# macOS
+.DS_Store
+
+# VSCode
+.vscode/
+
+# Project-specific (secrets / local config)
+sensors/brokers.yml
+sensors/*.local.yml
+sensors/*.dev.yml
+sensors/*.secrets.*
+
+# Docker
+*.log
