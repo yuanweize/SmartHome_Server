@@ -17,7 +17,10 @@ venv/
 sensors/brokers.yml
 sensors/*.local.yml
 sensors/*.dev.yml
-sensors/*.secrets.*
+
+# ESPHome
+esphome/.esphome/
+esphome/secrets.yaml
 
 # Docker
 *.log
