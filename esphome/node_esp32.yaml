@@ -1,0 +1,22 @@
+esphome:
+  name: smarthome-esp32
+  friendly_name: "Environment Node ESP32(Node B)"
+
+esp32:
+  board: esp32doit-devkit-v1
+  framework:
+    type: esp-idf
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+logger:
+  level: DEBUG
+
+# Basic GPIO configuration
+# More sensors to be added later
