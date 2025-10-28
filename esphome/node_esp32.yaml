@@ -11,12 +11,23 @@ ota:
   - platform: esphome
     password: !secret ota_password
 
+api:
+  encryption:
+    key: !secret api_encryption_key
+
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
+  fast_connect: true
 
 logger:
   level: DEBUG
 
-# Basic GPIO configuration
-# More sensors to be added later
+# I2C bus configuration
+i2c:
+  sda: GPIO33
+  scl: GPIO32
+  scan: true
+  id: bus_b
+
+# Sensors will be added in next commit
