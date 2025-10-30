@@ -1,0 +1,13 @@
+# SmartHome Server
+
+IoT Smart Home server infrastructure with MQTT brokers, Home Assistant, and ESPHome integration.
+
+## Components
+- ESPHome nodes for ESP32/ESP32-S3 hardware
+- MQTT brokers (EMQX, Mosquitto) with mTLS support
+- Home Assistant container
+- Sensor simulator for testing
+
+## Getting Started
+
+See individual component READMEs for setup instructions.
