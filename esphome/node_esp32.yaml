@@ -20,14 +20,20 @@ wifi:
   password: !secret wifi_password
   fast_connect: true
 
+# MQTT configuration
+mqtt:
+  broker: !secret mqtt_broker
+  port: !secret mqtt_port
+  
+  certificate_authority: !secret mqtt_ca_cert
+  client_certificate: !secret mqtt_client_cert
+  client_certificate_key: !secret mqtt_client_key
+
 logger:
   level: DEBUG
 
-# I2C bus configuration
 i2c:
   sda: GPIO33
   scl: GPIO32
   scan: true
   id: bus_b
-
-# Sensors will be added in next commit
