@@ -7,10 +7,13 @@ esp32:
   framework:
     type: esp-idf
 
+
+# 1. 开启 OTA
 ota:
   - platform: esphome
     password: !secret ota_password
 
+# 2. Native API
 api:
   encryption:
     key: !secret api_encryption_key
@@ -20,11 +23,12 @@ wifi:
   password: !secret wifi_password
   fast_connect: true
 
-# MQTT configuration
+# 3. MQTT 配置
 mqtt:
   broker: !secret mqtt_broker
   port: !secret mqtt_port
   
+  # 引用 secrets.yaml 里的证书
   certificate_authority: !secret mqtt_ca_cert
   client_certificate: !secret mqtt_client_cert
   client_certificate_key: !secret mqtt_client_key
@@ -32,8 +36,100 @@ mqtt:
 logger:
   level: DEBUG
 
+# --- I2C 总线配置 ---
 i2c:
   sda: GPIO33
   scl: GPIO32
   scan: true
   id: bus_b
+
+# --- 补光灯控制 (TCS34725 LED) ---
+switch:
+  - platform: gpio
+    pin: GPIO25
+    name: "Color Sensor LED"
+    id: tcs_led
+
+sensor:
+  # 1. TCS34725 颜色传感器
+  - platform: tcs34725
+    i2c_id: bus_b
+    red_channel: { name: "RGB Red" }
+    green_channel: { name: "RGB Green" }
+    blue_channel: { name: "RGB Blue" }
+    illuminance: { name: "Ambient Lux" }
+    gain: 4x
+    integration_time: 24ms
+    update_interval: 1s
+
+  # 2. MQ-2 烟雾传感器
+  - platform: adc
+    pin: GPIO34
+    name: "Smoke Concentration"
+    update_interval: 0.1s
+    attenuation: 12db
+    accuracy_decimals: 3
+    filters:
+      - sliding_window_moving_average:
+          window_size: 5
+          send_every: 2
+      - delta: 0.005
+    # 本地联动逻辑：烟雾过大 -> 红灯闪烁
+    on_value_range:
+      - above: 2.5
+        then:
+          - light.turn_on:
+              id: status_light
+              red: 100%
+              green: 0%
+              blue: 0%
+              effect: "Pulse"
+      # (可选) 增加一个恢复正常的逻辑：低于 2.5 关灯
+      - below: 2.4
+        then:
+          - light.turn_off: status_light
+
+binary_sensor:
+  # 3. SR602 人体传感器
+  - platform: gpio
+    pin: GPIO23
+    name: "Motion Detected"
+    device_class: motion
+    # 本地联动逻辑：有人经过 -> 绿灯亮
+    on_press:
+      then:
+        - light.turn_on:
+            id: status_light
+            red: 0%
+            green: 100%
+            blue: 0%
+    # (可选) 没人时延迟关灯
+    on_release:
+      then:
+        - delay: 5s
+        - light.turn_off: status_light
+
+# --- RGB 灯光控制 ---
+light:
+  - platform: rgb
+    name: "Status Indicator"
+    id: status_light
+    red: output_r
+    green: output_g
+    blue: output_b
+    effects:
+      - pulse:
+          name: "Pulse"
+          transition_length: 0.5s
+          update_interval: 0.5s
+
+output:
+  - platform: ledc
+    pin: GPIO26
+    id: output_r
+  - platform: ledc
+    pin: GPIO27
+    id: output_g
+  - platform: ledc
+    pin: GPIO14
+    id: output_b
