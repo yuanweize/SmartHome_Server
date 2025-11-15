@@ -1,22 +1,27 @@
 services:
-  ha_mosquitto:
-    container_name: ha_mosquitto
+  home-assistant:
+    container_name: home-assistant
     image: ghcr.io/home-assistant/home-assistant:stable
     volumes:
-      - ./config_mos:/config
+      - ./config_ha:/config
     restart: unless-stopped
     ports:
-      - "8123:8123"
+      - "127.0.0.1:8123:8123"   # maping second port for another instance
     environment:
       - TZ=Europe/Prague
-
-  ha_emqx:
-    container_name: ha_emqx
-    image: ghcr.io/home-assistant/home-assistant:stable
+    networks:
+      - smarthome-net
+  esphome:
+    container_name: esphome
+    image: esphome/esphome:latest
+    restart: always
+    ports:
+      - "127.0.0.1:6052:6052"
     volumes:
-      - ./config_emqx:/config
-    restart: unless-stopped
-    ports:
-      - "8124:8123"   # maping second port for another instance
-    environment:
-      - TZ=Europe/Prague
+      - ./config_esphome:/config
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - smarthome-net
+networks:
+  smarthome-net:
+    driver: bridge
