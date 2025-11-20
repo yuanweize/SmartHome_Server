@@ -2,16 +2,27 @@
 # Copy this file to brokers.yml and adjust credentials as needed.
 # You can also use JSON with an equivalent structure.
 
-- host: chi.google.com
-  port: 1883
-  username: null
-  password: null
-  tls: false
-  keepalive: 60
-
 - host: sgp.google.com
   port: 1883
   username: your_emqx_user
   password: your_emqx_pass
   tls: false
   keepalive: 60
+
+- host: mqtt.google.com
+  port: 8883
+
+  # Enable TLS
+  tls: true
+
+  # [Key] mTLS certificate paths (relative to this file)
+  # If using one-way TLS, only ca_file is required.
+  # If using mTLS (mutual TLS), all three fields below are required.
+  ca_file: "./certs/ca.pem"
+  cert_file: "./certs/client.pem"
+  key_file: "./certs/client.key"
+
+  tls_insecure: false
+
+  keepalive: 60
+  # client_id: "python_sim_1" # Optional; a value will be generated automatically by default
