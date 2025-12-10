@@ -4,8 +4,19 @@ services:
       context: ..
       dockerfile: sensors/Dockerfile
     container_name: sensor-simulator
-    # 可按需修改参数
-    command: ["-n","100","-i","1","--payload","json","--qos","1","--ha-discovery","--config","/app/sensors/brokers.yml"]
+    # Command-line arguments:
+    # -n 100: simulate 100 devices
+    # -i 1: send once every 1 second (high-load test)
+    # --payload json: use JSON format (recommended)
+    # --ha-discovery: automatically create entities in Home Assistant (HA)
+    # --config: specify the config file path (inside the container)
+    command: ["-n", "100", "-i", "1", "--payload", "json", "--qos", "1", "--ha-discovery", "--config", "/app/sensors/brokers.yml"]
+    
     volumes:
+      # 1. Mount the config file
       - ./brokers.yml:/app/sensors/brokers.yml:ro
+      
+      # 2. Mount the certificates directory
+      - ./certs:/app/sensors/certs:ro
+    
     restart: unless-stopped
