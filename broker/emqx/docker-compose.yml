@@ -26,9 +26,9 @@ services:
       EMQX_LISTENERS__SSL__DEFAULT__BIND: "8883"
 
       # TLS certificate paths inside the container
-      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__CACERTFILE: "/opt/emqx/certs/ca.pem"
-      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__CERTFILE: "/opt/emqx/certs/server.pem"
-      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__KEYFILE: "/opt/emqx/certs/server.key"
+      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__CACERTFILE: "/opt/emqx/certs/ca/ca.pem"
+      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__CERTFILE: "/opt/emqx/certs/server/server.pem"
+      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__KEYFILE: "/opt/emqx/certs/server/server.key"
 
       # ----------------------------
       # mTLS (Mutual TLS) Enforcement
