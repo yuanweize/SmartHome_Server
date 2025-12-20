@@ -15,7 +15,7 @@ ota:
 # --- 2. 开启 Native API (HA 直连专用，加密) ---
 api:
   encryption:
-    key: !secret api_encryption_key
+    key: !secret api_key_esp32s3
 
 wifi:
   ssid: !secret wifi_ssid
