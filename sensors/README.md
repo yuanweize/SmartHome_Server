@@ -74,6 +74,20 @@ Home Assistant MQTT Discovery (no YAML needed):
 python sensors/sensor_simulator.py -n 20 -i 5 --payload json --ha-discovery
 ```
 
+## TLS / mTLS certificates
+
+The simulator supports two ways to provide TLS materials:
+
+1) **File paths** in `sensors/brokers.yml` (`ca_file`, `cert_file`, `key_file`).
+  - Paths are resolved **relative to the brokers config file**.
+  - With Docker, this matches `sensors/docker-compose.yml` mounting `./certs` into the container.
+  - Common pitfall: if your certs are stored at repo root `certs/`, then a path like `./certs/...` inside `sensors/brokers.yml` refers to `sensors/certs/...`.
+    Use `../certs/...` or copy certs under `sensors/certs/...`.
+
+2) **Inline PEM text** in `sensors/brokers.yml` (`ca_pem`, `cert_pem`, `key_pem`).
+  - Inline PEM takes priority over file paths.
+  - If inline TLS setup fails, it will fall back to file paths (if present).
+
 Drift model with noise and jitter:
 
 ```bash
@@ -87,8 +101,8 @@ python sensors/sensor_simulator.py -n 10 -i 2 --payload json \
 - `-c, --config` Path to brokers config (YAML/JSON). Default: `sensors/brokers.yml`
 - `-n, --sensors` Number of virtual sensors. Default: 50
 - `-i, --interval` Seconds between publishes. Default: 5
-- `-t, --topic-template` MQTT topic template. Default: `sensor/{sensor_id}/temperature`
-- `--payload` Payload format: `plain` or `json`. Default: `plain`
+- `-t, --topic-template` MQTT topic template. Default: `sensor/{sensor_id}/data`
+- `--payload` Payload format: `plain` or `json`. Default: `json`
 - `--qos` QoS level: 0, 1, or 2. Default: 0
 - `--retain` Set MQTT retain flag
 - `--min` / `--max` Value range for generated temperature. Default: 20.0 / 30.0
@@ -96,7 +110,7 @@ python sensors/sensor_simulator.py -n 10 -i 2 --payload json \
 - `--connect-timeout` Seconds to wait for MQTT connections before publishing. Default: 5.0
 - `--ha-discovery` Publish Home Assistant MQTT Discovery config (retained)
 - `--discovery-prefix` HA discovery prefix. Default: `homeassistant`
-- `--model` Temperature model: `uniform` or `drift`. Default: `uniform`
+- `--model` Temperature model: `uniform` or `drift`. Default: `drift`
 - `--noise-sd` Std dev of Gaussian noise per publish when `--model drift`. Default: 0.2
 - `--drift-per-minute` Linear drift in value per minute when `--model drift`. Default: 0.0
 - `--jitter` Sleep jitter as fraction of interval (e.g., 0.1 = ±10%). Default: 0.0
