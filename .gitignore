@@ -21,6 +21,10 @@ sensors/*.secrets.*
 
 # Docker
 *.log
-certs/
+# Certificates
+# Allow committing public certs/CA bundles if you want, but always ignore private keys.
+*.key
+*.p12
+*.pfx
 docs/
 tests/
