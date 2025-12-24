@@ -13,6 +13,10 @@ services:
     command: ["-n", "100", "-i", "1", "--payload", "json", "--qos", "1", "--ha-discovery", "--config", "/app/sensors/brokers.yml"]
     
     volumes:
+      # Dev convenience: mount code so edits take effect without rebuilding the image.
+      # Note: if you change dependencies in requirements.txt, you still need `docker compose up -d --build`.
+      - ./sensor_simulator.py:/app/sensors/sensor_simulator.py:ro
+
       # 1. Mount the config file
       - ./brokers.yml:/app/sensors/brokers.yml:ro
       
