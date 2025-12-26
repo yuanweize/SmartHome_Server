@@ -1,6 +1,8 @@
 # Sensor Simulator
 
-A simple multi-broker MQTT sensor simulator used to demonstrate smart home sensor publishing for Home Assistant via Mosquitto and EMQX. It can publish the same virtual sensor data to multiple brokers concurrently.
+A multi-broker MQTT smart-home simulator for Home Assistant.
+
+This module is designed for a thesis/demo environment: it generates realistic sensor streams AND controllable actuator entities, so you can build meaningful HA automations even when hardware devices are limited.
 
 Files:
 - `sensor_simulator.py` — main simulator script
@@ -22,23 +24,11 @@ pip install -r requirements.txt
 
 ## Configuration
 
-Create `sensors/brokers.yml` based on `sensors/brokers.example.yml`:
+Copy `sensors/brokers.example.yml` to `sensors/brokers.yml` and edit it.
 
-```yaml
-- host: chi.google.com
-  port: 1883
-  username: null
-  password: null
-  tls: false
-  keepalive: 60
-
-- host: sgp.google.com
-  port: 1883
-  username: your_emqx_user
-  password: your_emqx_pass
-  tls: false
-  keepalive: 60
-```
+The config file contains BOTH:
+- `brokers`: MQTT broker list (TLS/mTLS supported)
+- `simulation`: devices/entities/automations shown in Home Assistant
 
 Notes:
 - YAML and JSON are both supported. Use `--config` to specify a custom path.
@@ -50,28 +40,28 @@ Dry-run (no network publishes, logs only):
 
 ```bash
 . .venv/bin/activate
-python sensors/sensor_simulator.py --dry-run -n 5 -i 1 --payload json --log-level DEBUG
+python sensors/sensor_simulator.py --config sensors/brokers.yml --dry-run --log-level DEBUG
 ```
 
-Publish to both brokers using `sensors/brokers.yml`:
+Publish using `sensors/brokers.yml`:
 
 ```bash
 . .venv/bin/activate
-python sensors/sensor_simulator.py -n 50 -i 5 --payload json --qos 1
+python sensors/sensor_simulator.py --config sensors/brokers.yml
 ```
 
-Use a custom config file:
+Override some settings from CLI (CLI > brokers.yml > defaults):
 
 ```bash
 . .venv/bin/activate
-python sensors/sensor_simulator.py --config sensors/brokers.dev.yml -n 10 -i 2
+python sensors/sensor_simulator.py --config sensors/brokers.yml --devices 200 --qos 1 --log-level INFO
 ```
 
-Home Assistant MQTT Discovery (no YAML needed):
+Home Assistant MQTT Discovery:
 
 ```bash
 . .venv/bin/activate
-python sensors/sensor_simulator.py -n 20 -i 5 --payload json --ha-discovery
+python sensors/sensor_simulator.py --config sensors/brokers.yml
 ```
 
 ## TLS / mTLS certificates
@@ -88,36 +78,50 @@ The simulator supports two ways to provide TLS materials:
   - Inline PEM takes priority over file paths.
   - If inline TLS setup fails, it will fall back to file paths (if present).
 
-Drift model with noise and jitter:
+## Entities & automations
 
-```bash
-. .venv/bin/activate
-python sensors/sensor_simulator.py -n 10 -i 2 --payload json \
-  --model drift --drift-per-minute 0.5 --noise-sd 0.1 --jitter 0.1
-```
+All entities are defined in `simulation.entities`.
 
-## Options (summary)
+Entity fields:
+- `id`: base id (required). If `count > 1`, instances become `id_1`, `id_2`, ...
+- `count`: optional, default `1` (per-device instance count)
+- `name`: supports `{device_id}` and `{index}` (instance index)
 
-- `-c, --config` Path to brokers config (YAML/JSON). Default: `sensors/brokers.yml`
-- `-n, --sensors` Number of virtual sensors. Default: 50
-- `-i, --interval` Seconds between publishes. Default: 5
-- `-t, --topic-template` MQTT topic template. Default: `sensor/{sensor_id}/data`
-- `--payload` Payload format: `plain` or `json`. Default: `json`
-- `--qos` QoS level: 0, 1, or 2. Default: 0
-- `--retain` Set MQTT retain flag
-- `--min` / `--max` Value range for generated temperature. Default: 20.0 / 30.0
-- `--client-id-prefix` Prefix for MQTT client IDs (optional)
-- `--connect-timeout` Seconds to wait for MQTT connections before publishing. Default: 5.0
-- `--ha-discovery` Publish Home Assistant MQTT Discovery config (retained)
-- `--discovery-prefix` HA discovery prefix. Default: `homeassistant`
-- `--model` Temperature model: `uniform` or `drift`. Default: `drift`
-- `--noise-sd` Std dev of Gaussian noise per publish when `--model drift`. Default: 0.2
-- `--drift-per-minute` Linear drift in value per minute when `--model drift`. Default: 0.0
-- `--jitter` Sleep jitter as fraction of interval (e.g., 0.1 = ±10%). Default: 0.0
-- `--seed` Global RNG seed for deterministic runs (overrides per-sensor seeding)
-- `--dry-run` Do not connect/publish; log only
-- `--once` Publish one cycle then exit
-- `--log-level` Logging level (DEBUG, INFO, WARNING, ERROR). Default: INFO
+Supported kinds:
+- `sensor`: publishes numeric values
+- `binary_sensor`: publishes `ON`/`OFF`
+- `switch`: controllable from HA via MQTT command topic
+- `light`: controllable from HA via MQTT command topic (JSON state)
+
+Meaningful couplings can be configured via `simulation.automation`:
+- `motion_entity` + `light_entity`: motion turns on light for `motion_hold_seconds`
+- `switch_entity` + `sensor_entity`: switch affects sensor trend (e.g., heater affects temperature)
+
+## CLI overrides
+
+The design goal is to keep Docker usage simple: `--config` is enough.
+
+If you do use CLI flags, the precedence is:
+1) CLI flags
+2) `sensors/brokers.yml`
+3) built-in defaults
+
+Common flags:
+- `--config PATH`
+- `--devices N`
+- `--qos 0|1|2`
+- `--retain`
+- `--log-level DEBUG|INFO|WARNING|ERROR`
+
+## Home Assistant device metadata
+
+The MQTT Discovery payload includes a Home Assistant `device` object, configured in `simulation.device`:
+- `identifiers` (string list)
+- `name`
+- `model`
+- `manufacturer`
+
+These fields support `{device_id}`.
 
 ## Troubleshooting
 
