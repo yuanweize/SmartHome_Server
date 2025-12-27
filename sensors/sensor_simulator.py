@@ -543,6 +543,8 @@ def parse_simulation_config(rest: Any, cli: argparse.Namespace) -> SimulationCon
     # CLI overrides (highest priority)
     if getattr(cli, "devices", None) is not None:
         cfg.devices = int(cli.devices)
+    elif getattr(cli, "sensors", None) is not None:
+        cfg.devices = int(cli.sensors)
     if getattr(cli, "base_topic", None):
         cfg.base_topic = str(cli.base_topic)
     if getattr(cli, "discovery_prefix", None):
@@ -559,6 +561,18 @@ def parse_simulation_config(rest: Any, cli: argparse.Namespace) -> SimulationCon
         cfg.ha_discovery = True
     if getattr(cli, "client_id_prefix", None):
         cfg.client_id_prefix = str(cli.client_id_prefix)
+
+    # Legacy/global overrides
+    if getattr(cli, "interval", None) is not None:
+        interval = float(cli.interval)
+        for e in cfg.entities:
+            if e.kind not in {"switch", "light"}:
+                e.interval = interval
+    if getattr(cli, "payload", None):
+        payload = str(cli.payload)
+        for e in cfg.entities:
+            if e.kind == "sensor":
+                e.state_payload = payload
 
     return cfg
 
@@ -670,7 +684,10 @@ class Simulator:
                     self.state[key] = bool(ent.initial) if ent.initial is not None else False
                 elif ent.kind in {"light"}:
                     if isinstance(ent.initial, dict):
-                        self.state[key] = ent.initial
+                        initial = dict(ent.initial)
+                        if "state" in initial and isinstance(initial["state"], bool):
+                            initial["state"] = "ON" if initial["state"] else "OFF"
+                        self.state[key] = initial
                     else:
                         self.state[key] = {"state": "OFF", "brightness": 255, "color": {"r": 255, "g": 255, "b": 255}}
                 elif ent.kind == "binary_sensor":
@@ -722,7 +739,11 @@ class Simulator:
                 cur = {"state": "OFF", "brightness": 255, "color": {"r": 255, "g": 255, "b": 255}}
 
             if "state" in obj:
-                cur["state"] = str(obj.get("state", "OFF")).upper()
+                state_val = obj.get("state", "OFF")
+                if isinstance(state_val, bool):
+                    cur["state"] = "ON" if state_val else "OFF"
+                else:
+                    cur["state"] = str(state_val).upper()
             if "brightness" in obj:
                 try:
                     cur["brightness"] = int(obj.get("brightness"))
@@ -992,6 +1013,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config", default="sensors/brokers.yml", help="Config file path")
     parser.add_argument("--devices", type=int, default=None, help="Override simulation.devices")
+    parser.add_argument("-n", "--sensors", type=int, default=None, help="(legacy) Alias for --devices")
+    parser.add_argument("-i", "--interval", type=float, default=None, help="(legacy) Override all non-actuator entity intervals")
+    parser.add_argument("--payload", choices=["json", "plain"], default=None, help="(legacy) Override sensor payload format")
     parser.add_argument("--base-topic", default=None, help="Override simulation.base_topic")
     parser.add_argument("--discovery-prefix", default=None, help="Override simulation.discovery_prefix")
     parser.add_argument("--qos", type=int, choices=[0, 1, 2], default=None, help="Override simulation.qos")
