@@ -948,6 +948,18 @@ class Simulator:
                     self.state[light_key] = cur
 
     def run(self) -> None:
+        prev_sigint_handler = signal.getsignal(signal.SIGINT)
+
+        def _handle_sigint(_sig, _frame) -> None:
+            # Make Ctrl+C graceful: stop the scheduler loop, then cleanly disconnect.
+            self._stop = True
+
+        try:
+            signal.signal(signal.SIGINT, _handle_sigint)
+        except Exception:
+            # Best-effort: signal handlers may not be available in some contexts.
+            prev_sigint_handler = None
+
         self._ensure_initial_state()
         self._build_command_map()
         ctx = MQTTContext(command_topics=self.command_topics, command_handlers=self.command_handlers)
@@ -1006,7 +1018,7 @@ class Simulator:
 
         last_time = time.monotonic()
         try:
-            while True:
+            while not self._stop:
                 if not heap:
                     time.sleep(0.2)
                     continue
@@ -1048,11 +1060,27 @@ class Simulator:
         except KeyboardInterrupt:
             logging.info("Stopping...")
         finally:
+            if prev_sigint_handler is not None:
+                try:
+                    signal.signal(signal.SIGINT, prev_sigint_handler)
+                except Exception:
+                    pass
+
             for c, _ in self._broker_clients:
                 if c:
                     try:
-                        c.loop_stop()
                         c.disconnect()
+                    except Exception:
+                        pass
+                    try:
+                        # Avoid blocking join; a second Ctrl+C should not be needed.
+                        c.loop_stop(force=True)
+                    except TypeError:
+                        # Older paho-mqtt without force param.
+                        try:
+                            c.loop_stop()
+                        except Exception:
+                            pass
                     except Exception:
                         pass
 
