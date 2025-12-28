@@ -1,0 +1,126 @@
+esphome:
+  name: smarthome-esp32s3
+  friendly_name: "Edge Compute Node ESP32S3(Node A)"
+
+esp32:
+  board: esp32-s3-devkitc-1
+  framework:
+    type: esp-idf
+
+# --- 1. 开启 OTA (无线刷写) ---
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+# --- 2. 开启 Native API (HA 直连专用，加密) ---
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: true
+
+# --- 3. MQTT 配置 (mTLS 学术级加密) ---
+mqtt:
+  broker: !secret mqtt_broker
+  port: !secret mqtt_port  # SSL 安全端口
+  
+  # 引用 secrets.yaml 中的证书内容
+  certificate_authority: !secret mqtt_ca_cert
+  client_certificate: !secret mqtt_client_cert
+  client_certificate_key: !secret mqtt_client_key
+
+logger:
+  hardware_uart: USB_CDC
+
+# --- I2C 硬件配置 ---
+i2c:
+  sda: GPIO5
+  scl: GPIO4
+  scan: true
+  id: bus_a
+
+sensor:
+  # --- 1. 网络与系统状态 ---
+  - platform: wifi_signal
+    name: "WiFi RSSI"
+    id: wifi_rssi
+    unit_of_measurement: "dBm"
+    update_interval: 10s
+
+  - platform: uptime
+    name: "System Uptime"
+    unit_of_measurement: "s"
+
+  # --- 2. 运动传感器 (全 6 轴数据) ---
+  - platform: mpu6050
+    i2c_id: bus_a
+    address: 0x68
+    accel_x: { name: "Acceleration X", id: acc_x, accuracy_decimals: 3 }
+    accel_y: { name: "Acceleration Y", id: acc_y, accuracy_decimals: 3 }
+    accel_z: { name: "Acceleration Z", id: acc_z, accuracy_decimals: 3 }
+    gyro_x: { name: "Angular Velocity X", accuracy_decimals: 2 }
+    gyro_y: { name: "Angular Velocity Y", accuracy_decimals: 2 }
+    gyro_z: { name: "Angular Velocity Z", accuracy_decimals: 2 }
+    update_interval: 0.1s
+
+  # --- 3. 环境传感器 ---
+  - platform: bmp085
+    i2c_id: bus_a
+    address: 0x77
+    temperature: { name: "Indoor Temperature", accuracy_decimals: 1 }
+    pressure: { name: "Indoor Pressure", accuracy_decimals: 2 }
+    update_interval: 5s
+
+  # --- 4. 声学采样 (ADC 0dB) ---
+  - platform: adc
+    pin: GPIO6
+    name: "Acoustic ADC Voltage"
+    id: sound_adc
+    update_interval: 0.05s
+    attenuation: 0db
+    accuracy_decimals: 4
+    filters:
+      - sliding_window_moving_average:
+          window_size: 10
+          send_every: 5
+
+  # --- 5. 边缘计算核心算法 ---
+
+  # [算法 1]： Resultant G-Force (静态合力)
+  - platform: template
+    name: "Resultant G-Force"
+    unit_of_measurement: "G"
+    accuracy_decimals: 3
+    update_interval: 0.1s
+    lambda: |-
+      float ax = id(acc_x).state;
+      float ay = id(acc_y).state;
+      float az = id(acc_z).state;
+      if (isnan(ax) || (ax==0 && ay==0 && az==0)) return 0.0;
+      return sqrt(ax*ax + ay*ay + az*az) / 9.80665;
+
+  # [算法 2]： Dynamic Vibration Component (动态震动)
+  - platform: template
+    name: "Dynamic Vibration Component"
+    unit_of_measurement: "G"
+    accuracy_decimals: 3
+    update_interval: 0.1s
+    lambda: |-
+      float ax = id(acc_x).state;
+      float ay = id(acc_y).state;
+      float az = id(acc_z).state;
+      if (isnan(ax)) return 0.0;
+      float mag = sqrt(ax*ax + ay*ay + az*az) / 9.80665;
+      float dev = fabs(mag - 1.0); 
+      return (dev < 0.02) ? 0.0 : dev; 
+
+binary_sensor:
+  # [算法 3]： Acoustic Event Detection
+  - platform: template
+    name: "Acoustic Peak Event"
+    device_class: sound
+    lambda: |-
+      return (id(sound_adc).state > 0.6);

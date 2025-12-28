@@ -21,3 +21,6 @@ sensors/*.secrets.*
 
 # Docker
 *.log
+certs/
+docs/
+tests/
