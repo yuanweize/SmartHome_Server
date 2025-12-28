@@ -133,6 +133,40 @@ The MQTT Discovery payload includes a Home Assistant `device` object, configured
 
 These fields support `{device_id}`.
 
+## Handshake benchmark (real data export)
+
+For thesis-grade measurements, the simulator can run a **real** connect/disconnect loop and record end-to-end MQTT connect latency (including TCP + TLS handshake + MQTT CONNACK time).
+
+Single process:
+
+```bash
+. .venv/bin/activate
+python sensors/sensor_simulator.py \
+  --config sensors/brokers.yml \
+  --handshake-samples 200 \
+  --handshake-interval 0.2 \
+  --handshake-timeout 10 \
+  --handshake-out sensors/handshake_metrics \
+  --handshake-only
+```
+
+Outputs (local files):
+- `sensors/handshake_metrics/handshake.w0.jsonl`: one JSON record per real connection attempt
+- `sensors/handshake_metrics/handshake.w0.summary.json`: computed statistics (p50/p90/p95/p99, mean/stdev, etc.)
+
+Optional plots (requires matplotlib):
+
+```bash
+pip install matplotlib
+python sensors/sensor_simulator.py --config sensors/brokers.yml --handshake-samples 200 --handshake-plot --handshake-only
+```
+
+Multi-process (runs samples **per worker**):
+
+```bash
+python sensors/sensor_simulator.py --config sensors/brokers.yml --workers 4 --handshake-samples 200 --handshake-only
+```
+
 ## Troubleshooting
 
 - If imports fail, ensure the virtual environment is active and dependencies are installed.
