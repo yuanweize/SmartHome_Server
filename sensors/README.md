@@ -50,6 +50,15 @@ Publish using `sensors/brokers.yml`:
 python sensors/sensor_simulator.py --config sensors/brokers.yml
 ```
 
+Multi-core stress test (Linux server recommended):
+
+```bash
+. .venv/bin/activate
+# Use multiple processes to utilize multi-core CPUs.
+# Each worker handles a slice of device_id ranges.
+python sensors/sensor_simulator.py --config sensors/brokers.yml --workers 6 --log-level INFO
+```
+
 Override some settings from CLI (CLI > brokers.yml > defaults):
 
 ```bash
@@ -109,6 +118,7 @@ If you do use CLI flags, the precedence is:
 Common flags:
 - `--config PATH`
 - `--devices N`
+- `--workers N` (use >1 to utilize multi-core)
 - `--qos 0|1|2`
 - `--retain`
 - `--log-level DEBUG|INFO|WARNING|ERROR`
