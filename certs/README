@@ -1,0 +1,68 @@
+# Smart Home IoT Security Certificates (ECC)
+
+此目录包含用于智能家居系统（Smart Home IoT System）的安全证书。
+本系统采用 **mTLS (双向 TLS 认证)** 机制，确保 Unix 服务器 (MQTT Broker) 与边缘计算节点 (ESP32-S3) 及控制中心 (Home Assistant) 之间的通信安全。
+
+## ⚠️ 安全警告 (Security Warning)
+
+* **私钥保护**：`.key` 文件是私钥，**严禁上传到 GitHub** 或分享给他人。
+* **Git 忽略**：请确保本目录已被加入项目的 `.gitignore` 文件中。
+
+## 目录结构 (Directory Structure)
+
+* **`ca/`**: 根证书 (Root CA)
+    * `ca.pem`: 根证书公钥
+    * `ca.key`: 根证书私钥 (高度机密)
+* **`server/`**: MQTT Broker (EMQX/Mosquitto) 证书
+    * `server.pem`: 服务端证书
+    * `server.key`: 服务端私钥
+* **`client/`**: 客户端 (传感器/模拟器/ESP32) 证书
+    * `client.pem`: 客户端证书
+    * `client.key`: 客户端私钥
+
+---
+
+## 证书详情 (Certificate Details)
+
+* **加密算法 (Algorithm)**: ECC (Elliptic Curve Cryptography)
+* **曲线类型 (Curve)**: `prime256v1` (NIST P-256) - *针对 ESP32 硬件加速优化*
+* **有效期 (Validity)**: 100 年 (36500 天)
+* **生成时间**: 2025-12-28
+
+---
+
+## 文件说明 (File Manifest)
+
+### 1. 根证书 (Root CA)
+这是信任链的根基，所有设备都必须信任它。
+* `ca.key`: **CA 私钥** (最高机密，仅用于签发新证书，切勿泄露)
+* `ca.pem`: **CA 根证书** (公钥) -> **需部署到：EMQX, ESP32, Home Assistant**
+
+### 2. 服务器端证书 (Server Side)
+用于 MQTT Broker (EMQX) 验证自身身份。
+* `server.key`: **服务器私钥** -> **需挂载到 EMQX Docker 容器**
+* `server.pem`: **服务器证书** (CN: `mqtt.eurun.top`) -> **需挂载到 EMQX Docker 容器**
+
+### 3. 客户端证书 (Client Side)
+用于边缘节点 (Node A/B) 和 Home Assistant 验证自身身份。
+* `client.key`: **客户端私钥** -> **需填入 ESPHome YAML (`client_certificate_key`) 和 HA MQTT 配置**
+* `client.pem`: **客户端证书** (CN: `client_device`) -> **需填入 ESPHome YAML (`client_certificate`) 和 HA MQTT 配置**
+
+---
+
+## 快速使用指南 (Quick Usage)
+
+### EMQX (Docker) 配置
+将 `ca.pem`, `server.pem`, `server.key` 映射至容器，并开启 `verify_peer`。
+
+### ESPHome (YAML) 配置
+```yaml
+mqtt:
+  broker: mqtt.eurun.top
+  port: 8883
+  certificate_authority: |
+    (粘贴 ca.pem 内容)
+  client_certificate: |
+    (粘贴 client.pem 内容)
+  client_certificate_key: |
+    (粘贴 client.key 内容)
