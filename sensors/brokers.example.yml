@@ -15,12 +15,30 @@
   # Enable TLS
   tls: true
 
-  # [Key] mTLS certificate paths (relative to this file)
-  # If using one-way TLS, only ca_file is required.
-  # If using mTLS (mutual TLS), all three fields below are required.
+  # ----------------------------
+  # mTLS certificates (two supported ways)
+  # ----------------------------
+  # 1) File paths (recommended for docker): relative to this brokers.yml
+  #    If using one-way TLS, only ca_file is required.
   ca_file: "./certs/ca/ca.pem"
   cert_file: "./certs/client/client.pem"
   key_file: "./certs/client/client.key"
+
+  # 2) Inline PEM text (recommended for quick local debugging)
+  #    If provided, inline PEM takes priority over file paths.
+  #    If inline TLS setup fails, it falls back to file paths (if present).
+  # ca_pem: |-
+  #   -----BEGIN CERTIFICATE-----
+  #   ...
+  #   -----END CERTIFICATE-----
+  # cert_pem: |-
+  #   -----BEGIN CERTIFICATE-----
+  #   ...
+  #   -----END CERTIFICATE-----
+  # key_pem: |-
+  #   -----BEGIN PRIVATE KEY-----
+  #   ...
+  #   -----END PRIVATE KEY-----
 
   tls_insecure: false
 
