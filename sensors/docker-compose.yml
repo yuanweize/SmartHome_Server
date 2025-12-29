@@ -5,12 +5,8 @@ services:
       dockerfile: sensors/Dockerfile
     container_name: sensor-simulator
     # Command-line arguments:
-    # -n 100: simulate 100 devices
-    # -i 1: send once every 1 second (high-load test)
-    # --payload json: use JSON format (recommended)
-    # --ha-discovery: automatically create entities in Home Assistant (HA)
     # --config: specify the config file path (inside the container)
-    # All simulation settings live in brokers.yml; CLI args (if added) override it.
+    # All simulation settings live in brokers.yml; CLI args (if used) override it.
     command: ["--config", "/app/sensors/brokers.yml"]
     
     volumes:
