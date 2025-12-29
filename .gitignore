@@ -26,5 +26,7 @@ sensors/*.secrets.*
 *.key
 *.p12
 *.pfx
+*.crt
+*.pem
 docs/
 tests/
