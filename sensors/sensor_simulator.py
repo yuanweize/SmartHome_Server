@@ -690,7 +690,6 @@ def run_handshake_benchmark(
             )
 
             error: Optional[str] = None
-            rc: Optional[int] = None
             try:
                 # Timestamp as close as possible to the actual connect() call.
                 try:
@@ -737,7 +736,7 @@ def run_handshake_benchmark(
                         "sample": sample_idx,
                         "broker": {"host": broker.host, "port": int(broker.port), "tls": bool(broker.tls)},
                         "client_id": None,
-                        "rc": rc,
+                        "rc": None,
                         "connect_latency_ms": None,
                         "error": error,
                     }
@@ -1542,6 +1541,22 @@ def main():
     # Load Brokers
     try:
         brokers, rest, _path = load_brokers(args.config)
+    except FileNotFoundError as e:
+        # A common local workflow is: try a quick dry-run before copying brokers.yml.
+        # For dry-run only, allow running with default simulation config and a placeholder broker.
+        cfg_default = str(getattr(args, "config", "")) == "sensors/brokers.yml"
+        if bool(getattr(args, "dry_run", False)) and cfg_default:
+            logging.warning(
+                "Config file not found (%s). Proceeding in --dry-run mode with built-in defaults. "
+                "Tip: copy sensors/brokers.example.yml to sensors/brokers.yml or pass --config.",
+                e,
+            )
+            brokers = [Broker(host="dry-run", port=1883, tls=False)]
+            rest = {}
+            _path = Path(args.config)
+        else:
+            logging.error(f"Config Error: {e}")
+            raise SystemExit(2)
     except Exception as e:
         logging.error(f"Config Error: {e}")
         raise SystemExit(2)
