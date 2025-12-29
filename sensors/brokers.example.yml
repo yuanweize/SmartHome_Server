@@ -122,7 +122,7 @@ simulation:
       count: 1
       commandable: true
       initial:
-        state: OFF
+        state: "OFF"
         brightness: 255
         color: { r: 255, g: 255, b: 255 }
 
