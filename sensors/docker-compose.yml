@@ -10,7 +10,8 @@ services:
     # --payload json: use JSON format (recommended)
     # --ha-discovery: automatically create entities in Home Assistant (HA)
     # --config: specify the config file path (inside the container)
-    command: ["-n", "100", "-i", "1", "--payload", "json", "--qos", "1", "--ha-discovery", "--config", "/app/sensors/brokers.yml"]
+    # All simulation settings live in brokers.yml; CLI args (if added) override it.
+    command: ["--config", "/app/sensors/brokers.yml"]
     
     volumes:
       # Dev convenience: mount code so edits take effect without rebuilding the image.

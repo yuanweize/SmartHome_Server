@@ -1,46 +1,140 @@
-# Example brokers configuration for the sensor simulator
-# Copy this file to brokers.yml and adjust credentials as needed.
-# You can also use JSON with an equivalent structure.
+# Unified configuration for the sensor simulator.
+# Copy this file to brokers.yml and adjust credentials/certs as needed.
+#
+# This file configures BOTH:
+# - brokers: where to publish (supports TLS/mTLS)
+# - simulation: what entities/devices to simulate (shown in Home Assistant)
 
-- host: sgp.google.com
-  port: 1883
-  username: your_emqx_user
-  password: your_emqx_pass
-  tls: false
-  keepalive: 60
+brokers:
+  - host: mqtt.example.com
+    port: 8883
+    tls: true
 
-- host: mqtt.google.com
-  port: 8883
+    # ----------------------------
+    # mTLS certificates (two supported ways)
+    # ----------------------------
+    # 1) File paths (recommended for docker): relative to this brokers.yml
+    #    If using one-way TLS, only ca_file is required.
+    ca_file: "./certs/ca.pem"
+    cert_file: "./certs/client.pem"
+    key_file: "./certs/client.key"
 
-  # Enable TLS
-  tls: true
+    # 2) Inline PEM text (recommended for quick local debugging)
+    #    If provided, inline PEM takes priority over file paths.
+    #    If inline TLS setup fails, it falls back to file paths (if present).
+    # ca_pem: |-
+    #   -----BEGIN CERTIFICATE-----
+    #   ...
+    #   -----END CERTIFICATE-----
+    # cert_pem: |-
+    #   -----BEGIN CERTIFICATE-----
+    #   ...
+    #   -----END CERTIFICATE-----
+    # key_pem: |-
+    #   -----BEGIN PRIVATE KEY-----
+    #   ...
+    #   -----END PRIVATE KEY-----
 
-  # ----------------------------
-  # mTLS certificates (two supported ways)
-  # ----------------------------
-  # 1) File paths (recommended for docker): relative to this brokers.yml
-  #    If using one-way TLS, only ca_file is required.
-  ca_file: "./certs/ca/ca.pem"
-  cert_file: "./certs/client/client.pem"
-  key_file: "./certs/client/client.key"
+    tls_insecure: false
+    keepalive: 60
 
-  # 2) Inline PEM text (recommended for quick local debugging)
-  #    If provided, inline PEM takes priority over file paths.
-  #    If inline TLS setup fails, it falls back to file paths (if present).
-  # ca_pem: |-
-  #   -----BEGIN CERTIFICATE-----
-  #   ...
-  #   -----END CERTIFICATE-----
-  # cert_pem: |-
-  #   -----BEGIN CERTIFICATE-----
-  #   ...
-  #   -----END CERTIFICATE-----
-  # key_pem: |-
-  #   -----BEGIN PRIVATE KEY-----
-  #   ...
-  #   -----END PRIVATE KEY-----
 
-  tls_insecure: false
+simulation:
+  # Number of virtual devices (for future stress testing, set higher)
+  devices: 10
 
-  keepalive: 60
-  # client_id: "python_sim_1" # Optional; a value will be generated automatically by default
+  # MQTT topic namespace used for states/commands
+  base_topic: "smarthome/sim"
+
+  # Home Assistant MQTT discovery prefix
+  discovery_prefix: "homeassistant"
+
+  # Publish QoS + retain
+  qos: 1
+  retain: false
+
+  # Publish HA discovery after waiting for broker connections
+  connect_timeout: 5
+
+  # Default entity settings (can be overridden per-entity)
+  defaults:
+    interval: 5
+    precision: 2
+    payload: json
+
+  # Home Assistant "device" metadata used for MQTT discovery.
+  # Strings support {device_id}. (Use {index} in entity names; see below.)
+  device:
+    identifiers:
+      - "sim_device_{device_id}"
+    name: "Sim Device {device_id}"
+    model: "SmartHome Simulator"
+    manufacturer: "Eurun Lab"
+
+  # Entity definitions (displayed in HA).
+  # - name supports {device_id} and {index}
+  # - count (optional, default 1): create multiple instances per device
+  entities:
+    - id: temperature
+      kind: sensor
+      name: "Room {device_id} Temperature {index}"
+      count: 2
+      device_class: temperature
+      unit: "°C"
+      interval: 5
+      model: drift
+      min: 18
+      max: 30
+      precision: 2
+
+    - id: humidity
+      kind: sensor
+      name: "Room {device_id} Humidity"
+      count: 1
+      device_class: humidity
+      unit: "%"
+      interval: 7
+      model: drift
+      min: 35
+      max: 70
+      precision: 1
+
+    - id: motion
+      kind: binary_sensor
+      name: "Room {device_id} Motion"
+      count: 1
+      device_class: motion
+      interval: 1
+      model: motion
+
+    # Actuator (controllable from HA)
+    - id: heater
+      kind: switch
+      name: "Room {device_id} Heater"
+      count: 1
+      commandable: true
+      initial: false
+
+    # RGB Light (controllable from HA). State is JSON.
+    - id: rgb_light
+      kind: light
+      name: "Room {device_id} RGB Light"
+      count: 1
+      commandable: true
+      initial:
+        state: OFF
+        brightness: 255
+        color: { r: 255, g: 255, b: 255 }
+
+  # Optional simple automations (internal couplings, per-device)
+  automation:
+    # Motion turns on light for a hold duration
+    motion_entity: motion
+    light_entity: rgb_light
+    motion_hold_seconds: 30
+
+    # Heater switch affects temperature trend
+    switch_entity: heater
+    sensor_entity: temperature
+    delta_per_minute_on: 1.5
+    delta_per_minute_off: -0.3
