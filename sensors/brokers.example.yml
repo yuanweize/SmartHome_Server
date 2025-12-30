@@ -53,7 +53,10 @@ simulation:
   qos: 1
   retain: false
 
-  # Publish HA discovery after waiting for broker connections
+  # HA Discovery (default: false). Set to true only when connecting to Home Assistant.
+  # ha_discovery: true
+
+  # Timeout waiting for broker connections before publishing discovery
   connect_timeout: 5
 
   # Default entity settings (can be overridden per-entity)
