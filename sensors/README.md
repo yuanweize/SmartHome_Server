@@ -1,12 +1,39 @@
-# Sensor Simulator
+\# Sensor Simulator
+
+Language: **English** | [简体中文](README.zh-CN.md)
 
 A multi-broker MQTT smart-home simulator for Home Assistant.
 
 This module is designed for a thesis/demo environment: it generates realistic sensor streams AND controllable actuator entities, so you can build meaningful HA automations even when hardware devices are limited.
 
-Files:
-- `sensor_simulator.py` — main simulator script
-- `brokers.example.yml` — example broker configuration; copy to `brokers.yml` and edit
+\## Contents
+
+- [What it is](#what-it-is)
+- [Repo files](#repo-files)
+- [Prerequisites](#prerequisites)
+- [Configuration](#configuration)
+- [Quick start](#quick-start)
+- [TLS / mTLS certificates](#tls--mtls-certificates)
+- [Entities & automations](#entities--automations)
+- [CLI overrides](#cli-overrides)
+- [Home Assistant device metadata](#home-assistant-device-metadata)
+- [Handshake benchmark (real data export)](#handshake-benchmark-real-data-export)
+- [Troubleshooting](#troubleshooting)
+
+\## What it is
+
+- Publishes simulated sensor data to MQTT (supports multiple brokers).
+- Optionally advertises entities via Home Assistant MQTT Discovery.
+- Supports controllable entities (switch/light) via MQTT command topics.
+- Supports TLS/mTLS via file paths or inline PEM.
+
+\## Repo files
+
+- `sensors/sensor_simulator.py` — main simulator script
+- `sensors/brokers.example.yml` — example configuration (copy to `sensors/brokers.yml` and edit)
+- `sensors/docker-compose.yml` — Docker entry (mounts config/certs)
+- `sensors/Dockerfile` — container image for server-side runs
+- `certs/README` — certificate layout notes
 
 ## Prerequisites
 
@@ -152,7 +179,12 @@ python sensors/sensor_simulator.py \
 
 Outputs (local files):
 - `sensors/handshake_metrics/handshake.w0.jsonl`: one JSON record per real connection attempt
-- `sensors/handshake_metrics/handshake.w0.summary.json`: computed statistics (p50/p90/p95/p99, mean/stdev, etc.)
+- `sensors/handshake_metrics/handshake.w0.summary.json`: computed statistics derived from JSONL (p50/p90/p95/p99, mean/stdev, etc.)
+
+Data correctness notes:
+- JSONL records are written from actual connection outcomes (including failures).
+- Summary metrics are computed only from successful records (`rc == 0` and `connect_latency_ms` present).
+- Percentiles use linear interpolation between closest ranks (documented in the summary).
 
 Optional plots (requires matplotlib):
 
@@ -173,3 +205,10 @@ python sensors/sensor_simulator.py --config sensors/brokers.yml --workers 4 --ha
 - For EMQX authentication errors, double-check `username`/`password` in `brokers.yml`.
 - If you enable TLS on your brokers, set `tls: true` in the corresponding entry. By default, system CA certs are used.
 - Use `--log-level DEBUG` to see connection and publish details.
+
+\---
+
+Contributions and experiment reports are welcome. If you publish results, include:
+- config used (`sensors/brokers.yml` redacted)
+- command line
+- raw JSONL + summary JSON
