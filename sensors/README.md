@@ -1,4 +1,4 @@
-\# Sensor Simulator
+# Sensor Simulator
 
 Language: **English** | [简体中文](README.zh-CN.md)
 
@@ -6,7 +6,7 @@ A multi-broker MQTT smart-home simulator for Home Assistant.
 
 This module is designed for a thesis/demo environment: it generates realistic sensor streams AND controllable actuator entities, so you can build meaningful HA automations even when hardware devices are limited.
 
-\## Contents
+## Contents
 
 - [What it is](#what-it-is)
 - [Repo files](#repo-files)
@@ -14,20 +14,20 @@ This module is designed for a thesis/demo environment: it generates realistic se
 - [Configuration](#configuration)
 - [Quick start](#quick-start)
 - [TLS / mTLS certificates](#tls--mtls-certificates)
-- [Entities & automations](#entities--automations)
+- [Entities \& automations](#entities--automations)
 - [CLI overrides](#cli-overrides)
 - [Home Assistant device metadata](#home-assistant-device-metadata)
 - [Handshake benchmark (real data export)](#handshake-benchmark-real-data-export)
 - [Troubleshooting](#troubleshooting)
 
-\## What it is
+## What it is
 
 - Publishes simulated sensor data to MQTT (supports multiple brokers).
 - Optionally advertises entities via Home Assistant MQTT Discovery.
 - Supports controllable entities (switch/light) via MQTT command topics.
 - Supports TLS/mTLS via file paths or inline PEM.
 
-\## Repo files
+## Repo files
 
 - `sensors/sensor_simulator.py` — main simulator script
 - `sensors/brokers.example.yml` — example configuration (copy to `sensors/brokers.yml` and edit)
