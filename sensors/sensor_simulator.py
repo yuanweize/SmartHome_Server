@@ -23,6 +23,8 @@ import tempfile
 import heapq
 import math
 import multiprocessing as mp
+import statistics
+import threading
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Optional, Callable
@@ -78,6 +80,208 @@ def _materialize_pem_bundle(
         write_one("client.pem", cert_pem),
         write_one("client.key", key_pem),
     )
+
+
+def _iso_utc(ts: Optional[float] = None) -> str:
+    t = time.gmtime(ts if ts is not None else time.time())
+    return time.strftime("%Y-%m-%dT%H:%M:%SZ", t)
+
+
+def _ensure_dir(path: Path) -> None:
+    path.mkdir(parents=True, exist_ok=True)
+
+
+def _percentile_sorted(values_sorted: List[float], q: float) -> float:
+    """Percentile with linear interpolation between closest ranks.
+
+    - values_sorted: non-empty, ascending
+    - q: [0, 100]
+    """
+
+    if not values_sorted:
+        raise ValueError("values_sorted must not be empty")
+    if q <= 0:
+        return values_sorted[0]
+    if q >= 100:
+        return values_sorted[-1]
+
+    n = len(values_sorted)
+    # Position in [0, n-1]
+    pos = (q / 100.0) * (n - 1)
+    lo = int(math.floor(pos))
+    hi = int(math.ceil(pos))
+    if lo == hi:
+        return values_sorted[lo]
+    frac = pos - lo
+    return values_sorted[lo] * (1.0 - frac) + values_sorted[hi] * frac
+
+
+class HandshakeRecorder:
+    """Thread-safe recorder for real connection attempts.
+
+    This is intentionally simple: it only records what actually happened.
+    """
+
+    def __init__(self, out_jsonl_path: Path) -> None:
+        self.out_jsonl_path = out_jsonl_path
+        _ensure_dir(out_jsonl_path.parent)
+        self._lock = threading.Lock()
+
+    def write(self, record: Dict[str, Any]) -> None:
+        line = json.dumps(record, ensure_ascii=False, sort_keys=True)
+        with self._lock:
+            with self.out_jsonl_path.open("a", encoding="utf-8") as f:
+                f.write(line + "\n")
+
+
+def _summarize_handshake_jsonl(jsonl_path: Path) -> Dict[str, Any]:
+    latencies_ms: List[float] = []
+    total = 0
+    ok = 0
+    failed = 0
+    by_broker: Dict[str, Dict[str, Any]] = {}
+
+    with jsonl_path.open("r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            total += 1
+            try:
+                rec = json.loads(line)
+            except Exception:
+                failed += 1
+                continue
+
+            broker_key = str(rec.get("broker", {}).get("host", "?"))
+            if broker_key not in by_broker:
+                by_broker[broker_key] = {"total": 0, "ok": 0, "failed": 0, "latencies_ms": []}
+            by_broker[broker_key]["total"] += 1
+
+            latency = rec.get("connect_latency_ms")
+            rc = rec.get("rc")
+            is_ok = (rc == 0) and (latency is not None)
+            if is_ok:
+                ok += 1
+                by_broker[broker_key]["ok"] += 1
+                lat = float(latency)
+                latencies_ms.append(lat)
+                by_broker[broker_key]["latencies_ms"].append(lat)
+            else:
+                failed += 1
+                by_broker[broker_key]["failed"] += 1
+
+    summary: Dict[str, Any] = {
+        "schema": "smarthome.handshake.summary.v1",
+        "source": str(jsonl_path),
+        "generated_at_utc": _iso_utc(),
+        "records_total": total,
+        "records_ok": ok,
+        "records_failed": failed,
+        "latency_unit": "ms",
+        "percentile_method": "linear_interpolation_between_closest_ranks",
+        "overall": {},
+        "by_broker": {},
+    }
+
+    def compute_stats(values: List[float]) -> Dict[str, Any]:
+        if not values:
+            return {}
+        values_sorted = sorted(values)
+        n = len(values_sorted)
+        mean = statistics.fmean(values_sorted)
+        # Sample stddev requires n>=2.
+        stdev = statistics.stdev(values_sorted) if n >= 2 else 0.0
+        sem = stdev / math.sqrt(n) if n >= 2 else 0.0
+        ci95 = None
+        # Asymptotic normal CI for mean; only report when n is reasonably large.
+        if n >= 30 and n >= 2:
+            z = 1.96
+            ci95 = [mean - z * sem, mean + z * sem]
+        return {
+            "n": n,
+            "min": values_sorted[0],
+            "max": values_sorted[-1],
+            "mean": mean,
+            "stdev": stdev,
+            "sem": sem,
+            "ci95_mean_normal_approx": ci95,
+            "p50": _percentile_sorted(values_sorted, 50),
+            "p90": _percentile_sorted(values_sorted, 90),
+            "p95": _percentile_sorted(values_sorted, 95),
+            "p99": _percentile_sorted(values_sorted, 99),
+        }
+
+    summary["overall"] = compute_stats(latencies_ms)
+    for broker_key, v in by_broker.items():
+        stats = compute_stats(v["latencies_ms"])
+        summary["by_broker"][broker_key] = {
+            "records_total": v["total"],
+            "records_ok": v["ok"],
+            "records_failed": v["failed"],
+            "stats": stats,
+        }
+
+    return summary
+
+
+def _plot_handshake_jsonl(jsonl_path: Path, *, out_prefix: Path) -> List[str]:
+    """Create plots from real JSONL data.
+
+    Requires matplotlib. If not installed, this raises ImportError.
+    """
+
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    latencies_ms: List[float] = []
+    with jsonl_path.open("r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rec = json.loads(line)
+            except Exception:
+                continue
+            if rec.get("rc") == 0 and rec.get("connect_latency_ms") is not None:
+                latencies_ms.append(float(rec["connect_latency_ms"]))
+
+    if not latencies_ms:
+        raise ValueError(f"No successful handshake records in {jsonl_path}")
+
+    latencies_ms.sort()
+    n = len(latencies_ms)
+
+    out_files: List[str] = []
+
+    # Histogram
+    plt.figure(figsize=(10, 6))
+    plt.hist(latencies_ms, bins=60)
+    plt.title("MQTT Connect Latency (TLS handshake included)")
+    plt.xlabel("Connect latency (ms)")
+    plt.ylabel("Count")
+    hist_path = out_prefix.with_name(out_prefix.name + ".hist.png")
+    plt.tight_layout()
+    plt.savefig(hist_path)
+    plt.close()
+    out_files.append(str(hist_path))
+
+    # ECDF
+    plt.figure(figsize=(10, 6))
+    y = [(i + 1) / n for i in range(n)]
+    plt.step(latencies_ms, y, where="post")
+    plt.title("ECDF of MQTT Connect Latency")
+    plt.xlabel("Connect latency (ms)")
+    plt.ylabel("ECDF")
+    ecdf_path = out_prefix.with_name(out_prefix.name + ".ecdf.png")
+    plt.tight_layout()
+    plt.savefig(ecdf_path)
+    plt.close()
+    out_files.append(str(ecdf_path))
+
+    return out_files
 
 # ==========================
 # Broker Model & Config
@@ -179,7 +383,14 @@ class Broker:
 
         return primary, fallback
 
-    def create_client(self, *, client_id_prefix: Optional[str], mqtt_context: "MQTTContext") -> mqtt.Client:
+    def create_client(
+        self,
+        *,
+        client_id_prefix: Optional[str],
+        mqtt_context: "MQTTContext",
+        auto_connect: bool = True,
+        userdata_extra: Optional[Dict[str, Any]] = None,
+    ) -> mqtt.Client:
         cid = self.client_id
         if not cid:
             # Generate a random ID if not provided, adding prefix if available
@@ -187,7 +398,10 @@ class Broker:
             cid = f"{client_id_prefix}-{suffix}" if client_id_prefix else f"sim-{suffix}"
 
         client = mqtt.Client(client_id=cid, clean_session=True)
-        client.user_data_set({"broker_host": self.host, "ctx": mqtt_context})
+        userdata: Dict[str, Any] = {"broker_host": self.host, "ctx": mqtt_context}
+        if userdata_extra:
+            userdata.update(userdata_extra)
+        client.user_data_set(userdata)
         
         # Callbacks
         client.on_connect = on_connect
@@ -263,11 +477,16 @@ class Broker:
         # Connection
         client.reconnect_delay_set(min_delay=1, max_delay=60)
 
-        try:
-            client.connect_async(self.host, int(self.port), keepalive=int(self.keepalive))
-            client.loop_start()
-        except Exception as e:
-            raise RuntimeError(f"Failed to connect to broker {self.host}:{self.port}: {e}")
+        if auto_connect:
+            try:
+                # Record a real connect start timestamp for the initial connection.
+                ud = client._userdata or {}
+                if isinstance(ud, dict):
+                    ud.setdefault("connect_started_at", time.perf_counter())
+                client.connect_async(self.host, int(self.port), keepalive=int(self.keepalive))
+                client.loop_start()
+            except Exception as e:
+                raise RuntimeError(f"Failed to connect to broker {self.host}:{self.port}: {e}")
 
         return client
 
@@ -328,6 +547,48 @@ def setup_logging(level: str) -> None:
 # ==========================
 def on_connect(client, userdata, flags, rc):
     host = userdata.get("broker_host", "?")
+
+    try:
+        userdata["last_rc"] = int(rc)
+    except Exception:
+        pass
+
+    # Handshake timing (real connect duration): start at connect_async, end at on_connect.
+    try:
+        started = userdata.get("connect_started_at")
+        if started is not None:
+            latency_ms = (time.perf_counter() - float(started)) * 1000.0
+            userdata["connect_latency_ms"] = latency_ms
+    except Exception:
+        pass
+
+    # Wake up benchmark waiters if present.
+    ev = userdata.get("connect_event")
+    if ev is not None:
+        try:
+            ev.set()
+        except Exception:
+            pass
+
+    # Optional recorder (benchmark/export).
+    recorder = userdata.get("handshake_recorder")
+    if recorder is not None:
+        try:
+            record = {
+                "schema": "smarthome.handshake.record.v1",
+                "ts_unix": time.time(),
+                "ts_iso": _iso_utc(),
+                "worker_id": userdata.get("worker_id"),
+                "sample": userdata.get("sample_index"),
+                "broker": {"host": host, "port": userdata.get("broker_port"), "tls": userdata.get("broker_tls")},
+                "client_id": getattr(client, "_client_id", b"").decode("utf-8", errors="replace") if getattr(client, "_client_id", None) else None,
+                "rc": int(rc),
+                "connect_latency_ms": userdata.get("connect_latency_ms"),
+            }
+            recorder.write(record)
+        except Exception:
+            pass
+
     if rc == 0:
         transport = "TLS" if getattr(client, "_ssl", None) else "TCP"
         logging.info(f"[{host}] Connected via {transport}")
@@ -347,10 +608,156 @@ def on_connect(client, userdata, flags, rc):
 
 def on_disconnect(client, userdata, rc):
     host = userdata.get("broker_host", "?")
+
+    ev = userdata.get("disconnect_event")
+    if ev is not None:
+        try:
+            ev.set()
+        except Exception:
+            pass
+
     if rc != 0:
         logging.warning(f"[{host}] Unexpected disconnect (rc={rc}), auto-reconnecting...")
     else:
         logging.info(f"[{host}] Disconnected")
+
+
+def _handshake_output_paths(out: str, *, worker_id: Optional[int]) -> Tuple[Path, Path, Path]:
+    """Return (jsonl_path, summary_path, plot_prefix)."""
+
+    base = Path(out).expanduser()
+    if base.suffix.lower() == ".jsonl":
+        jsonl_path = base
+    elif base.suffix:
+        # Treat as file path but ensure it ends with .jsonl
+        jsonl_path = base.with_suffix(base.suffix + ".jsonl")
+    else:
+        # Directory
+        _ensure_dir(base)
+        suffix = f"w{worker_id}" if worker_id is not None else "w0"
+        jsonl_path = base / f"handshake.{suffix}.jsonl"
+
+    summary_path = jsonl_path.with_suffix(".summary.json")
+    plot_prefix = jsonl_path.with_suffix("")
+    return jsonl_path, summary_path, plot_prefix
+
+
+def run_handshake_benchmark(
+    *,
+    brokers: List[Broker],
+    client_id_prefix: str,
+    samples: int,
+    interval_s: float,
+    timeout_s: float,
+    out: str,
+    plot: bool,
+    worker_id: Optional[int],
+) -> None:
+    if samples <= 0:
+        return
+
+    jsonl_path, summary_path, plot_prefix = _handshake_output_paths(out, worker_id=worker_id)
+    recorder = HandshakeRecorder(jsonl_path)
+
+    logging.info(
+        f"Handshake benchmark: samples={samples}, brokers={len(brokers)}, out={jsonl_path}"
+    )
+
+    empty_ctx = MQTTContext(command_topics=[], command_handlers={})
+
+    for sample_idx in range(1, samples + 1):
+        for broker in brokers:
+            connect_event = threading.Event()
+            disconnect_event = threading.Event()
+
+            userdata_extra = {
+                "connect_event": connect_event,
+                "disconnect_event": disconnect_event,
+                "connect_started_at": None,
+                "handshake_recorder": recorder,
+                "sample_index": sample_idx,
+                "worker_id": worker_id,
+                "broker_port": int(broker.port),
+                "broker_tls": bool(broker.tls),
+            }
+
+            # New client per attempt to guarantee a real TCP+TLS handshake.
+            client = broker.create_client(
+                client_id_prefix=f"{client_id_prefix}-hs{sample_idx}",
+                mqtt_context=empty_ctx,
+                auto_connect=False,
+                userdata_extra=userdata_extra,
+            )
+
+            error: Optional[str] = None
+            rc: Optional[int] = None
+            try:
+                # Timestamp as close as possible to the actual connect() call.
+                try:
+                    if isinstance(getattr(client, "_userdata", None), dict):
+                        client._userdata["connect_started_at"] = time.perf_counter()
+                except Exception:
+                    pass
+                client.connect_async(broker.host, int(broker.port), keepalive=int(broker.keepalive))
+                client.loop_start()
+
+                if not connect_event.wait(timeout=timeout_s):
+                    error = f"connect_timeout_{timeout_s}s"
+                else:
+                    rc = int(getattr(client, "_userdata", {}).get("last_rc", 0) or 0)
+            except Exception as e:
+                error = f"connect_exception:{e}"
+            finally:
+                try:
+                    client.disconnect()
+                except Exception:
+                    pass
+                try:
+                    disconnect_event.wait(timeout=2.0)
+                except Exception:
+                    pass
+                try:
+                    client.loop_stop(force=True)
+                except TypeError:
+                    try:
+                        client.loop_stop()
+                    except Exception:
+                        pass
+                except Exception:
+                    pass
+
+            # If connect timed out or errored before on_connect, write a failure record explicitly.
+            if error is not None:
+                recorder.write(
+                    {
+                        "schema": "smarthome.handshake.record.v1",
+                        "ts_unix": time.time(),
+                        "ts_iso": _iso_utc(),
+                        "worker_id": worker_id,
+                        "sample": sample_idx,
+                        "broker": {"host": broker.host, "port": int(broker.port), "tls": bool(broker.tls)},
+                        "client_id": None,
+                        "rc": rc,
+                        "connect_latency_ms": None,
+                        "error": error,
+                    }
+                )
+
+        if interval_s > 0:
+            time.sleep(interval_s)
+
+    summary = _summarize_handshake_jsonl(jsonl_path)
+    summary_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
+    logging.info(f"Handshake summary written: {summary_path}")
+
+    if plot:
+        try:
+            out_files = _plot_handshake_jsonl(jsonl_path, out_prefix=plot_prefix)
+            logging.info(f"Handshake plots written: {', '.join(out_files)}")
+        except ImportError:
+            logging.warning("matplotlib not installed; skip plots. Install: pip install matplotlib")
+        except Exception as e:
+            logging.warning(f"Failed to generate plots: {e}")
 
 
 def on_message(client, userdata, msg):
@@ -611,6 +1018,21 @@ def _run_worker_process(
 
     # Ensure client ids don't collide across workers.
     sim.client_id_prefix = f"{sim.client_id_prefix}-w{worker_id}"
+
+    hs_samples = int(cli_overrides.get("handshake_samples") or 0)
+    if hs_samples > 0:
+        run_handshake_benchmark(
+            brokers=brokers,
+            client_id_prefix=str(sim.client_id_prefix),
+            samples=hs_samples,
+            interval_s=float(cli_overrides.get("handshake_interval") or 0.1),
+            timeout_s=float(cli_overrides.get("handshake_timeout") or sim.connect_timeout or 5.0),
+            out=str(cli_overrides.get("handshake_out") or "sensors/handshake_metrics"),
+            plot=bool(cli_overrides.get("handshake_plot") or False),
+            worker_id=worker_id,
+        )
+        if bool(cli_overrides.get("handshake_only") or False):
+            return
 
     Simulator(
         brokers=brokers,
@@ -1106,6 +1528,12 @@ def main():
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--once", action="store_true")
     parser.add_argument("--workers", type=int, default=1, help="Number of worker processes (use >1 to utilize multi-core)")
+    parser.add_argument("--handshake-samples", type=int, default=0, help="Run real connect/disconnect handshake benchmark N samples (per worker)")
+    parser.add_argument("--handshake-interval", type=float, default=0.1, help="Delay between handshake samples (seconds)")
+    parser.add_argument("--handshake-timeout", type=float, default=10.0, help="Timeout waiting for MQTT CONNACK (seconds)")
+    parser.add_argument("--handshake-out", default="sensors/handshake_metrics", help="Output directory (or .jsonl file) for handshake JSONL + summary")
+    parser.add_argument("--handshake-plot", action="store_true", help="Generate handshake plots (requires matplotlib)")
+    parser.add_argument("--handshake-only", action="store_true", help="Only run handshake benchmark, then exit")
     parser.add_argument("--log-level", default="INFO", help="Logging level")
     args = parser.parse_args()
 
@@ -1122,6 +1550,21 @@ def main():
 
     sim = parse_simulation_config(rest, args)
     workers = max(1, int(getattr(args, "workers", 1) or 1))
+
+    hs_samples = int(getattr(args, "handshake_samples", 0) or 0)
+    if workers == 1 and hs_samples > 0:
+        run_handshake_benchmark(
+            brokers=brokers,
+            client_id_prefix=str(sim.client_id_prefix),
+            samples=hs_samples,
+            interval_s=float(getattr(args, "handshake_interval", 0.1) or 0.1),
+            timeout_s=float(getattr(args, "handshake_timeout", 10.0) or 10.0),
+            out=str(getattr(args, "handshake_out", "sensors/handshake_metrics")),
+            plot=bool(getattr(args, "handshake_plot", False)),
+            worker_id=None,
+        )
+        if bool(getattr(args, "handshake_only", False)):
+            return
 
     if workers == 1:
         Simulator(
@@ -1153,6 +1596,12 @@ def main():
         "ha_discovery": bool(getattr(args, "ha_discovery", False)),
         "no_ha_discovery": bool(getattr(args, "no_ha_discovery", False)),
         "client_id_prefix": getattr(args, "client_id_prefix", None),
+        "handshake_samples": int(getattr(args, "handshake_samples", 0) or 0),
+        "handshake_interval": float(getattr(args, "handshake_interval", 0.1) or 0.1),
+        "handshake_timeout": float(getattr(args, "handshake_timeout", 10.0) or 10.0),
+        "handshake_out": str(getattr(args, "handshake_out", "sensors/handshake_metrics")),
+        "handshake_plot": bool(getattr(args, "handshake_plot", False)),
+        "handshake_only": bool(getattr(args, "handshake_only", False)),
     }
 
     procs: List[mp.Process] = []
@@ -1180,15 +1629,31 @@ def main():
             if p.is_alive():
                 p.terminate()
 
-    try:
-        for p in procs:
-            p.join()
-    except KeyboardInterrupt:
-        logging.info("Stopping workers...")
+    stop_requested = {"flag": False}
+    prev_sigint = signal.getsignal(signal.SIGINT)
+
+    def _on_sigint(signum, frame) -> None:
+        if not stop_requested["flag"]:
+            logging.info("Stopping workers...")
+        stop_requested["flag"] = True
         _terminate_children()
-        for p in procs:
-            p.join(timeout=2)
-        raise
+
+    try:
+        signal.signal(signal.SIGINT, _on_sigint)
+        # Join without raising KeyboardInterrupt; SIGINT is handled by _on_sigint.
+        while True:
+            alive = [p for p in procs if p.is_alive()]
+            if not alive:
+                break
+            for p in alive:
+                p.join(timeout=0.2)
+            if stop_requested["flag"]:
+                _terminate_children()
+    finally:
+        try:
+            signal.signal(signal.SIGINT, prev_sigint)
+        except Exception:
+            pass
 
 if __name__ == "__main__":
     main()
