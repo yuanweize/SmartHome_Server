@@ -1,0 +1,101 @@
+% !TeX spellcheck = en_US
+\documentclass{phdthesis}
+\usepackage[english]{babel}
+\usepackage{csquotes}      % Required by biblatex
+
+%% Additional packages for thesis content
+\usepackage{booktabs}      % Better tables
+\usepackage{listings}      % Code listings
+\usepackage{xcolor}        % Colors for listings
+\usepackage{amsmath}       % Math support
+\usepackage{amssymb}       % Math symbols
+
+%% Code listing style
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  numbers=left,
+  numberstyle=\tiny,
+  tabsize=2
+}
+
+%% Acronyms
+\usepackage[acronym,toc]{glossaries}
+\usepackage{threeparttable}  % For table notes
+% No external makeglossaries step required (works on Overleaf and locally).
+\makenoidxglossaries
+\input{acronyms}
+
+%% Bibliography database
+\addbibresource{literature.bib}
+
+% Metadata
+\university{Czech Technical University in Prague}
+\faculty{Faculty of Electrical Engineering}
+\department{Department of Microelectronics}
+
+% Use \csname to avoid any editor/JSON escaping issues with \t...
+\csname thesistype\endcsname{Bachelor thesis}
+\studyprogram{Electrical Engineering and Computer Science}
+
+\csname title\endcsname{Application of Servers and Unix-like Systems for Sensor Control in Smart Homes}
+\author{Weize Yuan}
+
+\supervisor{prof. Ing. Miroslav Hus{\'a}k, CSc.}
+\supervisorAffiliation{
+	Department of Microelectronics\\
+	Faculty of Electrical Engineering\\
+	Czech Technical University in Prague\\
+	Technická 2\\
+	160 00 Prague 6\\
+	Czech Republic}
+
+\placeyear{Prague 2026}
+\date{2026}
+
+\begin{document}
+
+%% Front matter
+\maketitle
+
+%% Declaration (required by CTU FEE)
+\input{chapters/declaration}
+
+%% Acknowledgements
+\input{chapters/acknowledgements}
+
+%% Abstract (English + Czech required)
+\input{chapters/abstract}
+
+%% Table of Contents (as per CTU requirements, includes page numbers)
+\tableofcontents
+
+%% List of Acronyms
+% Print the list even if you haven't used \gls{...} yet.
+\glsaddallunused
+\printnoidxglossary[type=\acronymtype,title=List of Acronyms,toctitle=List of Acronyms]
+
+%% List of Figures and Tables
+\listoffigures
+\listoftables
+
+%% Main text
+\mainmatter
+\input{chapters/introduction}
+\input{chapters/background}
+\input{chapters/architecture}
+\input{chapters/implementation}
+\input{chapters/evaluation}
+\input{chapters/comparison}
+\input{chapters/conclusion}
+
+%% Appendices
+\appendix
+\input{chapters/appendix}
+
+%% Bibliography
+\backmatter
+\printbibliography[heading=bibintoc,title={Bibliography}]
+
+\end{document}

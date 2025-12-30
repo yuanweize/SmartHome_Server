@@ -13,20 +13,54 @@ venv/
 # VSCode
 .vscode/
 
+# GitHub metadata (user request: exclude .github)
+.github/
+
 # Project-specific (secrets / local config)
 sensors/brokers.yml
 sensors/*.local.yml
 sensors/*.dev.yml
 sensors/*.secrets.*
 
-# Docker
+# ESPHome secrets
+esphome/secrets.yaml
+
+# Docker / runtime logs
 *.log
-# Certificates
-# Allow committing public certs/CA bundles if you want, but always ignore private keys.
+
+# Certificates / keys (avoid committing any private key material)
 *.key
 *.p12
 *.pfx
-*.crt
-*.pem
-docs/
-tests/
+*key*.pem
+*private*.pem
+
+# Local TLS material (keep documentation only)
+certs/**
+!certs/README
+sensors/certs/
+
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.lot
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+
+# Specific thesis build output (keep sources + images, ignore generated PDF)
+docs/BT/CTU_FEL_THESIS/thesis-final.pdf
+
+# Docs: keep sources, avoid committing heavy/binary and third-party materials
+docs/BT/论文/
+docs/BT/*.pdf
+docs/BT/*.doc
+docs/BT/*.docx
+docs/BT/*.zip
+doc
