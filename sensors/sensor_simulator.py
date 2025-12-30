@@ -22,6 +22,7 @@ import shutil
 import tempfile
 import heapq
 import math
+import multiprocessing as mp
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Optional, Callable
@@ -587,6 +588,42 @@ def _now_ts() -> int:
     return int(time.time())
 
 
+def _run_worker_process(
+    *,
+    config_path: str,
+    worker_id: int,
+    start_id: int,
+    end_id: int,
+    cli_overrides: Dict[str, Any],
+) -> None:
+    """Worker entrypoint for multi-process mode.
+
+    Must be module-level so it can be pickled on platforms using spawn (e.g. macOS).
+    """
+
+    setup_logging(str(cli_overrides.get("log_level", "INFO")))
+
+    brokers, rest, _ = load_brokers(config_path)
+
+    # Build a minimal Namespace-like object for parse_simulation_config.
+    cli = argparse.Namespace(**cli_overrides)
+    sim = parse_simulation_config(rest, cli)
+
+    # Ensure client ids don't collide across workers.
+    sim.client_id_prefix = f"{sim.client_id_prefix}-w{worker_id}"
+
+    Simulator(
+        brokers=brokers,
+        sim=sim,
+        dry_run=bool(cli_overrides.get("dry_run", False)),
+        once=bool(cli_overrides.get("once", False)),
+        log_level=str(cli_overrides.get("log_level", "INFO")),
+        device_id_start=start_id,
+        device_id_end=end_id,
+        worker_id=worker_id,
+    ).run()
+
+
 class Simulator:
     def __init__(
         self,
@@ -596,12 +633,21 @@ class Simulator:
         dry_run: bool,
         once: bool,
         log_level: str,
+        device_id_start: int = 1,
+        device_id_end: Optional[int] = None,
+        worker_id: Optional[int] = None,
     ) -> None:
         self.brokers = brokers
         self.sim = sim
         self.dry_run = dry_run
         self.once = once
         self.log_level = log_level
+
+        self.device_id_start = max(1, int(device_id_start))
+        self.device_id_end = int(device_id_end) if device_id_end is not None else int(sim.devices)
+        if self.device_id_end < self.device_id_start:
+            self.device_id_end = self.device_id_start
+        self.worker_id = worker_id
 
         self._broker_clients: List[Tuple[Optional[mqtt.Client], Broker]] = []
         self._stop = False
@@ -674,7 +720,7 @@ class Simulator:
                 self._publish_count += 1
 
     def _ensure_initial_state(self) -> None:
-        for device_id in range(1, self.sim.devices + 1):
+        for device_id in range(self.device_id_start, self.device_id_end + 1):
             for inst in self.entities:
                 ent = inst.base
                 key = (device_id, inst.entity_id)
@@ -700,7 +746,7 @@ class Simulator:
                         self.state[key] = 0.0
 
     def _build_command_map(self) -> None:
-        for device_id in range(1, self.sim.devices + 1):
+        for device_id in range(self.device_id_start, self.device_id_end + 1):
             for inst in self.entities:
                 ent = inst.base
                 if not ent.commandable:
@@ -766,7 +812,7 @@ class Simulator:
         if not self.sim.ha_discovery:
             return
 
-        for device_id in range(1, self.sim.devices + 1):
+        for device_id in range(self.device_id_start, self.device_id_end + 1):
             for inst in self.entities:
                 ent = inst.base
                 uid = self._unique_id(device_id, inst.entity_id)
@@ -881,7 +927,7 @@ class Simulator:
         light_id = self._resolve_entity_id(self.sim.automation.light_entity)
         hold = float(self.sim.automation.motion_hold_seconds)
 
-        for device_id in range(1, self.sim.devices + 1):
+        for device_id in range(self.device_id_start, self.device_id_end + 1):
             motion_key = (device_id, motion_id)
             light_key = (device_id, light_id)
             motion_on = bool(self.state.get(motion_key, False))
@@ -924,7 +970,7 @@ class Simulator:
         self._publish_discovery()
 
         # Publish initial actuator states
-        for device_id in range(1, self.sim.devices + 1):
+        for device_id in range(self.device_id_start, self.device_id_end + 1):
             for inst in self.entities:
                 ent = inst.base
                 if ent.kind in {"switch", "light"}:
@@ -933,9 +979,14 @@ class Simulator:
         base_defs = len(self.sim.entities or [])
         expanded = len(self.entities)
         command_topics = len(self.command_topics)
+        device_count = (self.device_id_end - self.device_id_start + 1)
+        worker_tag = "" if self.worker_id is None else f" worker={self.worker_id}"
         logging.info(
-            "Started %s device(s), entities=%s defs -> %s instances, command_topics=%s, base_topic=%s",
-            self.sim.devices,
+            "Started %s device(s)%s range=%s..%s, entities=%s defs -> %s instances, command_topics=%s, base_topic=%s",
+            device_count,
+            worker_tag,
+            self.device_id_start,
+            self.device_id_end,
             base_defs,
             expanded,
             command_topics,
@@ -945,7 +996,7 @@ class Simulator:
         # Scheduler heap: (next_time, device_id, entity_index)
         heap: List[Tuple[float, int, int]] = []
         start = time.monotonic()
-        for device_id in range(1, self.sim.devices + 1):
+        for device_id in range(self.device_id_start, self.device_id_end + 1):
             for idx, inst in enumerate(self.entities):
                 ent = inst.base
                 if ent.kind in {"switch", "light"}:
@@ -1026,6 +1077,7 @@ def main():
     parser.add_argument("--no-ha-discovery", action="store_true", help="Override simulation.ha_discovery=false")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--once", action="store_true")
+    parser.add_argument("--workers", type=int, default=1, help="Number of worker processes (use >1 to utilize multi-core)")
     parser.add_argument("--log-level", default="INFO", help="Logging level")
     args = parser.parse_args()
 
@@ -1041,14 +1093,74 @@ def main():
     logging.info(f"Loaded {len(brokers)} broker(s) from {args.config}")
 
     sim = parse_simulation_config(rest, args)
-    simulator = Simulator(
-        brokers=brokers,
-        sim=sim,
-        dry_run=bool(args.dry_run),
-        once=bool(args.once),
-        log_level=str(args.log_level),
-    )
-    simulator.run()
+    workers = max(1, int(getattr(args, "workers", 1) or 1))
+
+    if workers == 1:
+        Simulator(
+            brokers=brokers,
+            sim=sim,
+            dry_run=bool(args.dry_run),
+            once=bool(args.once),
+            log_level=str(args.log_level),
+        ).run()
+        return
+
+    # Multi-process mode: partition device_ids across workers to utilize multiple CPU cores.
+    total_devices = int(sim.devices)
+    chunk = (total_devices + workers - 1) // workers
+
+    cli_overrides: Dict[str, Any] = {
+        "log_level": str(args.log_level),
+        "dry_run": bool(args.dry_run),
+        "once": bool(args.once),
+        "devices": getattr(args, "devices", None),
+        "sensors": getattr(args, "sensors", None),
+        "interval": getattr(args, "interval", None),
+        "payload": getattr(args, "payload", None),
+        "base_topic": getattr(args, "base_topic", None),
+        "discovery_prefix": getattr(args, "discovery_prefix", None),
+        "connect_timeout": getattr(args, "connect_timeout", None),
+        "qos": getattr(args, "qos", None),
+        "retain": bool(getattr(args, "retain", False)),
+        "ha_discovery": bool(getattr(args, "ha_discovery", False)),
+        "no_ha_discovery": bool(getattr(args, "no_ha_discovery", False)),
+        "client_id_prefix": getattr(args, "client_id_prefix", None),
+    }
+
+    procs: List[mp.Process] = []
+    for wid in range(workers):
+        start_id = wid * chunk + 1
+        end_id = min((wid + 1) * chunk, total_devices)
+        if start_id > end_id:
+            continue
+        p = mp.Process(
+            target=_run_worker_process,
+            kwargs={
+                "config_path": args.config,
+                "worker_id": wid,
+                "start_id": start_id,
+                "end_id": end_id,
+                "cli_overrides": cli_overrides,
+            },
+            daemon=False,
+        )
+        p.start()
+        procs.append(p)
+
+    def _terminate_children() -> None:
+        for p in procs:
+            if p.is_alive():
+                p.terminate()
+
+    try:
+        for p in procs:
+            p.join()
+    except KeyboardInterrupt:
+        logging.info("Stopping workers...")
+        _terminate_children()
+        for p in procs:
+            p.join(timeout=2)
+        raise
 
 if __name__ == "__main__":
     main()
