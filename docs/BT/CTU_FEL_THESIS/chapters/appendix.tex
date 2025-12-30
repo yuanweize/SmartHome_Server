@@ -1,0 +1,232 @@
+\chapter{ESPHome Configuration Files}
+\label{app:esphome}
+
+This appendix contains excerpts from the ESPHome configuration files used for the ESP32 sensor nodes.
+
+\section{ESP32-S3 Edge Intelligence Node}
+\label{app:esp32s3-config}
+
+\begin{verbatim}
+# esp32s3.yaml (excerpt)
+esphome:
+  name: esp32s3-node-a
+  platform: ESP32
+  board: esp32-s3-devkitc-1
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+api:
+  encryption:
+    key: !secret api_key
+
+mqtt:
+  broker: mqtt.example.com
+  port: 8883
+  certificate_authority: !secret ca_cert
+  client_certificate: !secret client_cert
+  client_key: !secret client_key
+
+sensor:
+  - platform: bmp085
+    temperature:
+      name: "S3 Temperature"
+    pressure:
+      name: "S3 Pressure"
+    address: 0x77
+    update_interval: 60s
+
+  - platform: mpu6050
+    address: 0x68
+    accel_x:
+      name: "S3 Accel X"
+      id: accel_x
+    accel_y:
+      name: "S3 Accel Y"
+      id: accel_y
+    accel_z:
+      name: "S3 Accel Z"
+      id: accel_z
+    update_interval: 100ms
+
+  - platform: template
+    name: "Resultant G-Force"
+    lambda: |-
+      float ax = id(accel_x).state;
+      float ay = id(accel_y).state;
+      float az = id(accel_z).state;
+      return sqrt(ax*ax + ay*ay + az*az);
+    update_interval: 100ms
+    unit_of_measurement: "g"
+\end{verbatim}
+
+\section{ESP32 Environment Sensing Node}
+\label{app:esp32-config}
+
+\begin{verbatim}
+# esp32.yaml (excerpt)
+esphome:
+  name: esp32-node-b
+  platform: ESP32
+  board: esp32dev
+
+sensor:
+  - platform: tcs34725
+    red_channel:
+      name: "Color Red"
+    green_channel:
+      name: "Color Green"
+    blue_channel:
+      name: "Color Blue"
+    illuminance:
+      name: "Illuminance"
+    address: 0x29
+    update_interval: 10s
+
+  - platform: adc
+    pin: GPIO34
+    name: "Smoke Sensor"
+    id: smoke_sensor
+    update_interval: 5s
+    filters:
+      - multiply: 3.3
+
+binary_sensor:
+  - platform: gpio
+    pin: GPIO27
+    name: "Motion Detected"
+    device_class: motion
+
+light:
+  - platform: rgb
+    name: "Status LED"
+    id: status_led
+    red: output_red
+    green: output_green
+    blue: output_blue
+    effects:
+      - pulse:
+          name: "Fast Pulse"
+          transition_length: 0.5s
+          update_interval: 0.5s
+
+automation:
+  - trigger:
+      platform: numeric_state
+      id: smoke_sensor
+      above: 2.5
+    action:
+      - light.turn_on:
+          id: status_led
+          effect: "Fast Pulse"
+          red: 100%
+          green: 0%
+          blue: 0%
+\end{verbatim}
+
+% ============================================================================
+
+\chapter{Python Simulator Code Excerpts}
+\label{app:simulator}
+
+This appendix contains key excerpts from the Python sensor simulator.
+
+\section{Simulator Entry Point}
+\label{app:sim-entry}
+
+\begin{verbatim}
+# smarthome_sim/simulator.py (excerpt)
+class Simulator:
+    def __init__(self, config, args):
+        self.brokers = config.get('brokers', [])
+        self.devices = args.devices
+        self.workers = args.workers
+        self.qos = args.qos
+        
+    def run(self):
+        with Pool(self.workers) as pool:
+            pool.map(self._run_worker, range(self.workers))
+            
+    def _run_worker(self, worker_id):
+        devices_per_worker = self.devices // self.workers
+        for i in range(devices_per_worker):
+            device_id = worker_id * devices_per_worker + i
+            self._simulate_device(device_id)
+\end{verbatim}
+
+\section{mTLS Configuration}
+\label{app:mtls-config}
+
+\begin{verbatim}
+# smarthome_sim/broker.py (excerpt)
+def _create_tls_context(self, broker_config):
+    import ssl
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    context.verify_mode = ssl.CERT_REQUIRED
+    
+    # Load CA certificate
+    context.load_verify_locations(broker_config['ca_file'])
+    
+    # Load client certificate and key for mTLS
+    if 'client_cert' in broker_config:
+        context.load_cert_chain(
+            certfile=broker_config['client_cert'],
+            keyfile=broker_config['client_key']
+        )
+    
+    return context
+\end{verbatim}
+
+% ============================================================================
+
+\chapter{Certificate Generation}
+\label{app:certs}
+
+This appendix documents the certificate generation process for mTLS.
+
+\section{Certificate Authority}
+\label{app:ca-gen}
+
+\begin{verbatim}
+# Generate CA private key (ECC)
+openssl ecparam -genkey -name secp256r1 -out ca.key
+
+# Generate CA certificate
+openssl req -new -x509 -days 3650 -key ca.key -out ca.pem \
+  -subj "/CN=SmartHome CA/O=CTU FEL/C=CZ"
+\end{verbatim}
+
+\section{Server Certificate}
+\label{app:server-cert}
+
+\begin{verbatim}
+# Generate server private key
+openssl ecparam -genkey -name secp256r1 -out server.key
+
+# Generate certificate signing request
+openssl req -new -key server.key -out server.csr \
+  -subj "/CN=mqtt.example.com"
+
+# Sign with CA
+openssl x509 -req -in server.csr \
+  -CA ca.pem -CAkey ca.key -CAcreateserial \
+  -out server.pem -days 365
+\end{verbatim}
+
+\section{Client Certificate}
+\label{app:client-cert}
+
+\begin{verbatim}
+# Generate client private key
+openssl ecparam -genkey -name secp256r1 -out client.key
+
+# Generate certificate signing request
+openssl req -new -key client.key -out client.csr \
+  -subj "/CN=esp32-client/OU=IoT Devices"
+
+# Sign with CA
+openssl x509 -req -in client.csr \
+  -CA ca.pem -CAkey ca.key -CAcreateserial \
+  -out client.pem -days 365
+\end{verbatim}

@@ -1,0 +1,74 @@
+\chapter{Conclusion}
+\label{ch:conclusion}
+
+This chapter summarizes the thesis contributions, acknowledges limitations, and suggests directions for future work.
+
+% ============================================================================
+% 7.1 Summary of Contributions
+% ============================================================================
+\section{Summary of Contributions}
+\label{sec:summary}
+
+This thesis presented the design and implementation of a smart home sensor control system utilizing servers and Unix-like operating systems. The primary contributions are:
+
+\begin{enumerate}
+    \item \textbf{Distributed Architecture Design:} A geographically distributed system architecture was designed with components spanning multiple locations (Nuremberg, Prague), demonstrating practical deployment of cross-region IoT infrastructure with secure communications.
+    
+    \item \textbf{Dual Hardware Node Implementation:} Two ESP32-based sensor nodes were implemented demonstrating different IoT paradigms:
+    \begin{itemize}
+        \item ESP32-S3 edge intelligence node performing local signal processing (vibration analysis, acoustic event detection)
+        \item ESP32 environment sensing node with safety monitoring capabilities (smoke detection, occupancy sensing)
+    \end{itemize}
+    
+    \item \textbf{Scalable Simulation Framework:} A Python-based sensor simulator capable of generating traffic from over 12,000 virtual devices was developed, enabling stress testing and performance benchmarking beyond physical hardware limitations.
+    
+    \item \textbf{Security Implementation:} Mutual TLS authentication with ECC certificates was implemented throughout the system, demonstrating practical IoT security measures with quantified performance benefits (2.5x handshake speedup compared to RSA-2048).
+    
+    \item \textbf{Commercial Platform Comparison:} A systematic comparison with commercial solutions (Xiaomi, Amazon Alexa, Google Home) was conducted, highlighting trade-offs between convenience and data sovereignty.
+\end{enumerate}
+
+The implemented system successfully demonstrates that open-source smart home solutions can provide comparable or superior functionality to commercial alternatives while maintaining complete user control over data and system behavior.
+
+% ============================================================================
+% 7.2 Limitations
+% ============================================================================
+\section{Limitations}
+\label{sec:limitations}
+
+The following limitations should be acknowledged:
+
+\begin{itemize}
+    \item \textbf{Setup Complexity:} The system requires significant technical expertise for initial deployment, including certificate generation, server configuration, and network setup. This barrier limits accessibility for non-technical users.
+    
+    \item \textbf{Hardware Scale:} Only two physical sensor nodes were implemented. Production deployments with hundreds of devices may encounter unforeseen challenges.
+    
+    \item \textbf{Voice Integration:} No voice control interface was implemented, limiting comparison with voice-centric commercial platforms.
+    
+    \item \textbf{Long-term Testing:} Reliability metrics were collected over a two-week period. Extended operation may reveal additional failure modes.
+    
+    \item \textbf{Commercial Device Testing:} Direct integration testing with Amazon Alexa and Google Home devices was not performed due to availability constraints.
+\end{itemize}
+
+% ============================================================================
+% 7.3 Future Work
+% ============================================================================
+\section{Future Work}
+\label{sec:future}
+
+Several directions for future research and development are identified:
+
+\begin{enumerate}
+    \item \textbf{Matter Protocol Integration:} Implementing Matter protocol support would enable interoperability with an expanding ecosystem of compatible devices while maintaining local control principles.
+    
+    \item \textbf{Machine Learning at the Edge:} The ESP32-S3's vector instructions could be leveraged for more sophisticated edge AI applications, such as anomaly detection or predictive maintenance.
+    
+    \item \textbf{Automated Certificate Management:} Implementing automated certificate lifecycle management (issuance, renewal, revocation) would reduce operational overhead for larger deployments.
+    
+    \item \textbf{Energy Monitoring:} Extending the system to include power consumption monitoring and optimization would provide additional value for energy-conscious users.
+    
+    \item \textbf{User Interface Improvements:} Developing simplified setup wizards and mobile applications could reduce the technical barrier for non-expert users.
+    
+    \item \textbf{Redundancy and Failover:} Implementing MQTT broker clustering and Home Assistant high-availability would improve system resilience for critical applications.
+\end{enumerate}
+
+The growing adoption of local-first smart home solutions and the emergence of interoperability standards like Matter suggest a promising trajectory for open-source home automation. Continued development in this area has the potential to democratize smart home technology while preserving user privacy and autonomy.
