@@ -1,0 +1,189 @@
+\chapter{Theoretical Background}
+\label{ch:background}
+
+This chapter provides the theoretical foundation for understanding smart home systems, communication protocols, and security mechanisms employed in this thesis.
+
+% ============================================================================
+% 2.1 Smart Home Systems Overview
+% ============================================================================
+\section{Smart Home Systems Overview}
+\label{sec:smarthome-overview}
+
+A smart home system consists of interconnected devices that monitor and control various aspects of a residential environment. These systems typically comprise three main layers:
+
+\begin{itemize}
+    \item \textbf{Perception Layer:} Sensors and actuators that interact with the physical environment, including temperature sensors, motion detectors, smart switches, and lighting controls.
+    
+    \item \textbf{Network Layer:} Communication infrastructure that enables data transmission between devices, including protocols such as WiFi, Zigbee, Z-Wave, and Bluetooth.
+    
+    \item \textbf{Application Layer:} Software platforms that process sensor data, execute automation rules, and provide user interfaces for monitoring and control.
+\end{itemize}
+
+The evolution of smart home technology has been driven by advances in microcontroller capabilities, wireless communication standards, and cloud computing infrastructure~\cite{smarthome_survey_2020}. Modern systems increasingly emphasize edge computing, where data processing occurs locally rather than in centralized cloud servers~\cite{edge_computing_iot_2016}.
+
+The architecture of IoT systems has been extensively studied, with researchers proposing various layered models to describe the interactions between physical devices, communication networks, and application services~\cite{iot_architecture_2019}.
+
+% ============================================================================
+% 2.2 MQTT Protocol
+% ============================================================================
+\section{MQTT Protocol}
+\label{sec:mqtt}
+
+Message Queuing Telemetry Transport (MQTT) is a lightweight publish-subscribe messaging protocol designed for constrained devices and low-bandwidth networks~\cite{mqtt_oasis_2019}. Originally developed by IBM in 1999, MQTT has become a de facto standard for IoT communications due to its minimal bandwidth requirements and simple implementation~\cite{mqtt_iot_survey_2017}.
+
+Comparative studies have demonstrated MQTT's advantages over HTTP for IoT applications, particularly in terms of reduced network overhead and power consumption~\cite{mqtt_performance_2018}.
+
+% ----------------------------------------------------------------------------
+\subsection{Publish/Subscribe Model}
+\label{subsec:pubsub}
+
+Unlike traditional request-response protocols, MQTT employs a publish-subscribe model with a central broker:
+
+\begin{itemize}
+    \item \textbf{Publishers} send messages to specific topics without knowledge of subscribers.
+    \item \textbf{Subscribers} register interest in topics and receive all messages published to those topics.
+    \item \textbf{Broker} acts as an intermediary, routing messages from publishers to subscribers based on topic matching.
+\end{itemize}
+
+This decoupled architecture enables scalable many-to-many communication patterns suitable for IoT deployments.
+
+% TODO: Add Figure showing MQTT publish-subscribe model
+
+% ----------------------------------------------------------------------------
+\subsection{Quality of Service Levels}
+\label{subsec:qos}
+
+MQTT defines three Quality of Service (QoS) levels to balance reliability against overhead:
+
+\begin{table}[htbp]
+\centering
+\caption{MQTT Quality of Service Levels}
+\label{tab:mqtt-qos}
+\begin{tabular}{cll}
+\toprule
+\textbf{QoS} & \textbf{Delivery Guarantee} & \textbf{Use Case} \\
+\midrule
+0 & At most once (fire and forget) & Non-critical sensor readings \\
+1 & At least once (acknowledged) & Important state changes \\
+2 & Exactly once (four-way handshake) & Critical commands \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+QoS 0 provides the lowest overhead but no delivery guarantees. QoS 1 ensures delivery through acknowledgment but may result in duplicates. QoS 2 guarantees exactly-once delivery at the cost of additional message exchanges.
+
+% ----------------------------------------------------------------------------
+\subsection{Topic Hierarchy}
+\label{subsec:topics}
+
+MQTT topics use a hierarchical structure with forward slash separators, enabling flexible subscription patterns:
+
+\begin{verbatim}
+smarthome/living_room/temperature/state
+smarthome/bedroom/+/state        (single-level wildcard)
+smarthome/#                      (multi-level wildcard)
+\end{verbatim}
+
+This hierarchical organization facilitates logical grouping of devices and supports pattern-based subscriptions for efficient message filtering.
+
+% ============================================================================
+% 2.3 Transport Layer Security
+% ============================================================================
+\section{Transport Layer Security}
+\label{sec:tls}
+
+Transport Layer Security (TLS) provides cryptographic security for communications over computer networks. In IoT contexts, TLS protects against eavesdropping, tampering, and impersonation attacks~\cite{iot_security_survey_2019}.
+
+% ----------------------------------------------------------------------------
+\subsection{TLS and mTLS}
+\label{subsec:mtls}
+
+Standard TLS authenticates only the server to the client, verifying the server's identity through certificate validation. Mutual TLS (mTLS) extends this by requiring both parties to present certificates:
+
+\begin{enumerate}
+    \item Client initiates connection with ClientHello message.
+    \item Server responds with certificate and requests client certificate.
+    \item Client presents its certificate for server verification.
+    \item Both parties complete key exchange and establish encrypted session.
+\end{enumerate}
+
+mTLS provides stronger security guarantees for IoT deployments by ensuring that only authorized devices can connect to the message broker.
+
+% TODO: Add sequence diagram for mTLS handshake
+
+% ----------------------------------------------------------------------------
+\subsection{ECC vs RSA Cryptography}
+\label{subsec:ecc-rsa}
+
+Elliptic Curve Cryptography (ECC) offers equivalent security to RSA with significantly smaller key sizes, making it particularly suitable for resource-constrained IoT devices~\cite{ecc_vs_rsa_2020}.
+
+\begin{table}[htbp]
+\centering
+\caption{Comparison of ECC and RSA Key Sizes}
+\label{tab:ecc-rsa}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Security Level} & \textbf{ECC Key Size} & \textbf{RSA Key Size} \\
+\midrule
+80-bit & 160 bits & 1024 bits \\
+112-bit & 224 bits & 2048 bits \\
+128-bit & 256 bits & 3072 bits \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The secp256r1 curve (also known as P-256 or prime256v1) provides 128-bit security with 256-bit keys, representing a 12x reduction compared to equivalent RSA-3072 keys. This results in faster cryptographic operations and reduced memory requirements on microcontrollers.
+
+% ============================================================================
+% 2.4 Home Assistant Platform
+% ============================================================================
+\section{Home Assistant Platform}
+\label{sec:homeassistant}
+
+Home Assistant is an open-source home automation platform designed to run on local hardware~\cite{homeassistant_2024}. Key features include:
+
+\begin{itemize}
+    \item \textbf{Integration Support:} Over 2,000 integrations for commercial and DIY devices.
+    \item \textbf{Local Control:} All processing occurs locally without mandatory cloud connectivity.
+    \item \textbf{Automation Engine:} YAML-based or visual automation configuration.
+    \item \textbf{Dashboard System:} Customizable user interfaces for monitoring and control.
+\end{itemize}
+
+Home Assistant supports MQTT discovery, enabling automatic registration of devices that publish configuration payloads to designated discovery topics.
+
+% ============================================================================
+% 2.5 ESPHome Framework
+% ============================================================================
+\section{ESPHome Framework}
+\label{sec:esphome}
+
+ESPHome is a firmware framework for ESP8266 and ESP32 microcontrollers that generates custom firmware from YAML configuration files~\cite{esphome_2024}. Key capabilities include:
+
+\begin{itemize}
+    \item \textbf{Sensor Support:} Native drivers for hundreds of sensor types.
+    \item \textbf{Native API:} Low-latency direct communication with Home Assistant.
+    \item \textbf{MQTT Support:} Full MQTT client with TLS/mTLS capability.
+    \item \textbf{OTA Updates:} Over-the-air firmware updates via WiFi.
+    \item \textbf{Local Automation:} On-device automation without external dependencies.
+\end{itemize}
+
+The declarative YAML configuration approach reduces development complexity while maintaining flexibility through lambda expressions for custom logic.
+
+% ============================================================================
+% 2.6 Edge Computing in IoT
+% ============================================================================
+\section{Edge Computing in IoT}
+\label{sec:edge}
+
+Edge computing refers to processing data near its source rather than transmitting all data to centralized cloud servers. Benefits include:
+
+\begin{itemize}
+    \item \textbf{Reduced Latency:} Local processing eliminates round-trip delays to remote servers.
+    \item \textbf{Bandwidth Efficiency:} Only processed results need transmission.
+    \item \textbf{Privacy Enhancement:} Raw sensor data remains on local devices.
+    \item \textbf{Offline Capability:} Critical functions operate without internet connectivity.
+\end{itemize}
+
+The ESP32-S3 microcontroller features vector instructions optimized for signal processing and machine learning inference, enabling edge computing applications such as vibration analysis and acoustic event detection directly on the sensor node.
+
+% TODO: Add citation for edge computing in IoT survey
