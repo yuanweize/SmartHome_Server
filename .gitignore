@@ -41,5 +41,4 @@ certs/**
 sensors/certs/
 
 # Docs: keep only docs/README tracked
-docs/**
-!docs/README
+docs/BT/
