@@ -19,7 +19,7 @@
 # 安装依赖
 cd SmartHome_Server
 python3 -m venv .venv && . .venv/bin/activate
-pip install -r requirements.txt
+pip install -r sensors/requirements.txt
 
 # 复制并编辑配置
 cp sensors/brokers.example.yml sensors/brokers.yml

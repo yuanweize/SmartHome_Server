@@ -11,8 +11,11 @@ services:
     
     volumes:
       # Dev convenience: mount code so edits take effect without rebuilding the image.
-      # Note: if you change dependencies in requirements.txt, you still need `docker compose up -d --build`.
+      # Note: if you change dependencies in sensors/requirements.txt, you still need `docker compose up -d --build`.
       - ./sensor_simulator.py:/app/sensors/sensor_simulator.py:ro
+
+      # Mount the Python package itself (so `git pull` updates are reflected without rebuilding)
+      - ./smarthome_sim:/app/sensors/smarthome_sim:ro
 
       # 1. Mount the config file
       - ./brokers.yml:/app/sensors/brokers.yml:ro

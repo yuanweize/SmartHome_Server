@@ -50,7 +50,8 @@ def main() -> None:
         print("\nInterrupted.")
         sys.exit(130)
     except ImportError as e:
-        sys.exit(f"Import error: {e}\nRun: pip install -r requirements.txt")
+        req_file = Path(__file__).with_name("requirements.txt")
+        sys.exit(f"Import error: {e}\nRun: pip install -r {req_file}")
     except FileNotFoundError as e:
         sys.exit(f"File not found: {e}")
     except Exception as e:
