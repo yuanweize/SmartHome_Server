@@ -66,6 +66,19 @@ python sensors/sensor_simulator.py --config sensors/brokers.yml [选项]
 python -m smarthome_sim --config sensors/brokers.yml [选项]
 ```
 
+## Docker Compose
+
+`sensors/docker-compose.yml` 提供两种模式：
+
+```bash
+# 默认：开启 Home Assistant MQTT Discovery
+cd sensors
+docker compose up -d --build
+
+# Bench/压力测试：关闭 Discovery
+docker compose --profile bench up -d --build simulator_bench
+```
+
 ## 配置说明
 
 将 `sensors/brokers.example.yml` 复制为 `sensors/brokers.yml`：
