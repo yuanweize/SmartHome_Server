@@ -19,7 +19,7 @@ A thesis-grade multi-broker MQTT smart-home simulator with mTLS support, designe
 # Install dependencies
 cd SmartHome_Server
 python3 -m venv .venv && . .venv/bin/activate
-pip install -r requirements.txt
+pip install -r sensors/requirements.txt
 
 # Copy and edit configuration
 cp sensors/brokers.example.yml sensors/brokers.yml
