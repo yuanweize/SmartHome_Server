@@ -7,7 +7,9 @@ services:
     # Command-line arguments:
     # --config: specify the config file path (inside the container)
     # All simulation settings live in brokers.yml; CLI args (if used) override it.
-    command: ["--config", "/app/sensors/brokers.yml"]
+    # Enable HA discovery for the dockerized simulator run.
+    # For stress tests, remove `--ha-discovery` (default is disabled).
+    command: ["--config", "/app/sensors/brokers.yml", "--ha-discovery"]
     
     volumes:
       # Dev convenience: mount code so edits take effect without rebuilding the image.
