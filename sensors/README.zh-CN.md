@@ -289,3 +289,11 @@ python sensors/sensor_simulator.py --config sensors/brokers.yml --log-level DEBU
 
 **环境要求：** Python 3.8+ | paho-mqtt>=1.6,<2.0 | PyYAML>=6.0 | matplotlib（可选）
 
+## 许可证
+
+MIT 许可证 - 详见 [LICENSE](../LICENSE)
+
+## 引用
+
+本模拟器是捷克理工大学学士论文《基于边缘计算的智能家居》的组成部分。引用信息请参阅 [主 README](../README.zh-CN.md)。
+

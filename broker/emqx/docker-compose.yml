@@ -3,43 +3,25 @@ services:
     image: emqx/emqx:latest
     container_name: emqx
     restart: always
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
     ports:
-      # EMQX Dashboard (bind to localhost only; remove 127.0.0.1 to allow remote access)
-      - "127.0.0.1:18083:18083"
-
-      # MQTTS (MQTT over TLS)
-      - "8883:8883"
-
+      - "127.0.0.1:18083:18083"  # Dashboard (localhost only)
+      - "8883:8883"              # MQTTS
     volumes:
-      # Persist EMQX data and logs on the host
       - ./data:/opt/emqx/data
       - ./log:/opt/emqx/log
-
-      # Mount local TLS certificates into the container
       - ./certs:/opt/emqx/certs
-
     environment:
-      # ----------------------------
-      # TLS Listener Configuration
-      # ----------------------------
-      # Bind TLS listener to port 8883
+      # TLS listener
       EMQX_LISTENERS__SSL__DEFAULT__BIND: "8883"
-
-      # TLS certificate paths inside the container
-      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__CACERTFILE: "/opt/emqx/certs/ca/ca.pem"
-      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__CERTFILE: "/opt/emqx/certs/server/server.pem"
-      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__KEYFILE: "/opt/emqx/certs/server/server.key"
-
-      # ----------------------------
-      # mTLS (Mutual TLS) Enforcement
-      # ----------------------------
-      # Require the broker to verify client certificates
+      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__CACERTFILE: "/opt/emqx/certs/ca.pem"
+      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__CERTFILE: "/opt/emqx/certs/server.pem"
+      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__KEYFILE: "/opt/emqx/certs/server.key"
+      # mTLS enforcement
       EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__VERIFY: "verify_peer"
-      # Reject connections if the client does not present a certificate
       EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__FAIL_IF_NO_PEER_CERT: "true"
-
-      # ----------------------------
-      # Authentication Hardening (Optional)
-      # ----------------------------
-      # Disable anonymous access (recommended when using mTLS)
+      # Authentication
       EMQX_ALLOW_ANONYMOUS: "false"

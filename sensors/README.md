@@ -288,3 +288,11 @@ python sensors/sensor_simulator.py --config sensors/brokers.yml --log-level DEBU
 ---
 
 **Requirements:** Python 3.8+ | paho-mqtt>=1.6,<2.0 | PyYAML>=6.0 | matplotlib (optional)
+
+## License
+
+MIT License - See [LICENSE](../LICENSE)
+
+## Citation
+
+This simulator is part of the bachelor thesis *"Smart Home Based on Edge Computing"* at Czech Technical University in Prague. See the [main README](../README.md) for citation information.
