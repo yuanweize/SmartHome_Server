@@ -1,18 +1,26 @@
 esphome:
   name: smarthome-esp32s3
-  friendly_name: "Edge Compute Node ESP32S3(Node A)"
+  friendly_name: "Edge Compute Node ESP32-S3 (Node A)"
 
 esp32:
   board: esp32-s3-devkitc-1
   framework:
     type: esp-idf
+    sdkconfig_options:
+      # ECDSA P-256 for certificate signatures
+      CONFIG_MBEDTLS_ECP_DP_SECP256R1_ENABLED: "y"
+      CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED: "y"
+      CONFIG_MBEDTLS_ECDSA_DETERMINISTIC: "y"
+      # X25519 for key exchange
+      CONFIG_MBEDTLS_ECP_DP_CURVE25519_ENABLED: "y"
+      CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED: "y"
+      # TLS 1.3 support
+      CONFIG_MBEDTLS_SSL_PROTO_TLS1_3: "y"
 
-# --- 1. 开启 OTA (无线刷写) ---
 ota:
   - platform: esphome
     password: !secret ota_password
 
-# --- 2. 开启 Native API (HA 直连专用，加密) ---
 api:
   encryption:
     key: !secret api_key_esp32s3
@@ -22,12 +30,9 @@ wifi:
   password: !secret wifi_password
   fast_connect: true
 
-# --- 3. MQTT 配置 (mTLS 学术级加密) ---
 mqtt:
   broker: !secret mqtt_broker
-  port: !secret mqtt_port  # SSL 安全端口
-  
-  # 引用 secrets.yaml 中的证书内容
+  port: !secret mqtt_port
   certificate_authority: !secret mqtt_ca_cert
   client_certificate: !secret mqtt_client_cert
   client_certificate_key: !secret mqtt_client_key
@@ -35,7 +40,12 @@ mqtt:
 logger:
   hardware_uart: USB_CDC
 
-# --- I2C 硬件配置 ---
+globals:
+  - id: fall_detected_time
+    type: unsigned long
+    restore_value: no
+    initial_value: '0'
+
 i2c:
   sda: GPIO5
   scl: GPIO4
@@ -43,7 +53,7 @@ i2c:
   id: bus_a
 
 sensor:
-  # --- 1. 网络与系统状态 ---
+  # Network diagnostics
   - platform: wifi_signal
     name: "WiFi RSSI"
     id: wifi_rssi
@@ -54,19 +64,57 @@ sensor:
     name: "System Uptime"
     unit_of_measurement: "s"
 
-  # --- 2. 运动传感器 (全 6 轴数据) ---
+  # MPU6050 6-axis IMU
+  # Calibration: zero-offset compensation from stationary samples
+  # Ref: IEEE Std 528-2019
   - platform: mpu6050
     i2c_id: bus_a
     address: 0x68
-    accel_x: { name: "Acceleration X", id: acc_x, accuracy_decimals: 3 }
-    accel_y: { name: "Acceleration Y", id: acc_y, accuracy_decimals: 3 }
-    accel_z: { name: "Acceleration Z", id: acc_z, accuracy_decimals: 3 }
-    gyro_x: { name: "Angular Velocity X", accuracy_decimals: 2 }
-    gyro_y: { name: "Angular Velocity Y", accuracy_decimals: 2 }
-    gyro_z: { name: "Angular Velocity Z", accuracy_decimals: 2 }
+    accel_x:
+      name: "Acceleration X"
+      id: acc_x
+      accuracy_decimals: 3
+      filters:
+        - offset: -0.877
+        - throttle: 0.3s
+    accel_y:
+      name: "Acceleration Y"
+      id: acc_y
+      accuracy_decimals: 3
+      filters:
+        - offset: -0.145
+        - throttle: 0.3s
+    accel_z:
+      name: "Acceleration Z"
+      id: acc_z
+      accuracy_decimals: 3
+      filters:
+        - offset: -0.564
+        - throttle: 0.3s
+    gyro_x:
+      name: "Angular Velocity X"
+      id: gyro_x
+      accuracy_decimals: 2
+      filters:
+        - offset: 2.53
+        - throttle: 0.3s
+    gyro_y:
+      name: "Angular Velocity Y"
+      id: gyro_y
+      accuracy_decimals: 2
+      filters:
+        - offset: -2.68
+        - throttle: 0.3s
+    gyro_z:
+      name: "Angular Velocity Z"
+      id: gyro_z
+      accuracy_decimals: 2
+      filters:
+        - offset: 2.44
+        - throttle: 0.3s
     update_interval: 0.1s
 
-  # --- 3. 环境传感器 ---
+  # BMP180 environmental sensor
   - platform: bmp085
     i2c_id: bus_a
     address: 0x77
@@ -74,27 +122,27 @@ sensor:
     pressure: { name: "Indoor Pressure", accuracy_decimals: 2 }
     update_interval: 5s
 
-  # --- 4. 声学采样 (ADC 0dB) ---
+  # Acoustic ADC sampling
   - platform: adc
     pin: GPIO6
     name: "Acoustic ADC Voltage"
     id: sound_adc
-    update_interval: 0.05s
+    update_interval: 0.2s
     attenuation: 0db
     accuracy_decimals: 4
     filters:
       - sliding_window_moving_average:
-          window_size: 10
-          send_every: 5
+          window_size: 5
+          send_every: 2
 
-  # --- 5. 边缘计算核心算法 ---
-
-  # [算法 1]： Resultant G-Force (静态合力)
+  # Resultant acceleration magnitude (G-force)
   - platform: template
     name: "Resultant G-Force"
     unit_of_measurement: "G"
     accuracy_decimals: 3
     update_interval: 0.1s
+    filters:
+      - throttle: 0.3s
     lambda: |-
       float ax = id(acc_x).state;
       float ay = id(acc_y).state;
@@ -102,23 +150,74 @@ sensor:
       if (isnan(ax) || (ax==0 && ay==0 && az==0)) return 0.0;
       return sqrt(ax*ax + ay*ay + az*az) / 9.80665;
 
-  # [算法 2]： Dynamic Vibration Component (动态震动)
+  # Dynamic vibration component
   - platform: template
     name: "Dynamic Vibration Component"
     unit_of_measurement: "G"
     accuracy_decimals: 3
     update_interval: 0.1s
+    filters:
+      - throttle: 0.3s
     lambda: |-
       float ax = id(acc_x).state;
       float ay = id(acc_y).state;
       float az = id(acc_z).state;
       if (isnan(ax)) return 0.0;
       float mag = sqrt(ax*ax + ay*ay + az*az) / 9.80665;
-      float dev = fabs(mag - 1.0); 
-      return (dev < 0.02) ? 0.0 : dev; 
+      float dev = fabs(mag - 1.0);
+      return (dev < 0.02) ? 0.0 : dev;
+
+  # Angular velocity magnitude
+  # Ref: Huynh et al., J. Sensors, vol. 2015, Art. no. 452078
+  - platform: template
+    name: "Angular Velocity Magnitude"
+    unit_of_measurement: "deg/s"
+    accuracy_decimals: 2
+    update_interval: 0.1s
+    id: omega_mag
+    filters:
+      - throttle: 0.3s
+    lambda: |-
+      float wx = id(gyro_x).state;
+      float wy = id(gyro_y).state;
+      float wz = id(gyro_z).state;
+      if (isnan(wx)) return 0.0;
+      return sqrt(wx*wx + wy*wy + wz*wz);
 
 binary_sensor:
-  # [算法 3]： Acoustic Event Detection
+  # Fall detection using accelerometer-gyroscope fusion
+  # Ref: Huynh et al., J. Sensors, vol. 2015, Art. no. 452078
+  # Thresholds: UFT_acc = 2.4 G, UFT_gyro = 240 deg/s
+  # Reported sensitivity: 96.3%, specificity: 96.2%
+  - platform: template
+    name: "Fall Detection Alert"
+    device_class: safety
+    id: fall_alert
+    lambda: |-
+      const float UFT_ACC = 2.4;
+      const float UFT_GYRO = 240.0;
+      const unsigned long HOLD_MS = 5000;
+      
+      float ax = id(acc_x).state;
+      float ay = id(acc_y).state;
+      float az = id(acc_z).state;
+      if (isnan(ax)) return id(fall_alert).state;
+      float smv = sqrt(ax*ax + ay*ay + az*az) / 9.80665;
+      float omega = id(omega_mag).state;
+      unsigned long now = millis();
+      
+      if ((smv > UFT_ACC) && (omega > UFT_GYRO)) {
+        id(fall_detected_time) = now;
+        return true;
+      }
+      
+      if (id(fall_detected_time) > 0 && (now - id(fall_detected_time)) < HOLD_MS) {
+        return true;
+      }
+      
+      return false;
+
+  # Acoustic event detection
   - platform: template
     name: "Acoustic Peak Event"
     device_class: sound

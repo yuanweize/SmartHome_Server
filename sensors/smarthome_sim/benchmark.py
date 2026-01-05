@@ -205,82 +205,62 @@ def run_handshake_benchmark(
     on_connect,
     on_disconnect,
     on_message,
+    warmup: int = 3,
 ) -> None:
-    """Run connect/disconnect benchmark and record latencies."""
+    """Run connect/disconnect benchmark and record latencies.
+    
+    Note: Measures full MQTT CONNECT latency including:
+    - TCP handshake
+    - TLS handshake (if enabled)
+    - MQTT CONNECT/CONNACK exchange
+    
+    Args:
+        warmup: Number of warmup connections to perform (not recorded).
+                Used to prime DNS cache and establish baseline.
+    """
     if samples <= 0:
         return
 
     jsonl_path, summary_path, plot_prefix = _handshake_output_paths(out, worker_id=worker_id)
     recorder = HandshakeRecorder(jsonl_path)
 
-    logging.info(f"Handshake benchmark: samples={samples}, brokers={len(brokers)}, out={jsonl_path}")
+    logging.info(f"Handshake benchmark: samples={samples}, warmup={warmup}, brokers={len(brokers)}, out={jsonl_path}")
 
     empty_ctx = MQTTContext(command_topics=[], command_handlers={})
 
+    # Warmup phase: prime DNS cache and connection pools
+    if warmup > 0:
+        logging.info(f"Warmup: {warmup} connection(s) per broker (not recorded)")
+        for _ in range(warmup):
+            for broker in brokers:
+                _do_single_connect(
+                    broker=broker,
+                    client_id_prefix=f"{client_id_prefix}-warmup",
+                    empty_ctx=empty_ctx,
+                    timeout_s=timeout_s,
+                    on_connect=on_connect,
+                    on_disconnect=on_disconnect,
+                    on_message=on_message,
+                    recorder=None,  # Don't record warmup
+                    sample_idx=0,
+                    worker_id=worker_id,
+                )
+                time.sleep(0.1)
+
     for sample_idx in range(1, samples + 1):
         for broker in brokers:
-            connect_event = threading.Event()
-            disconnect_event = threading.Event()
-
-            userdata_extra = {
-                "connect_event": connect_event,
-                "disconnect_event": disconnect_event,
-                "connect_started_at": None,
-                "handshake_recorder": recorder,
-                "sample_index": sample_idx,
-                "worker_id": worker_id,
-                "broker_port": broker.port,
-                "broker_tls": broker.tls,
-            }
-
-            client = broker.create_client(
+            _do_single_connect(
+                broker=broker,
                 client_id_prefix=f"{client_id_prefix}-hs{sample_idx}",
-                mqtt_context=empty_ctx,
+                empty_ctx=empty_ctx,
+                timeout_s=timeout_s,
                 on_connect=on_connect,
                 on_disconnect=on_disconnect,
                 on_message=on_message,
-                auto_connect=False,
-                userdata_extra=userdata_extra,
+                recorder=recorder,
+                sample_idx=sample_idx,
+                worker_id=worker_id,
             )
-
-            error: Optional[str] = None
-            try:
-                if isinstance(getattr(client, "_userdata", None), dict):
-                    client._userdata["connect_started_at"] = time.perf_counter()
-                client.connect_async(broker.host, broker.port, keepalive=broker.keepalive)
-                client.loop_start()
-
-                if not connect_event.wait(timeout=timeout_s):
-                    error = f"connect_timeout_{timeout_s}s"
-            except Exception as e:
-                error = f"connect_exception:{e}"
-            finally:
-                try:
-                    client.disconnect()
-                except Exception:
-                    pass
-                disconnect_event.wait(timeout=2.0)
-                try:
-                    client.loop_stop(force=True)
-                except (TypeError, Exception):
-                    try:
-                        client.loop_stop()
-                    except Exception:
-                        pass
-
-            if error is not None:
-                recorder.write({
-                    "schema": "smarthome.handshake.record.v1",
-                    "ts_unix": time.time(),
-                    "ts_iso": iso_utc(),
-                    "worker_id": worker_id,
-                    "sample": sample_idx,
-                    "broker": {"host": broker.host, "port": broker.port, "tls": broker.tls},
-                    "client_id": None,
-                    "rc": None,
-                    "connect_latency_ms": None,
-                    "error": error,
-                })
 
         if interval_s > 0:
             time.sleep(interval_s)
@@ -299,3 +279,81 @@ def run_handshake_benchmark(
             logging.warning("matplotlib not installed; pip install matplotlib")
         except Exception as e:
             logging.warning(f"Failed to generate plots: {e}")
+
+
+def _do_single_connect(
+    *,
+    broker: Broker,
+    client_id_prefix: str,
+    empty_ctx: MQTTContext,
+    timeout_s: float,
+    on_connect,
+    on_disconnect,
+    on_message,
+    recorder: Optional[HandshakeRecorder],
+    sample_idx: int,
+    worker_id: Optional[int],
+) -> None:
+    """Perform a single connect/disconnect cycle."""
+    connect_event = threading.Event()
+    disconnect_event = threading.Event()
+
+    userdata_extra = {
+        "connect_event": connect_event,
+        "disconnect_event": disconnect_event,
+        "connect_started_at": None,
+        "handshake_recorder": recorder,
+        "sample_index": sample_idx,
+        "worker_id": worker_id,
+        "broker_port": broker.port,
+        "broker_tls": broker.tls,
+    }
+
+    client = broker.create_client(
+        client_id_prefix=client_id_prefix,
+        mqtt_context=empty_ctx,
+        on_connect=on_connect,
+        on_disconnect=on_disconnect,
+        on_message=on_message,
+        auto_connect=False,
+        userdata_extra=userdata_extra,
+    )
+
+    error: Optional[str] = None
+    try:
+        if isinstance(getattr(client, "_userdata", None), dict):
+            client._userdata["connect_started_at"] = time.perf_counter()
+        client.connect_async(broker.host, broker.port, keepalive=broker.keepalive)
+        client.loop_start()
+
+        if not connect_event.wait(timeout=timeout_s):
+            error = f"connect_timeout_{timeout_s}s"
+    except Exception as e:
+        error = f"connect_exception:{e}"
+    finally:
+        try:
+            client.disconnect()
+        except Exception:
+            pass
+        disconnect_event.wait(timeout=2.0)
+        try:
+            client.loop_stop(force=True)
+        except (TypeError, Exception):
+            try:
+                client.loop_stop()
+            except Exception:
+                pass
+
+    if error is not None and recorder is not None:
+        recorder.write({
+            "schema": "smarthome.handshake.record.v1",
+            "ts_unix": time.time(),
+            "ts_iso": iso_utc(),
+            "worker_id": worker_id,
+            "sample": sample_idx,
+            "broker": {"host": broker.host, "port": broker.port, "tls": broker.tls},
+            "client_id": None,
+            "rc": None,
+            "connect_latency_ms": None,
+            "error": error,
+        })
