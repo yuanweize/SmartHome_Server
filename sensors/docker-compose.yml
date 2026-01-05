@@ -26,3 +26,22 @@ services:
       - ./certs:/app/sensors/certs:ro
     
     restart: unless-stopped
+
+  # Bench/stress-test mode (HA discovery disabled)
+  # Usage:
+  #   docker compose --profile bench up -d simulator_bench
+  simulator_bench:
+    profiles: ["bench"]
+    build:
+      context: ..
+      dockerfile: sensors/Dockerfile
+    container_name: sensor-simulator-bench
+    command: ["--config", "/app/sensors/brokers.yml"]
+
+    volumes:
+      - ./sensor_simulator.py:/app/sensors/sensor_simulator.py:ro
+      - ./smarthome_sim:/app/sensors/smarthome_sim:ro
+      - ./brokers.yml:/app/sensors/brokers.yml:ro
+      - ./certs:/app/sensors/certs:ro
+
+    restart: unless-stopped
