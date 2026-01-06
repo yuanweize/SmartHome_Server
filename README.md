@@ -4,7 +4,7 @@ Language: **English** | [简体中文](README.zh-CN.md)
 
 A thesis-grade smart home IoT platform for simulating and benchmarking sensor/actuator traffic over MQTT with mTLS support. Designed for Home Assistant integration, security research, and scalability testing.
 
-> **Academic Project:** This repository accompanies the bachelor thesis *"Smart Home Based on Edge Computing"* at Czech Technical University in Prague, Faculty of Electrical Engineering.
+> **Academic Project:** This repository accompanies the bachelor thesis *"Application of Servers and Unix-like Systems for Sensor Control in Smart Homes"* at Czech Technical University in Prague, Faculty of Electrical Engineering.
 
 ## Architecture
 
@@ -79,7 +79,7 @@ cd broker/emqx && docker compose up -d
 | [sensors/README.md](sensors/README.md) | Simulator usage and configuration |
 | [certs/README](certs/README) | Certificate generation guide |
 | [homeassistant/README.md](homeassistant/README.md) | Home Assistant setup |
-| [docs/](docs/README) | Thesis LaTeX source |
+| [docs/README.md](docs/README.md) | Thesis LaTeX source |
 
 ## Requirements
 
