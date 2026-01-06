@@ -89,7 +89,7 @@ cd broker/emqx && docker compose up -d
     author  = {Yuan, Weize},
     title   = {Application of Servers and Unix-like Systems for Sensor Control in Smart Homes},
     school  = {Czech Technical University in Prague, Faculty of Electrical Engineering},
-    year    = {2025},
+    year    = {2026},
     type    = {Bachelor's Thesis}
 }
 ```
