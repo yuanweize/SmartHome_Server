@@ -32,10 +32,10 @@ certs/
 
 | Certificate | Algorithm | Curve | Validity | CN |
 |-------------|-----------|-------|----------|-----|
-| Root CA | ECDSA | P-256 | 10 years (3650 days) | SmartHome Root CA |
-| Server | ECDSA | P-256 | 5 years (1825 days) | mqtt.example.com |
-| Client (ESP32) | ECDSA | P-256 | 1 year (365 days) | esp-client |
-| Home Assistant | ECDSA | P-256 | 5 years (1825 days) | homeassistant |
+| Root CA | ECDSA | P-256 | 10 years | SmartHome Root CA |
+| Server | ECDSA | P-256 | 5 years | (your MQTT domain) |
+| Client (ESP32) | ECDSA | P-256 | 1 year | esp-client |
+| Home Assistant | ECDSA | P-256 | 5 years | homeassistant |
 
 ## Certificate Generation
 
@@ -48,10 +48,10 @@ openssl req -new -x509 -sha256 -days 3650 \
   -key ca/ca.key -out ca/ca.pem \
   -subj "/CN=SmartHome Root CA/O=CTU FEL/C=CZ"
 
-# 2. Server Certificate (5 years) - Replace CN with your domain
+# 2. Server Certificate (5 years) - Replace YOUR_MQTT_DOMAIN
 openssl ecparam -name prime256v1 -genkey -noout -out server/server.key
 openssl req -new -key server/server.key -out server/server.csr \
-  -subj "/CN=mqtt.example.com/O=SmartHome/OU=Broker"
+  -subj "/CN=YOUR_MQTT_DOMAIN/O=SmartHome/OU=Broker"
 openssl x509 -req -sha256 -days 1825 \
   -in server/server.csr -CA ca/ca.pem -CAkey ca/ca.key -CAcreateserial \
   -out server/server.pem
@@ -79,20 +79,9 @@ openssl x509 -in client/client.pem -noout -subject -dates
 openssl x509 -in ha/ha.pem -noout -subject -dates
 ```
 
-## Deployment
+## Usage
 
-### EMQX Broker
-Mount `ca/ca.pem`, `server/server.pem`, `server/server.key` to the container and enable `verify_peer`.
-
-### ESPHome
-```yaml
-mqtt:
-  broker: !secret mqtt_broker
-  port: 8883
-  certificate_authority: !secret mqtt_ca_cert
-  client_certificate: !secret mqtt_client_cert
-  client_certificate_key: !secret mqtt_client_key
-```
-
-### Home Assistant
-Configure MQTT integration with `ha/ha.pem`, `ha/ha.key`, and `ca/ca.pem`.
+For deployment examples, see:
+- [broker/emqx/docker-compose.yml](../broker/emqx/docker-compose.yml) - EMQX mTLS configuration
+- [esphome/*.yaml](../esphome/) - ESP32 client certificate configuration
+- [sensors/brokers.example.yml](../sensors/brokers.example.yml) - Simulator TLS configuration

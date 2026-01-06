@@ -37,7 +37,8 @@ esphome/secrets.yaml
 
 # Local TLS material (keep documentation only)
 certs/**
-!certs/README
+!certs/README.md
+!certs/README.zh-CN.md
 sensors/certs/
 
 # Docs: keep only docs/README tracked

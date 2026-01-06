@@ -54,7 +54,7 @@ docker compose up -d
 
 ## Certificate Setup
 
-See [`../certs/README`](../certs/README) for certificate generation instructions.
+See [`../certs/README.md`](../certs/README.md) for certificate generation instructions.
 
 ## Security Notes
 
