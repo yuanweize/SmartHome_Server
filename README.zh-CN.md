@@ -98,7 +98,7 @@ cd broker/emqx && docker compose up -d
 ```bibtex
 @thesis{yuan2026smarthome,
     author  = {Yuan, Weize},
-    title   = {Smart Home Based on Edge Computing},
+    title   = {Application of Servers and Unix-like Systems for Sensor Control in Smart Homes},
     school  = {Czech Technical University in Prague, Faculty of Electrical Engineering},
     year    = {2026},
     type    = {Bachelor's Thesis}
@@ -111,5 +111,6 @@ cd broker/emqx && docker compose up -d
 
 ## 作者
 
-**袁玮泽 (Weize Yuan)** - 捷克理工大学电气工程学院  
+**袁玮泽 (Weize Yuan)** - 电气工程与计算机科学 (EECS) 学士  
+捷克理工大学电气工程学院  
 GitHub: [@IYUANWEIZE](https://github.com/IYUANWEIZE)
