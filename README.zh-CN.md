@@ -4,7 +4,7 @@
 
 面向论文研究的智能家居 IoT 平台，支持 MQTT 传感器/执行器流量模拟与基准测试，具备 mTLS 双向认证能力。可与 Home Assistant 集成，适用于安全研究和可扩展性测试。
 
-> **学术项目：** 本仓库为捷克理工大学电气工程学院学士论文《基于边缘计算的智能家居》的配套代码。
+> **学术项目：** 本仓库为捷克理工大学电气工程学院学士论文《服务器与类 Unix 系统在智能家居传感器控制中的应用》的配套代码。
 
 ## 系统架构
 
@@ -79,7 +79,7 @@ cd broker/emqx && docker compose up -d
 | [sensors/README.zh-CN.md](sensors/README.zh-CN.md) | 模拟器使用与配置 |
 | [certs/README](certs/README) | 证书生成指南 |
 | [homeassistant/README.zh-CN.md](homeassistant/README.zh-CN.md) | Home Assistant 部署 |
-| [docs/](docs/README) | 论文 LaTeX 源码 |
+| [docs/README.zh-CN.md](docs/README.zh-CN.md) | 论文 LaTeX 源码 |
 
 ## 环境要求
 
