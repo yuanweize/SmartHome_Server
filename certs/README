@@ -1,68 +1,98 @@
-# Smart Home IoT Security Certificates (ECC)
+# Smart Home IoT Security Certificates (ECDSA P-256)
 
-此目录包含用于智能家居系统（Smart Home IoT System）的安全证书。
-本系统采用 **mTLS (双向 TLS 认证)** 机制，确保 Unix 服务器 (MQTT Broker) 与边缘计算节点 (ESP32-S3) 及控制中心 (Home Assistant) 之间的通信安全。
+Language: **English** | [简体中文](README.zh-CN.md)
 
-## ⚠️ 安全警告 (Security Warning)
+This directory contains TLS certificates for the Smart Home IoT system.
+The system uses **mTLS (Mutual TLS)** to secure communication between the MQTT broker (EMQX), edge nodes (ESP32/ESP32-S3), and the controller (Home Assistant).
 
-* **私钥保护**：`.key` 文件是私钥，**严禁上传到 GitHub** 或分享给他人。
-* **Git 忽略**：请确保本目录已被加入项目的 `.gitignore` 文件中。
+## ⚠️ Security Warning
 
-## 目录结构 (Directory Structure)
+* **Private keys** (`.key` files) must **NEVER** be committed to Git or shared publicly.
+* Ensure this directory is listed in `.gitignore`.
 
-* **`ca/`**: 根证书 (Root CA)
-    * `ca.pem`: 根证书公钥
-    * `ca.key`: 根证书私钥 (高度机密)
-* **`server/`**: MQTT Broker (EMQX/Mosquitto) 证书
-    * `server.pem`: 服务端证书
-    * `server.key`: 服务端私钥
-* **`client/`**: 客户端 (传感器/模拟器/ESP32) 证书
-    * `client.pem`: 客户端证书
-    * `client.key`: 客户端私钥
+## Directory Structure
 
----
+```
+certs/
+├── ca/         # Root Certificate Authority
+│   ├── ca.pem      # CA public certificate (deploy to all devices)
+│   └── ca.key      # CA private key (TOP SECRET - sign only)
+├── server/     # MQTT Broker (EMQX)
+│   ├── server.pem  # Server certificate
+│   └── server.key  # Server private key
+├── client/     # IoT Devices (ESP32)
+│   ├── client.pem  # Client certificate
+│   └── client.key  # Client private key
+└── ha/         # Home Assistant Controller
+    ├── ha.pem      # HA client certificate
+    └── ha.key      # HA private key
+```
 
-## 证书详情 (Certificate Details)
+## Certificate Specifications
 
-* **加密算法 (Algorithm)**: ECC (Elliptic Curve Cryptography)
-* **曲线类型 (Curve)**: `prime256v1` (NIST P-256) - *针对 ESP32 硬件加速优化*
-* **有效期 (Validity)**: 100 年 (36500 天)
-* **生成时间**: 2025-12-28
+| Certificate | Algorithm | Curve | Validity | CN |
+|-------------|-----------|-------|----------|-----|
+| Root CA | ECDSA | P-256 | 10 years (3650 days) | SmartHome Root CA |
+| Server | ECDSA | P-256 | 5 years (1825 days) | mqtt.example.com |
+| Client (ESP32) | ECDSA | P-256 | 1 year (365 days) | esp-client |
+| Home Assistant | ECDSA | P-256 | 5 years (1825 days) | homeassistant |
 
----
+## Certificate Generation
 
-## 文件说明 (File Manifest)
+```bash
+cd certs && mkdir -p ca server client ha
 
-### 1. 根证书 (Root CA)
-这是信任链的根基，所有设备都必须信任它。
-* `ca.key`: **CA 私钥** (最高机密，仅用于签发新证书，切勿泄露)
-* `ca.pem`: **CA 根证书** (公钥) -> **需部署到：EMQX, ESP32, Home Assistant**
+# 1. Root CA (10 years)
+openssl ecparam -name prime256v1 -genkey -noout -out ca/ca.key
+openssl req -new -x509 -sha256 -days 3650 \
+  -key ca/ca.key -out ca/ca.pem \
+  -subj "/CN=SmartHome Root CA/O=CTU FEL/C=CZ"
 
-### 2. 服务器端证书 (Server Side)
-用于 MQTT Broker (EMQX) 验证自身身份。
-* `server.key`: **服务器私钥** -> **需挂载到 EMQX Docker 容器**
-* `server.pem`: **服务器证书** (CN: `mqtt.eurun.top`) -> **需挂载到 EMQX Docker 容器**
+# 2. Server Certificate (5 years) - Replace CN with your domain
+openssl ecparam -name prime256v1 -genkey -noout -out server/server.key
+openssl req -new -key server/server.key -out server/server.csr \
+  -subj "/CN=mqtt.example.com/O=SmartHome/OU=Broker"
+openssl x509 -req -sha256 -days 1825 \
+  -in server/server.csr -CA ca/ca.pem -CAkey ca/ca.key -CAcreateserial \
+  -out server/server.pem
 
-### 3. 客户端证书 (Client Side)
-用于边缘节点 (Node A/B) 和 Home Assistant 验证自身身份。
-* `client.key`: **客户端私钥** -> **需填入 ESPHome YAML (`client_certificate_key`) 和 HA MQTT 配置**
-* `client.pem`: **客户端证书** (CN: `client_device`) -> **需填入 ESPHome YAML (`client_certificate`) 和 HA MQTT 配置**
+# 3. Client Certificate for ESP32 (1 year)
+openssl ecparam -name prime256v1 -genkey -noout -out client/client.key
+openssl req -new -key client/client.key -out client/client.csr \
+  -subj "/CN=esp-client/O=SmartHome/OU=Sensors"
+openssl x509 -req -sha256 -days 365 \
+  -in client/client.csr -CA ca/ca.pem -CAkey ca/ca.key -CAcreateserial \
+  -out client/client.pem
 
----
+# 4. Home Assistant Certificate (5 years)
+openssl ecparam -name prime256v1 -genkey -noout -out ha/ha.key
+openssl req -new -key ha/ha.key -out ha/ha.csr \
+  -subj "/CN=homeassistant/O=SmartHome/OU=Controller"
+openssl x509 -req -sha256 -days 1825 \
+  -in ha/ha.csr -CA ca/ca.pem -CAkey ca/ca.key -CAcreateserial \
+  -out ha/ha.pem
 
-## 快速使用指南 (Quick Usage)
+# Verify
+openssl x509 -in ca/ca.pem -noout -subject -dates
+openssl x509 -in server/server.pem -noout -subject -dates
+openssl x509 -in client/client.pem -noout -subject -dates
+openssl x509 -in ha/ha.pem -noout -subject -dates
+```
 
-### EMQX (Docker) 配置
-将 `ca.pem`, `server.pem`, `server.key` 映射至容器，并开启 `verify_peer`。
+## Deployment
 
-### ESPHome (YAML) 配置
+### EMQX Broker
+Mount `ca/ca.pem`, `server/server.pem`, `server/server.key` to the container and enable `verify_peer`.
+
+### ESPHome
 ```yaml
 mqtt:
-  broker: mqtt.eurun.top
+  broker: !secret mqtt_broker
   port: 8883
-  certificate_authority: |
-    (粘贴 ca.pem 内容)
-  client_certificate: |
-    (粘贴 client.pem 内容)
-  client_certificate_key: |
-    (粘贴 client.key 内容)
+  certificate_authority: !secret mqtt_ca_cert
+  client_certificate: !secret mqtt_client_cert
+  client_certificate_key: !secret mqtt_client_key
+```
+
+### Home Assistant
+Configure MQTT integration with `ha/ha.pem`, `ha/ha.key`, and `ca/ca.pem`.
