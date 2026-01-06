@@ -98,7 +98,7 @@ If you use this project in academic work, please cite:
 ```bibtex
 @thesis{yuan2026smarthome,
     author  = {Yuan, Weize},
-    title   = {Smart Home Based on Edge Computing},
+    title   = {Application of Servers and Unix-like Systems for Sensor Control in Smart Homes},
     school  = {Czech Technical University in Prague, Faculty of Electrical Engineering},
     year    = {2026},
     type    = {Bachelor's Thesis}
@@ -111,5 +111,6 @@ This project was developed under the supervision of [Prof. Miroslav Husák](http
 
 ## Author
 
-**Weize Yuan** - Czech Technical University in Prague, FEL  
+**Weize Yuan** - B.Sc. in Electrical Engineering and Computer Science (EECS)  
+Czech Technical University in Prague, Faculty of Electrical Engineering  
 GitHub: [@IYUANWEIZE](https://github.com/IYUANWEIZE)
