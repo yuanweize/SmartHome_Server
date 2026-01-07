@@ -111,6 +111,8 @@ This project was developed under the supervision of [Prof. Miroslav Husák](http
 
 ## Author
 
-**Weize Yuan** - B.Sc. in Electrical Engineering and Computer Science (EECS)  
-Czech Technical University in Prague, Faculty of Electrical Engineering  
-GitHub: [@IYUANWEIZE](https://github.com/IYUANWEIZE)
+**Weize Yuan**  
+*Electrical Engineering and Computer Science (EECS)*  
+Czech Technical University in Prague, Faculty of Electrical Engineering
+
+[![GitHub](https://img.shields.io/badge/GitHub-@IYUANWEIZE-181717?logo=github)](https://github.com/IYUANWEIZE)
