@@ -108,6 +108,7 @@ cd broker/emqx && docker compose up -d
 ## 致谢
 
 本项目在捷克理工大学电气工程学院微电子系 [Miroslav Husák 教授](https://fel.cvut.cz/en/faculty/people/966-miroslav-husak) 的指导下完成。
+
 ## 作者
 
 **袁玮泽 (Weize Yuan)**  
