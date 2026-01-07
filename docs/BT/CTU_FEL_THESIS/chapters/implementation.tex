@@ -57,8 +57,8 @@ Table~\ref{tab:esp32s3-pinout} details the complete GPIO assignments and sensor 
 \toprule
 \textbf{Module} & \textbf{Pin} & \textbf{ESP32-S3 GPIO} & \textbf{Function} & \textbf{Notes} \\
 \midrule
-\multirow{5}{*}{MPU6050 (GY-521)} 
-  & VCC & 3V3 & Power (2.4--3.5\,V) & Logic level compatible~\cite{mpu6050_datasheet_2013} \\
+\multirow{7}{*}{MPU6050 (GY-521)} 
+  & VCC & 3V3 & Power (2.375--3.46\,V) & VDD range per datasheet~\cite{mpu6050_datasheet_2013} \\
   & GND & GND & Ground & --- \\
   & SCL & GPIO4 & I2C Clock & Shared with BMP180 \\
   & SDA & GPIO5 & I2C Data & Shared with BMP180 \\
@@ -214,31 +214,30 @@ Table~\ref{tab:esp32-pinout} details the complete GPIO assignments for the ESP32
 \toprule
 \textbf{Module} & \textbf{Pin} & \textbf{ESP32 GPIO} & \textbf{Function} & \textbf{Notes} \\
 \midrule
-\multirow{5}{*}{TCS34725} 
-  & VIN & 3V3 & Power (2.7--3.6\,V) & Onboard regulator~\cite{tcs34725_datasheet_2012} \\
+\multirow{6}{*}{TCS34725} 
+  & VIN & 3V3 & Power (2.7--3.6\,V) & VDD range per datasheet~\cite{tcs34725_datasheet_2012} \\
   & GND & GND & Ground & --- \\
   & SCL & GPIO32 & I2C Clock & Address 0x29 (fixed) \\
   & SDA & GPIO33 & I2C Data & --- \\
   & LED & GPIO25 & White LED control & Illumination for color sensing \\
   & INT & --- & Interrupt & Unused; polling mode used \\
 \midrule
-\multirow{6}{*}{MQ-2 Gas} 
-  & VCC & VIN (5V) & Heater power & \textbf{5\,V required}~\cite{mq2_datasheet_2014} \\
+\multirow{4}{*}{MQ-2 Gas} 
+  & VCC & VIN (5V) & Heater power & \textbf{$V_H = 5.0\,\text{V} \pm 0.2\,\text{V}$}~\cite{mq2_datasheet_2014} \\
   & GND & GND & Ground & --- \\
-  & AO & GPIO34 & Analog output & 0--3.3\,V proportional to gas \\
-  & DO & --- & Digital output & Unused; AO provides finer resolution \\
-  & H1/H2 & (internal) & Heater coil & $R_H = 31\,\Omega$; $P_H \leq 900$\,mW \\
+  & AO & GPIO34 & Analog output & $R_s$ varies with gas concentration \\
+  & DO & --- & Digital output & Unused; AO preferred for resolution \\
 \midrule
 \multirow{3}{*}{SR602 PIR} 
   & VCC & 3V3 & Power (3.3--5\,V) & Ultra-low power~\cite{sr602_datasheet_2018} \\
   & GND & GND & Ground & --- \\
   & OUT & GPIO23 & Digital output & High on motion detection \\
 \midrule
-\multirow{4}{*}{RGB LED} 
-  & R & GPIO26 & Red channel & LEDC PWM (8-bit) \\
-  & G & GPIO27 & Green channel & LEDC PWM (8-bit) \\
-  & B & GPIO14 & Blue channel & LEDC PWM (8-bit) \\
-  & COM & 3V3/GND & Common anode/cathode & Depends on LED type \\
+\multirow{4}{*}{RGB LED (Common Cathode)} 
+  & R & GPIO26 & Red anode & LEDC PWM (8-bit) \\
+  & G & GPIO27 & Green anode & LEDC PWM (8-bit) \\
+  & B & GPIO14 & Blue anode & LEDC PWM (8-bit) \\
+  & K & GND & Common cathode & --- \\
 \bottomrule
 \end{tabular}%
 }
