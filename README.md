@@ -6,29 +6,18 @@ A thesis-grade smart home IoT platform for simulating and benchmarking sensor/ac
 
 > **Academic Project:** This repository accompanies the bachelor thesis *"Application of Servers and Unix-like Systems for Sensor Control in Smart Homes"* at Czech Technical University in Prague, Faculty of Electrical Engineering.
 
-## Architecture
-
-```
-┌─────────────────┐    MQTTS (8883)    ┌─────────────────┐
-│  smarthome_sim  │ ◄─────────────────► │  EMQX/Mosquitto │
-│  (Python pkg)   │                     │  (mTLS enforced)│
-└─────────────────┘                     └─────────────────┘
-       │ HA Discovery                          │
-       └──────────► Home Assistant ◄───────────┘
-```
-
 ## Repository Structure
 
 ```
 SmartHome_Server/
 ├── sensors/                # Python MQTT simulator package
-│   └── smarthome_sim/      # Core library (~800 lines)
+│   └── smarthome_sim/      # Core library
 ├── broker/                 # MQTT broker configurations
 │   ├── emqx/               # EMQX Docker with mTLS
 │   └── mosquitto/          # Mosquitto Docker alternative
-├── homeassistant/          # Home Assistant Docker + automation templates
+├── homeassistant/          # Home Assistant reference
 ├── esphome/                # ESP32/ESP32-S3 firmware configurations
-├── certs/                  # TLS/mTLS certificate templates
+├── certs/                  # TLS/mTLS certificate generation scripts
 └── docs/                   # Thesis documentation (LaTeX)
 ```
 
@@ -70,14 +59,14 @@ cd broker/emqx && docker compose up -d
 | **mTLS Security** | ECDSA P-256 certificates for mutual authentication |
 | **HA Integration** | Auto-discovery of sensors, switches, and lights |
 | **Benchmarking** | TLS handshake latency measurement with statistical analysis |
-| **Scalability** | Multi-process workers for 10,000+ simulated devices |
+| **Scalability** | Multi-process workers for thousands of simulated devices |
 
 ## Documentation
 
 | Directory | Description |
 |-----------|-------------|
 | [sensors/README.md](sensors/README.md) | Simulator usage and configuration |
-| [certs/README](certs/README) | Certificate generation guide |
+| [certs/README.md](certs/README.md) | Certificate generation guide |
 | [homeassistant/README.md](homeassistant/README.md) | Home Assistant setup |
 | [docs/README.md](docs/README.md) | Thesis LaTeX source |
 
@@ -96,11 +85,11 @@ This project is licensed under the [MIT License](LICENSE).
 If you use this project in academic work, please cite:
 
 ```bibtex
-@thesis{yuan2026smarthome,
+@thesis{yuan2025smarthome,
     author  = {Yuan, Weize},
     title   = {Application of Servers and Unix-like Systems for Sensor Control in Smart Homes},
     school  = {Czech Technical University in Prague, Faculty of Electrical Engineering},
-    year    = {2026},
+    year    = {2025},
     type    = {Bachelor's Thesis}
 }
 ```

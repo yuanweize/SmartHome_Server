@@ -26,17 +26,20 @@ docs/
 
 ```bash
 cd docs/BT/CTU_FEL_THESIS
-make pdf
+make          # 自动版本号递增 + 编译
+make pdf      # 仅编译（不递增版本号）
 ```
+
+输出：`bachelor_thesis_Yuan_vX.X.pdf`（自动版本号）
 
 ### 手动编译
 
 ```bash
 cd docs/BT/CTU_FEL_THESIS
-lualatex thesis-final.tex
-biber thesis-final
-lualatex thesis-final.tex
-lualatex thesis-final.tex
+lualatex -jobname=thesis thesis-final.tex
+biber thesis
+lualatex -jobname=thesis thesis-final.tex
+lualatex -jobname=thesis thesis-final.tex
 ```
 
 ### VS Code 任务
@@ -80,5 +83,5 @@ latexmk -C   # 删除 PDF
 
 ## 相关文档
 
-- [CTU FEL 论文模板](https://github.com/tohecz/ctuthesis)
+- [CTU FEL 论文模板 (Overleaf)](https://www.overleaf.com/latex/templates/sablona-pro-psani-disertacni-prace-na-cvut-fel/ptpvbxhsjdmg)
 - [LaTeX 教程](https://en.wikibooks.org/wiki/LaTeX)

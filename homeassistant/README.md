@@ -93,4 +93,4 @@ Node-RED flow template for fall detection notifications:
 
 ## Certificate Setup
 
-See [`../certs/README`](../certs/README) for mTLS certificate generation.
+See [`../certs/README.md`](../certs/README.md) for mTLS certificate generation.
