@@ -295,4 +295,4 @@ MIT License - See [LICENSE](../LICENSE)
 
 ## Citation
 
-This simulator is part of the bachelor thesis *"Smart Home Based on Edge Computing"* at Czech Technical University in Prague. See the [main README](../README.md) for citation information.
+This simulator is part of the bachelor thesis *"Application of Servers and Unix-like Systems for Sensor Control in Smart Homes"* at Czech Technical University in Prague. See the [main README](../README.md) for citation information.

@@ -6,29 +6,18 @@
 
 > **学术项目：** 本仓库为捷克理工大学电气工程学院学士论文《服务器与类 Unix 系统在智能家居传感器控制中的应用》的配套代码。
 
-## 系统架构
-
-```
-┌─────────────────┐    MQTTS (8883)    ┌─────────────────┐
-│  smarthome_sim  │ ◄─────────────────► │  EMQX/Mosquitto │
-│  (Python 包)    │                     │  (mTLS 双向认证) │
-└─────────────────┘                     └─────────────────┘
-       │ HA Discovery                          │
-       └──────────► Home Assistant ◄───────────┘
-```
-
 ## 仓库结构
 
 ```
 SmartHome_Server/
 ├── sensors/                # Python MQTT 模拟器包
-│   └── smarthome_sim/      # 核心库（约 800 行）
+│   └── smarthome_sim/      # 核心库
 ├── broker/                 # MQTT Broker 配置
 │   ├── emqx/               # EMQX Docker（含 mTLS）
 │   └── mosquitto/          # Mosquitto Docker 备选
-├── homeassistant/          # Home Assistant Docker + 自动化模板
+├── homeassistant/          # Home Assistant 参考
 ├── esphome/                # ESP32/ESP32-S3 固件配置
-├── certs/                  # TLS/mTLS 证书模板
+├── certs/                  # TLS/mTLS 证书生成脚本
 └── docs/                   # 论文文档（LaTeX）
 ```
 
@@ -70,14 +59,14 @@ cd broker/emqx && docker compose up -d
 | **mTLS 安全** | 基于 ECDSA P-256 的双向证书认证 |
 | **HA 集成** | 传感器、开关、灯光的自动发现 |
 | **基准测试** | TLS 握手延迟测量及统计分析 |
-| **可扩展性** | 多进程模式支持 10,000+ 模拟设备 |
+| **可扩展性** | 多进程模式支持数千台模拟设备 |
 
 ## 文档索引
 
 | 目录 | 描述 |
 |------|------|
 | [sensors/README.zh-CN.md](sensors/README.zh-CN.md) | 模拟器使用与配置 |
-| [certs/README](certs/README) | 证书生成指南 |
+| [certs/README.zh-CN.md](certs/README.zh-CN.md) | 证书生成指南 |
 | [homeassistant/README.zh-CN.md](homeassistant/README.zh-CN.md) | Home Assistant 部署 |
 | [docs/README.zh-CN.md](docs/README.zh-CN.md) | 论文 LaTeX 源码 |
 
@@ -96,11 +85,11 @@ cd broker/emqx && docker compose up -d
 如在学术工作中使用本项目，请引用：
 
 ```bibtex
-@thesis{yuan2026smarthome,
+@thesis{yuan2025smarthome,
     author  = {Yuan, Weize},
     title   = {Application of Servers and Unix-like Systems for Sensor Control in Smart Homes},
     school  = {Czech Technical University in Prague, Faculty of Electrical Engineering},
-    year    = {2026},
+    year    = {2025},
     type    = {Bachelor's Thesis}
 }
 ```

@@ -90,4 +90,4 @@ mqtt_client_key: |
 - [ESPHome MQTT Component](https://esphome.io/components/mqtt.html)
 - [ESP32 Datasheet](https://www.espressif.com/en/products/socs/esp32)
 - [ESP32-S3 Datasheet](https://www.espressif.com/en/products/socs/esp32-s3)
-- [Certificate Setup](../certs/README)
+- [Certificate Setup](../certs/README.md)

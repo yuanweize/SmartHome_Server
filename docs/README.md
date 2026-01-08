@@ -26,17 +26,20 @@ The template uses **LuaLaTeX** with **biblatex/biber**.
 
 ```bash
 cd docs/BT/CTU_FEL_THESIS
-make pdf
+make          # Auto-bump version + compile
+make pdf      # Compile only (no version bump)
 ```
+
+Output: `bachelor_thesis_Yuan_vX.X.pdf` (auto-versioned)
 
 ### Manual Build
 
 ```bash
 cd docs/BT/CTU_FEL_THESIS
-lualatex thesis-final.tex
-biber thesis-final
-lualatex thesis-final.tex
-lualatex thesis-final.tex
+lualatex -jobname=thesis thesis-final.tex
+biber thesis
+lualatex -jobname=thesis thesis-final.tex
+lualatex -jobname=thesis thesis-final.tex
 ```
 
 ### VS Code Task
@@ -80,5 +83,5 @@ latexmk -C   # Remove PDF
 
 ## Related Documentation
 
-- [CTU FEL Thesis Template](https://github.com/tohecz/ctuthesis)
+- [CTU FEL Thesis Template (Overleaf)](https://www.overleaf.com/latex/templates/sablona-pro-psani-disertacni-prace-na-cvut-fel/ptpvbxhsjdmg)
 - [LaTeX Wikibook](https://en.wikibooks.org/wiki/LaTeX)
