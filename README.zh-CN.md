@@ -85,7 +85,7 @@ cd broker/emqx && docker compose up -d
 如在学术工作中使用本项目，请引用：
 
 ```bibtex
-@thesis{yuan2025smarthome,
+@thesis{yuan2026smarthome,
     author  = {Yuan, Weize},
     title   = {Application of Servers and Unix-like Systems for Sensor Control in Smart Homes},
     school  = {Czech Technical University in Prague, Faculty of Electrical Engineering},

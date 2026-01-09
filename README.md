@@ -85,7 +85,7 @@ This project is licensed under the [MIT License](LICENSE).
 If you use this project in academic work, please cite:
 
 ```bibtex
-@thesis{yuan2025smarthome,
+@thesis{yuan2026smarthome,
     author  = {Yuan, Weize},
     title   = {Application of Servers and Unix-like Systems for Sensor Control in Smart Homes},
     school  = {Czech Technical University in Prague, Faculty of Electrical Engineering},
