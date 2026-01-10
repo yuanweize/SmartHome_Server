@@ -44,6 +44,44 @@ Acoustic & KY-037 & Sound Level & ADC \\
 \end{tabular}
 \end{table}
 
+The BMP180 barometric sensor and MPU6050 inertial measurement unit share the same I2C bus (GPIO4 for SCL, GPIO5 for SDA). This is possible because the I2C protocol supports multiple devices on a single two-wire bus through 7-bit addressing---each device responds only to its unique address (BMP180: \texttt{0x77}, MPU6050: \texttt{0x68})~\cite{i2c_spec_2021}. The shared-bus architecture reduces GPIO consumption from four pins to two while maintaining full duplex communication with both sensors.
+
+Table~\ref{tab:esp32s3-pinout} details the complete GPIO assignments and sensor module connections for the ESP32-S3 node. Each sensor module exposes multiple pins, but only a subset is required for basic operation; unused pins either provide redundant functionality or optional features not utilized in this implementation.
+
+\begin{table}[htbp]
+\centering
+\caption{ESP32-S3 Node Pin Connections and Sensor Module Details}
+\label{tab:esp32s3-pinout}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lllll}
+\toprule
+\textbf{Module} & \textbf{Pin} & \textbf{ESP32-S3 GPIO} & \textbf{Function} & \textbf{Notes} \\
+\midrule
+\multirow{5}{*}{MPU6050 (GY-521)} 
+  & VCC & 3V3 & Power (2.4--3.5\,V) & Logic level compatible~\cite{mpu6050_datasheet_2013} \\
+  & GND & GND & Ground & --- \\
+  & SCL & GPIO4 & I2C Clock & Shared with BMP180 \\
+  & SDA & GPIO5 & I2C Data & Shared with BMP180 \\
+  & XDA/XCL & --- & Aux I2C & Unused; for external magnetometer \\
+  & AD0 & --- & Address select & Unconnected = 0x68 \\
+  & INT & --- & Interrupt & Unused; polling mode used \\
+\midrule
+\multirow{4}{*}{BMP180 (GY-68)} 
+  & VIN & 3V3 & Power (1.8--3.6\,V) & Onboard regulator~\cite{bmp180_datasheet_2013} \\
+  & GND & GND & Ground & --- \\
+  & SCL & GPIO4 & I2C Clock & Shared with MPU6050 \\
+  & SDA & GPIO5 & I2C Data & Shared with MPU6050 \\
+\midrule
+\multirow{4}{*}{KY-037 Sound} 
+  & VCC & 3V3 & Power (3.3--5\,V) & --- \\
+  & GND & GND & Ground & --- \\
+  & AO & GPIO6 & Analog output & Continuous sound level \\
+  & DO & --- & Digital output & Unused; AO preferred for granularity \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
 The firmware execution flow is depicted in Figure~\ref{fig:esp32s3-flowchart}. Upon boot, the device loads TLS configuration from \texttt{sdkconfig} and connects to WiFi. The subsequent MQTT connection triggers an mTLS handshake using ECDSA P-256 for certificate verification and X25519 for ephemeral key exchange (TLS~1.3). Sensor acquisition operates at differentiated rates: MPU6050 at 10\,Hz for fall detection, BMP180 at 0.2\,Hz for environmental monitoring, and KY-037 at 5\,Hz for acoustic sampling. Calibrated inertial data feeds the edge computing pipeline, which computes SMV and angular velocity for threshold-based fall detection.
 
 \begin{figure}[H]
@@ -160,6 +198,50 @@ Motion & SR602 & PIR presence & GPIO \\
 Indicator & RGB LED & Status feedback & PWM \\
 \bottomrule
 \end{tabular}
+\end{table}
+
+\textbf{Power Supply Considerations.}
+Unlike other sensors that operate on 3.3\,V logic levels, the MQ-2 gas sensor requires a dedicated 5\,V supply connected to the VIN pin. This requirement stems from the sensor's internal tin dioxide (SnO$_2$) heating element, which must maintain a specific operating temperature for accurate gas detection. According to the manufacturer datasheet, the heater voltage ($V_H$) must be $5.0\,\text{V} \pm 0.2\,\text{V}$, with a heater resistance of $31\,\Omega \pm 3\,\Omega$ and power consumption up to 900\,mW~\cite{mq2_datasheet_2014}. The heater preheating time exceeds 48 hours for initial stabilization. Supplying only 3.3\,V would result in insufficient heater temperature, causing unreliable gas concentration readings. The analog output (AO) pin, however, remains 3.3\,V tolerant and connects directly to the ESP32's ADC input (GPIO34).
+
+Table~\ref{tab:esp32-pinout} details the complete GPIO assignments for the ESP32 environment sensing node.
+
+\begin{table}[htbp]
+\centering
+\caption{ESP32 Node Pin Connections and Sensor Module Details}
+\label{tab:esp32-pinout}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lllll}
+\toprule
+\textbf{Module} & \textbf{Pin} & \textbf{ESP32 GPIO} & \textbf{Function} & \textbf{Notes} \\
+\midrule
+\multirow{5}{*}{TCS34725} 
+  & VIN & 3V3 & Power (2.7--3.6\,V) & Onboard regulator~\cite{tcs34725_datasheet_2012} \\
+  & GND & GND & Ground & --- \\
+  & SCL & GPIO32 & I2C Clock & Address 0x29 (fixed) \\
+  & SDA & GPIO33 & I2C Data & --- \\
+  & LED & GPIO25 & White LED control & Illumination for color sensing \\
+  & INT & --- & Interrupt & Unused; polling mode used \\
+\midrule
+\multirow{6}{*}{MQ-2 Gas} 
+  & VCC & VIN (5V) & Heater power & \textbf{5\,V required}~\cite{mq2_datasheet_2014} \\
+  & GND & GND & Ground & --- \\
+  & AO & GPIO34 & Analog output & 0--3.3\,V proportional to gas \\
+  & DO & --- & Digital output & Unused; AO provides finer resolution \\
+  & H1/H2 & (internal) & Heater coil & $R_H = 31\,\Omega$; $P_H \leq 900$\,mW \\
+\midrule
+\multirow{3}{*}{SR602 PIR} 
+  & VCC & 3V3 & Power (3.3--5\,V) & Ultra-low power~\cite{sr602_datasheet_2018} \\
+  & GND & GND & Ground & --- \\
+  & OUT & GPIO23 & Digital output & High on motion detection \\
+\midrule
+\multirow{4}{*}{RGB LED} 
+  & R & GPIO26 & Red channel & LEDC PWM (8-bit) \\
+  & G & GPIO27 & Green channel & LEDC PWM (8-bit) \\
+  & B & GPIO14 & Blue channel & LEDC PWM (8-bit) \\
+  & COM & 3V3/GND & Common anode/cathode & Depends on LED type \\
+\bottomrule
+\end{tabular}%
+}
 \end{table}
 
 The ESP32 node employs an identical mTLS configuration to the ESP32-S3 (Section~\ref{subsec:esp32s3}). As shown in Figure~\ref{fig:esp32-flowchart}, this node emphasizes on-device automation rather than edge analytics. The MQ-2 smoke sensor triggers threshold-based alerts at 5\,Hz sampling, while the SR602 PIR sensor operates in interrupt-driven mode. Both sensors directly control the RGB LED indicator without cloud dependency.
