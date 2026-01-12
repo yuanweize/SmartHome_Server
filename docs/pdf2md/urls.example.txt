@@ -1,0 +1,11 @@
+# PDF URLs - One URL per line
+# Lines starting with # are comments
+#
+# Copy this file to urls.txt and add your URLs:
+#   cp urls.example.txt urls.txt
+#
+# Sensor Datasheets Examples:
+# https://cdn-shop.adafruit.com/datasheets/BST-BMP180-DS000-09.pdf
+# https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Datasheet1.pdf
+# https://cdn-shop.adafruit.com/datasheets/TCS34725.pdf
+# https://www.ti.com/lit/ds/symlink/lm393.pdf
