@@ -26,9 +26,25 @@ api:
     key: !secret api_key_esp32s3
 
 wifi:
-  ssid: !secret wifi_ssid
-  password: !secret wifi_password
+  # 全局设置
   fast_connect: true
+  
+  # 定义多个网络列表
+  networks:
+    # --- 主网络 (优先连接) ---
+    - ssid: !secret wifi_ssid_main
+      password: !secret wifi_password_main
+      priority: 20  # 数字越大，优先级越高
+
+    # --- 备用网络 (主网络连不上时使用) ---
+    - ssid: !secret wifi_ssid_backup
+      password: !secret wifi_password_backup
+      priority: 10  # 优先级较低
+
+  # 可选：如果两个都连不上，开启热点(AP)模式方便急救
+  ap:
+    ssid: "ESP32-S3-AP"
+    password: !secret wifi_ssid_ap_password
 
 mqtt:
   broker: !secret mqtt_broker
