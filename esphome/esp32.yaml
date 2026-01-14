@@ -92,15 +92,15 @@ switch:
     id: tcs_led
 
 sensor:
-    # --- 1. 网络与系统状态 ---
+  # --- 1. 网络与系统状态 ---
   - platform: wifi_signal
-    name: "WiFi RSSI"
+    name: "WiFi RSSI ESP32"
     id: wifi_rssi
     unit_of_measurement: "dBm"
     update_interval: 10s
 
   - platform: uptime
-    name: "System Uptime"
+    name: "System Uptime ESP32"
     unit_of_measurement: "s"
   # TCS34725 color sensor
   - platform: tcs34725
