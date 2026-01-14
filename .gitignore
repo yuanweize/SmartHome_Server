@@ -49,3 +49,4 @@ docs/pdf2md/input/
 docs/pdf2md/output/
 docs/pdf2md/urls.txt
 docs/pdf2md/.cache.json
+test/*
