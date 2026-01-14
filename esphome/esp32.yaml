@@ -83,6 +83,7 @@ i2c:
   scl: GPIO32
   scan: true
   id: bus_b
+  frequency: 100kHz
 
 switch:
   - platform: gpio
