@@ -77,6 +77,7 @@ button:
 
 logger:
   hardware_uart: USB_CDC
+  level: DEBUG
 
 globals:
   - id: fall_detected_time
@@ -89,6 +90,7 @@ i2c:
   scl: GPIO4
   scan: true
   id: bus_a
+  frequency: 100kHz
 
 sensor:
   # Network diagnostics
