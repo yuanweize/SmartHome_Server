@@ -69,6 +69,7 @@ cd broker/emqx && docker compose up -d
 | [certs/README.zh-CN.md](certs/README.zh-CN.md) | 证书生成指南 |
 | [homeassistant/README.zh-CN.md](homeassistant/README.zh-CN.md) | Home Assistant 部署 |
 | [docs/README.zh-CN.md](docs/README.zh-CN.md) | 论文 LaTeX 源码 |
+| [Declaration.pdf](Declaration.pdf) | 学术论文声明 |
 
 ## 环境要求
 

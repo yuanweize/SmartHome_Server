@@ -69,6 +69,7 @@ cd broker/emqx && docker compose up -d
 | [certs/README.md](certs/README.md) | Certificate generation guide |
 | [homeassistant/README.md](homeassistant/README.md) | Home Assistant setup |
 | [docs/README.md](docs/README.md) | Thesis LaTeX source |
+| [Declaration.pdf](Declaration.pdf) | Academic thesis declaration |
 
 ## Requirements
 
