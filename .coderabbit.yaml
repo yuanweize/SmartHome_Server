@@ -2,7 +2,6 @@
 # Persona: Academic Supervisor & Senior IoT Security Architect
 
 language: "en-US"
-yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 
 reviews:
   profile: "assertive" # Academic rigor requires strict review
