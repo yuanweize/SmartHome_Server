@@ -93,3 +93,5 @@ def get_default_entities() -> List[EntityDef]:
             commandable=True, initial=dict(DEFAULT_LIGHT_STATE)
         ),
     ]
+
+# [CodeRabbit Audit Trigger 1769364389]

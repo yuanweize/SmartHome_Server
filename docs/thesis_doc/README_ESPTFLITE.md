@@ -126,3 +126,5 @@ As per the upstream repository policy, the tflite-lib is copied into the compone
 This component and the examples are provided under Apache 2.0 license, see [LICENSE](LICENSE.md) file for details.
 
 TensorFlow library code and third_party code contains their own license specified under respective [repos](https://github.com/tensorflow/tflite-micro).
+
+# [CodeRabbit Audit Trigger 1769364389]

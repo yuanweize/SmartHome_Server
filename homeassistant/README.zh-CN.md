@@ -94,3 +94,5 @@ Home Assistant Container 的参考配置：
 ## 证书配置
 
 mTLS 证书生成请参阅 [`../certs/README.zh-CN.md`](../certs/README.zh-CN.md)。
+
+# [CodeRabbit Audit Trigger 1769364389]

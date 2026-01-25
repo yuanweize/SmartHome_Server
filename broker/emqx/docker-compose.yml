@@ -25,3 +25,5 @@ services:
       EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__FAIL_IF_NO_PEER_CERT: "true"
       # Authentication
       EMQX_ALLOW_ANONYMOUS: "false"
+
+# [CodeRabbit Audit Trigger 1769364389]

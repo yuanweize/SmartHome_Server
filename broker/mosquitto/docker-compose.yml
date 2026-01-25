@@ -10,3 +10,5 @@ services:
       - ./config:/mosquitto/config
       - ./data:/mosquitto/data
       - ./log:/mosquitto/log
+
+# [CodeRabbit Audit Trigger 1769364389]
