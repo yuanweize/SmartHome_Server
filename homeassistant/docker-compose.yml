@@ -9,3 +9,5 @@ services:
       - "127.0.0.1:8123:8123"
     environment:
       - TZ=Europe/Prague
+
+# [CodeRabbit Audit Trigger 1769364389]

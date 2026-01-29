@@ -45,3 +45,5 @@ services:
       - ./certs:/app/sensors/certs:ro
 
     restart: unless-stopped
+
+# [CodeRabbit Audit Trigger 1769364389]

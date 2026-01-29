@@ -181,3 +181,5 @@ class Broker:
             client.loop_start()
 
         return client
+
+# [CodeRabbit Audit Trigger 1769364389]

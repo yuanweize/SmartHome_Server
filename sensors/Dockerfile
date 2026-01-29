@@ -5,3 +5,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY sensors ./sensors
 ENV PYTHONUNBUFFERED=1
 ENTRYPOINT ["python", "sensors/sensor_simulator.py"]
+# [CodeRabbit Audit Trigger 1769364389]

@@ -103,3 +103,5 @@ def convert(value: Any, typ: type, default: Any) -> Any:
 def now_ts() -> int:
     """Return current Unix timestamp as integer."""
     return int(time.time())
+
+# [CodeRabbit Audit Trigger 1769364389]
