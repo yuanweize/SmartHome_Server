@@ -1,0 +1,100 @@
+\chapter{Introduction}
+\label{ch:introduction}
+
+% ============================================================================
+% 1.1 Background and Motivation
+% ============================================================================
+\section{Background and Motivation}
+\label{sec:background}
+
+The concept of smart homes has evolved significantly over the past decade, transforming from a futuristic vision into a widely deployed class of residential systems. Smart home systems integrate various sensors, actuators, and control platforms to provide automated environmental monitoring, security surveillance, and energy management capabilities~\cite{smarthome_survey_2020}.
+
+At the core of modern smart home architectures lie servers and Unix-like operating systems that provide the computational infrastructure for data processing, storage, and decision-making. These systems handle the aggregation of sensor data from potentially hundreds of devices, execute automation rules, and provide user interfaces for monitoring and control.
+
+The proliferation of Internet of Things (IoT) devices has created new challenges in terms of scalability, security, and interoperability~\cite{iot_architecture_2019}. Commercial smart home platforms such as Amazon Alexa, Google Home, and Xiaomi Mi Home offer convenient solutions but often rely on cloud connectivity and raise concerns about data privacy and ecosystem dependency~\cite{voice_assistant_privacy_2019,iot_vendor_lockin_2021}.
+
+% ============================================================================
+% 1.2 Problem Statement
+% ============================================================================
+\section{Problem Statement}
+\label{sec:problem}
+
+Despite the availability of numerous commercial smart home solutions, several challenges remain inadequately addressed:
+
+\begin{itemize}
+    \item \textbf{Data Sovereignty:} Commercial platforms typically transmit sensor data to cloud servers, limiting user control over personal information and raising privacy concerns.
+    
+    \item \textbf{Vendor Lock-in:} Proprietary ecosystems restrict device interoperability and create dependency on specific manufacturers, as evidenced by platform discontinuations that render devices unusable~\cite{iot_vendor_lockin_2021}.
+    
+    \item \textbf{Security Vulnerabilities:} Many IoT devices lack adequate security measures, with unencrypted communications and weak authentication mechanisms being common issues~\cite{iot_security_survey_2019}.
+    
+    \item \textbf{Scalability Limitations:} Consumer-grade solutions often struggle to handle large numbers of devices or high-frequency sensor data streams.
+
+    \item \textbf{Latency and Availability:} Reliance on remote cloud processing and wide-area networks can introduce variable end-to-end latency and reduce system availability during internet outages, which motivates local-first and edge-oriented designs~\cite{edge_computing_iot_2016}.
+
+    \item \textbf{Limited Customization:} Commercial ecosystems are typically designed for common household scenarios, making it difficult to implement specialized requirements (e.g., custom sensors, non-standard automation logic, or constrained network environments) without relying on vendor-specific extensions.
+\end{itemize}
+
+This thesis addresses these challenges by designing and implementing an open-source smart home system that prioritizes local data processing, secure communications, and scalable architecture.
+
+% ============================================================================
+% 1.3 Research Objectives
+% ============================================================================
+\section{Research Objectives}
+\label{sec:objectives}
+
+The primary objectives of this thesis are threefold:
+
+\begin{enumerate}
+    \item \textbf{Analytical Objective:} Analyze the role of servers and Unix-like systems in smart home sensor monitoring and control, examining the architectural patterns and communication protocols employed in modern IoT deployments.
+    
+    \item \textbf{Design Objective:} Design and implement a model smart home system using the MQTT protocol and Home Assistant platform, demonstrating integration of both real hardware sensors (ESP32/ESP32-S3) and Python-based simulated devices that appear as Home Assistant entities, with the simulator additionally enabling scalable load generation for benchmarking.
+    
+    \item \textbf{Evaluation Objective:} Compare the implemented solution with commercial alternatives in terms of scalability, performance, privacy, and reliability, supported by representative measurements and qualitative system characterization.
+\end{enumerate}
+
+% ============================================================================
+% 1.4 Thesis Organization
+% ============================================================================
+\section{Thesis Organization}
+\label{sec:organization}
+
+The remainder of this thesis is organized as follows:
+
+\textbf{Chapter~\ref{ch:background}} introduces the theoretical background, covering smart home systems, the MQTT protocol, transport layer security, Home Assistant and ESPHome, edge computing, and the role of Unix-like systems in IoT infrastructure.
+
+\textbf{Chapter~\ref{ch:architecture}} presents the system architecture and overall design choices, with emphasis on the communication flow, deployment topology, and security considerations.
+
+\textbf{Chapter~\ref{ch:implementation}} describes the implementation of hardware sensor nodes, the Python-based simulator, Home Assistant integration, and supporting data pipeline and automation components.
+
+\textbf{Chapter~\ref{ch:evaluation}} presents empirical evaluation covering performance characteristics, scalability, security considerations, system reliability, and a comparative analysis with commercial smart home platforms.
+
+\textbf{Chapter~\ref{ch:conclusion}} summarizes the contributions, outlines limitations, and suggests directions for future work.
+
+% ============================================================================
+% 1.5 Thesis Contributions Overview
+% ============================================================================
+\clearpage
+\section{Thesis Contributions Overview}
+\label{sec:scope-of-work}
+
+Figure~\ref{fig:contribution-overview} illustrates the system architecture developed in this thesis. The implementation builds upon a rich ecosystem of open-source technologies spanning messaging infrastructure (EMQX), home automation (Home Assistant, Node-RED), embedded firmware frameworks (ESPHome, mbedTLS), time-series data management (InfluxDB, Grafana), containerization and deployment (Docker, Nginx), and secure networking (Tailscale). Green-shaded components indicate areas where the author performed design, development, or integration work.
+
+\begin{figure}[htbp]
+\centering
+\IfFileExists{images/Architecture.drawio.png}{%
+    \includegraphics[width=0.95\linewidth]{images/Architecture.drawio.png}%
+}{%
+    \fbox{\parbox{0.9\linewidth}{\centering
+        Missing figure: \texttt{images/Architecture.drawio.png}\\[1em]
+        \textbf{Suggested content:}\\[0.5em]
+        \textit{Green boxes} = Work performed in this thesis\\[0.5em]
+        \textit{Blue boxes} = Open-source platforms utilized
+    }}%
+}
+\caption{System architecture overview. Green: work performed in this thesis; Blue: open-source platforms utilized.}
+\label{fig:contribution-overview}
+\end{figure}
+
+
+# [CodeRabbit Audit Trigger 1769364389]

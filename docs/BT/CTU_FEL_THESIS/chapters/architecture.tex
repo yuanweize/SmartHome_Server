@@ -1,0 +1,267 @@
+\chapter{System Architecture}
+\label{ch:architecture}
+
+This chapter presents the architecture of the implemented smart home system. The design emphasizes local-first control, secure cross-network communication, and integration of heterogeneous device types---including custom ESP32-based sensors, a Python-based simulator for virtual entity emulation also can use for load generation for benchmarking, and commercial IoT devices.
+
+% ============================================================================
+% 3.1 Architecture Overview
+% ============================================================================
+\section{Architecture Overview}
+\label{sec:arch-overview}
+
+The system follows a distributed architecture with components spanning local and cloud-hosted infrastructure, connected through secure communication channels. Figure~\ref{fig:system-arch} illustrates the high-level topology.
+
+\begin{figure}[H]
+\centering
+% tighten caption spacing (local to this figure)
+\setlength{\abovecaptionskip}{0pt} % default is often ~10pt
+\setlength{\belowcaptionskip}{0pt}
+
+\IfFileExists{images/system_architecture.drawio.png}{%
+    \scalebox{1}[0.90]{%
+    \includegraphics[width=\linewidth]{images/system_architecture.drawio.png}%
+}
+}{%
+    \fbox{\parbox{0.9\textwidth}{\centering
+        Missing figure: \texttt{images/system\_architecture.drawio.png}
+    }}%
+}
+\caption{Overall system architecture and communication paths.}
+\label{fig:system-arch}
+\end{figure}
+
+The architecture aligns with the three-layer IoT reference model introduced in Section~\ref{sec:smarthome-overview}:
+
+\begin{itemize}
+    \item \textbf{Application Layer:} Home Assistant platform providing automation engine, device management, user dashboards, and optional data persistence.
+    
+    \item \textbf{Network Layer:} MQTT messaging over mTLS for wide-area communication; ESPHome Native API for low-latency local control~\cite{esphome_2024}; cloud APIs for commercial device integration.
+    
+    \item \textbf{Perception Layer:} Physical sensor nodes (ESP32, ESP32-S3), commercial IoT devices (Xiaomi air purifier), and the Python simulator generating virtual device telemetry.
+\end{itemize}
+
+
+% ============================================================================
+% 3.2 System Components
+% ============================================================================
+\section{System Components}
+\label{sec:system-components}
+
+Table~\ref{tab:system-components} summarizes the principal components of the implemented system, their deployment locations, and roles.
+
+\begin{table}[htbp]
+\centering
+\caption{System components and deployment topology.}
+\label{tab:system-components}
+\small
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Component} & \textbf{Location} & \textbf{Platform} & \textbf{Role} \\
+\midrule
+Web Gateway & VPS (Frankfurt) & Debian / Nginx & Bastion; HA TLS reverse proxy \\
+EMQX Broker & VPS (Nuremberg) & Debian / OpenResty & MQTT routing \\
+Home Assistant & Local (Prague) & HAOS on ESXi & Automation hub \\
+ESP32 / ESP32-S3 & Local (Prague) & ESPHome & Sensor \& actuator \\
+Xiaomi Air Purifier & Local (Prague) & Commercial & Air quality \\
+Python Simulator & Network-connected host & Cross-platform & Virtual entities; load testing \\
+HA Companion App\footnote{\url{https://companion.home-assistant.io/}} & Mobile & iOS / Android & Mobile client / Sensor  \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+\subsection{Custom Sensor Nodes}
+\label{subsec:custom-nodes}
+
+Two ESP32-based sensor nodes are deployed using ESPHome firmware. These nodes collect environmental data (temperature, humidity, ambient light) and expose actuators (LED indicators, relays). Communication with Home Assistant occurs via two paths:
+
+\begin{itemize}
+    \item \textbf{ESPHome Native API~\cite{esphome_2024}:} Used for local-network communication, providing low-latency bidirectional control without broker dependency.
+    \item \textbf{MQTT over mTLS~\cite{mqtt_oasis_2019}:} Used for wide-area messaging when the controller or devices span different networks, ensuring encrypted and authenticated communication.
+\end{itemize}
+
+The dual-path design balances responsiveness for local automation with security for Internet-exposed scenarios.
+
+\subsection{Commercial Device Integration}
+\label{subsec:commercial-integration}
+
+Integrations connecting Home Assistant to external systems can be categorized by data flow direction: \emph{inbound integrations} import devices into Home Assistant, while \emph{outbound integrations} expose Home Assistant entities to external platforms.
+
+\paragraph{Inbound integration (devices to Home Assistant).}
+A Xiaomi smart air purifier is integrated via the Xiaomi Home Integration\footnote{\url{https://github.com/XiaoMi/ha_xiaomi_home}}, installed through HACS\footnote{\url{https://hacs.xyz/}}. According to the integration documentation, device state and events are delivered to Home Assistant via subscriptions to Xiaomi's MQTT-based cloud message bus, while control commands are issued via Xiaomi cloud HTTP interfaces. The integration also supports local-control modes under specific conditions (e.g., Xiaomi hub gateway or LAN control), otherwise operation is cloud-mediated. This contrasts with the fully local communication available for ESPHome-based nodes.
+
+\paragraph{Outbound integration (Home Assistant to voice platforms).}
+Home Assistant can expose entities to voice assistant ecosystems. The HomeKit Bridge\footnote{\url{https://www.home-assistant.io/integrations/homekit/}} publishes entities to Apple Home for Siri control. The Google Assistant integration\footnote{\url{https://www.home-assistant.io/integrations/google_assistant/}} exposes entities to Google Home. Home Assistant Cloud (Nabu Casa)\footnote{\url{https://www.nabucasa.com/}} simplifies connectivity for Google Assistant and Amazon Alexa without manual cloud configuration.
+
+Including these integrations serves two purposes:
+\begin{itemize}
+    \item It validates Home Assistant's role as a unifying platform capable of aggregating heterogeneous device ecosystems under a single interface.
+    \item It provides a concrete example of vendor cloud dependency, illustrating the privacy and availability trade-offs discussed in Section~\ref{sec:problem}.
+\end{itemize}
+
+\subsection{Python Simulator}
+\label{subsec:simulator-arch}
+
+The Python-based sensor simulator emulates large numbers of virtual devices as Home Assistant entities by publishing telemetry to the MQTT broker, subscribing to command topics, and supporting Home Assistant MQTT Discovery. This provides a controllable and repeatable way to validate message flows, automations, and dashboard behavior without requiring additional physical hardware.
+
+Building on this entity-emulation capability, the simulator also serves as a scalable load generator for stress testing, enabling experiments with thousands of virtual entities under reproducible configurations.
+
+The simulator supports:
+\begin{itemize}
+    \item Configurable device count and entity types (sensors, binary sensors, switches, lights).
+    \item Multiple data models (drift, uniform, sine wave, motion events).
+    \item Home Assistant MQTT Discovery for automatic entity registration.
+    \item mTLS client authentication matching the security requirements of the broker.
+\end{itemize}
+
+% ============================================================================
+% 3.3 Communication Architecture
+% ============================================================================
+\section{Communication Architecture}
+\label{sec:comm-arch}
+
+The communication design addresses three goals: (i) low latency for interactive local control, (ii) security for Internet-exposed messaging, and (iii) scalability for benchmarking with large device populations.
+
+\subsection{Topic Namespace Design}
+\label{subsec:topic-namespace}
+
+Building on the MQTT topic hierarchy introduced in Section~\ref{subsec:mqtt-characteristics}, the system implements a consistent naming convention. Device telemetry and commands follow the pattern:
+
+\begin{verbatim}
+{base_topic}/device_{id}/{entity}/state
+{base_topic}/device_{id}/{entity}/set
+\end{verbatim}
+
+Home Assistant MQTT Discovery publishes configuration payloads under the \texttt{homeassistant/} prefix~\cite{homeassistant_2024}, enabling automatic device registration.
+
+Table~\ref{tab:system-subscriptions} shows representative MQTT subscriptions captured from the EMQX broker during system operation, illustrating the topic namespace in practice.
+
+\begin{table}[htbp]
+\centering
+\caption{MQTT subscriptions observed during system operation (EMQX dashboard).}
+\label{tab:system-subscriptions}
+\small
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{llcl}
+\toprule
+\textbf{Client} & \textbf{Subscription Topic} & \textbf{QoS} & \textbf{Purpose} \\
+\midrule
+ESP32 & \texttt{smarthome-esp32/switch/led/command} & 0 & Actuator command \\
+ESP32-S3 & \texttt{smarthome-esp32s3/sensor/temperature/state} & 0 & Sensor telemetry \\
+Simulator & \texttt{smarthome/sim/device\_1/heater/set} & 0 & Virtual actuator \\
+Home Assistant & \texttt{homeassistant/sensor/+/config} & 0 & MQTT Discovery \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+\subsection{Communication Paths}
+\label{subsec:comm-paths}
+
+Three distinct communication paths serve different deployment scenarios:
+
+\begin{itemize}
+    \item \textbf{ESPHome Native API~\cite{esphome_2024}:} ESP32 nodes on the same LAN as Home Assistant use the native API protocol, providing sub-second response times without Internet dependency.
+    
+    \item \textbf{MQTT over mTLS~\cite{mqtt_oasis_2019}:} The simulator and devices outside the local network connect to the EMQX broker on port 8883 with mutual TLS authentication. This path also serves as a fallback for ESPHome devices in distributed deployments.
+    
+    \item \textbf{Cloud APIs:} Commercial devices (e.g., Xiaomi air purifier) integrate via vendor infrastructure. In the Xiaomi Home Integration, state is delivered via Xiaomi's MQTT-based message bus and commands are sent through vendor HTTP interfaces; local-control modes are optional and deployment-dependent.
+\end{itemize}
+
+Table~\ref{tab:comm-paths} summarizes the characteristics of each path.
+
+\begin{table}[htbp]
+\centering
+\caption{Communication path characteristics.}
+\label{tab:comm-paths}
+\begin{tabular}{llll}
+\toprule
+\textbf{Path} & \textbf{Latency} & \textbf{Security} & \textbf{Dependency} \\
+\midrule
+ESPHome Native API~\cite{esphome_2024} & Low (LAN) & API encryption & Local network \\
+MQTT over mTLS~\cite{mqtt_oasis_2019} & Medium (WAN) & mTLS mutual auth & Self-hosted broker \\
+Cloud APIs & Variable (WAN) & Vendor TLS & Vendor cloud \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ============================================================================
+% 3.4 Security Architecture
+% ============================================================================
+\section{Security Architecture}
+\label{sec:security-arch}
+
+The security architecture implements defense-in-depth across transport, network, and application layers.
+
+\subsection{Transport Layer Security}
+\label{subsec:transport-security}
+
+All MQTT communications between the simulator, ESPHome devices (when using MQTT), and the EMQX broker employ mutual TLS (mTLS) on port 8883. The certificate hierarchy consists of:
+
+\begin{itemize}
+    \item A self-signed Certificate Authority (CA) issuing all certificates.
+    \item Server certificate for the EMQX broker, verified by clients against the CA.
+    \item Client certificates for each device and simulator instance, verified by the broker.
+\end{itemize}
+
+Certificates use ECDSA with NIST P-256 for signatures and X25519 for ephemeral key exchange, based on the hybrid TLS approach analyzed in Section~\ref{subsubsec:hybrid-tls}. The complete certificate generation procedure is documented in Appendix~\ref{app:certs}. This choice provides strong security with minimal computational overhead on resource-constrained ESP32 devices.
+
+\subsection{Network Layer Security}
+\label{subsec:network-security}
+
+To avoid direct exposure of administrative interfaces to the public Internet, the system employs a layered access architecture:
+
+\begin{itemize}
+    \item \textbf{MQTT (port 8883):} Clients connect directly to the EMQX broker in Nuremberg using mTLS; no reverse proxy is involved.
+    \item \textbf{EMQX Dashboard:} A co-located OpenResty instance on the same host handles TLS termination (Let's Encrypt) and reverse proxying for the broker's web interface.
+    \item \textbf{Home Assistant Dashboard:} A Nginx gateway in Frankfurt terminates TLS (Let's Encrypt) and proxies requests to the internal Home Assistant instance in Prague via Tailscale.
+\end{itemize}
+
+Tailscale\footnote{\url{https://tailscale.com/blog/how-tailscale-works/}}, a mesh VPN built on WireGuard~\cite{donenfeld_wireguard_2017}, interconnects external VPS nodes and the internal network. Access Control Lists (ACLs) enforce least-privilege principles, as shown in Table~\ref{tab:tailscale-acl}.
+
+\begin{table}[htbp]
+\centering
+\caption{Tailscale ACL rules for network segmentation.}
+\label{tab:tailscale-acl}
+\begin{tabular}{lll}
+\toprule
+\textbf{Source Tag} & \textbf{Destination} & \textbf{Purpose} \\
+\midrule
+\texttt{tag:user} & \texttt{*:*} & Full access (owner devices) \\
+\texttt{tag:bastion} & \texttt{tag:ha-gateway:8123} & Web gateway to HA dashboard only \\
+\texttt{tag:node} & \texttt{tag:node:*} & Inter-node communication \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+This configuration ensures the web gateway can only reach Home Assistant on port 8123, while owner-controlled nodes (\texttt{tag:user}) retain full access for administration.
+
+\subsection{Application Layer Security}
+\label{subsec:app-security}
+
+Home Assistant uses token-based authentication with configurable session timeouts~\cite{homeassistant_2024}. For third-party integrations such as Xiaomi Home, the integration uses OAuth~2.0 login and stores user/device metadata (including tokens and certificates) in Home Assistant configuration files.
+
+ESP32 nodes store credentials in encrypted Non-Volatile Storage (NVS) partitions provided by the ESP-IDF framework~\cite{esp_idf_nvs_2024}, protecting against casual firmware extraction.
+
+% ============================================================================
+% 3.5 Design Rationale
+% ============================================================================
+\section{Design Rationale}
+\label{sec:design-rationale}
+
+This section motivates the principal architectural decisions and relates each choice to the system goals outlined in this chapter (local-first operation, secure cross-network communication, and heterogeneous device integration).
+
+\paragraph{Hybrid local--cloud topology.}
+Hosting the MQTT broker on a public VPS rather than locally reflects the experimental requirement for cross-network benchmarking. This enables the simulator to connect from arbitrary locations while maintaining mTLS-authenticated connectivity~\cite{mqtt_oasis_2019}. For production deployments, a local broker would reduce latency and eliminate external dependencies.
+
+\paragraph{Dual communication paths for ESP32 nodes.}
+Supporting both ESPHome Native API~\cite{esphome_2024} and MQTT allows the system to optimize for latency locally while retaining flexibility for distributed deployments. The native API provides lowest latency on shared LANs; MQTT extends connectivity across network boundaries.
+
+\paragraph{Inclusion of commercial devices.}
+Integrating the Xiaomi air purifier demonstrates that an open-source platform can coexist with vendor ecosystems, aggregating heterogeneous sources into a unified interface. This also illustrates cloud dependency trade-offs analyzed in Chapter~\ref{ch:evaluation}.
+
+\paragraph{Simulator for scalability testing.}
+Physical deployment of thousands of sensors is impractical for a thesis project. The Python simulator provides a controlled, repeatable method to stress-test the broker and controller, producing quantitative data presented in Chapter~\ref{ch:evaluation}.
+
+# [CodeRabbit Audit Trigger 1769364389]
