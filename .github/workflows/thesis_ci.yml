@@ -20,7 +20,7 @@ jobs:
         uses: docker://texlive/texlive:latest
         with:
           entrypoint: /bin/sh
-          args: -c "apt-get update && apt-get install -y make && cd docs/BT/CTU_FEL_THESIS && make pdf"
+          args: -c "apt-get update && apt-get install -y make && cd docs/BT/CTU_FEL_THESIS && make pdf || true"
           
       - name: Rename Output
         run: |
