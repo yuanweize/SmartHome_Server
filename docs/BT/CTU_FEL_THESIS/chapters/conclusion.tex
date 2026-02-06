@@ -1,0 +1,80 @@
+\chapter{Conclusion}
+\label{ch:conclusion}
+
+This chapter summarizes the thesis contributions, acknowledges limitations, and suggests directions for future work.
+
+% ============================================================================
+% 7.1 Summary of Contributions
+% ============================================================================
+\section{Summary of Contributions}
+\label{sec:summary}
+
+This thesis presented the design and implementation of a smart home sensor control system utilizing servers and Unix-like operating systems. The primary contributions are:
+
+\begin{enumerate}
+    \item \textbf{Distributed Architecture Design:} A geographically distributed system architecture was designed with components spanning multiple locations (Nuremberg, Frankfurt, Prague, Hong Kong), demonstrating practical deployment of cross-region IoT infrastructure with secure communications.
+    
+    \item \textbf{Dual Hardware Node Implementation:} Two ESP32-based sensor nodes were implemented demonstrating different IoT paradigms:
+    \begin{itemize}
+        \item ESP32-S3 edge intelligence node performing local signal processing (vibration analysis, acoustic event detection)
+        \item ESP32 environment sensing node with safety monitoring capabilities (smoke detection, occupancy sensing)
+    \end{itemize}
+    
+    \item \textbf{Virtual Entity Simulation Framework:} A Python-based sensor simulator was developed for virtual entity emulation and load generation, enabling integration testing and scalability benchmarking beyond physical hardware limitations.
+    
+    \item \textbf{Security Implementation:} Mutual TLS authentication was implemented using a hybrid cryptographic approach: ECDSA P-256 for certificate signatures (due to ESP-IDF library constraints) combined with X25519 for key exchange, balancing compatibility with performance~\cite{oryx_crypto_benchmark_esp32s3, esp_tls_2024}.
+    
+    \item \textbf{Commercial Platform Comparison:} A qualitative comparison with commercial solutions (Xiaomi Mi Home) was conducted based on published documentation, highlighting trade-offs between convenience and data sovereignty.
+\end{enumerate}
+
+The implemented system successfully demonstrates that open-source smart home solutions can provide comparable functionality to commercial alternatives while maintaining complete user control over data and system behavior.
+
+% ============================================================================
+% 7.2 Limitations
+% ============================================================================
+\section{Limitations}
+\label{sec:limitations}
+
+The following limitations should be acknowledged:
+
+\begin{itemize}
+    \item \textbf{Setup Complexity:} The system requires significant technical expertise for initial deployment, including certificate generation, server configuration, and network setup. This barrier limits accessibility for non-technical users.
+    
+    \item \textbf{Hardware Scale:} Only two physical sensor nodes were implemented. Production deployments with hundreds of devices may encounter unforeseen challenges.
+    
+    \item \textbf{Voice Integration:} No voice control interface was implemented, limiting comparison with voice-centric commercial platforms.
+    
+    \item \textbf{Limited Commercial Testing:} Direct integration testing with Amazon Alexa and Google Home devices was not performed due to availability constraints; comparison relied on published documentation.
+    
+    \item \textbf{Scalability Validation:} While the simulator supports large device counts, detailed CPU utilization measurements under load were not completed within the thesis timeline.
+\end{itemize}
+
+% ============================================================================
+% 7.3 Future Work
+% ============================================================================
+\section{Future Work}
+\label{sec:future}
+
+Several directions for future research and development are identified:
+
+\begin{enumerate}
+    \item \textbf{Matter Protocol Integration:} Implementing Matter protocol support would enable interoperability with an expanding ecosystem of compatible devices while maintaining local control principles.
+    
+    \item \textbf{Machine Learning at the Edge:} The ESP32-S3's vector instructions could be leveraged for more sophisticated edge AI applications, such as anomaly detection or predictive maintenance.
+    
+    \item \textbf{Automated Certificate Management:} Implementing automated certificate lifecycle management (issuance, renewal, revocation) would reduce operational overhead for larger deployments.
+    
+    \item \textbf{Energy Monitoring:} Extending the system to include power consumption monitoring and optimization would provide additional value for energy-conscious users.
+    
+    \item \textbf{User Interface Improvements:} Developing simplified setup wizards and mobile applications could reduce the technical barrier for non-expert users.
+    
+    \item \textbf{Custom Enclosure Fabrication:} The modular hardware design is well-suited for 3D-printed enclosures, enabling rapid customization for specific deployment environments. Recent work has demonstrated the feasibility of FDM-based enclosure prototyping for IoT sensor nodes, reducing fabrication time from weeks to hours while allowing iterative design refinement~\cite{dhawale_3dprint_enclosure_2022, osa_3dprint_iot_2025}.
+    
+    \item \textbf{Redundancy and Failover:} Implementing MQTT broker clustering and Home Assistant high-availability would improve system resilience for critical applications.
+    
+    \item \textbf{Cryptographic Library Contributions:} As noted in Section~\ref{subsubsec:hybrid-tls}, the current ESP-IDF Mbed~TLS implementation lacks Ed25519 support for X.509 certificate signatures. Should the opportunity arise, contributing to the upstream Mbed~TLS project to address this limitation~\cite{mbedtls_ed25519_issue} would benefit the broader embedded systems community and enable pure Curve25519-based mTLS deployments on ESP32 platforms.
+\end{enumerate}
+
+The growing adoption of local-first smart home solutions and the emergence of interoperability standards like Matter suggest a promising trajectory for open-source home automation. Continued development in this area has the potential to democratize smart home technology while preserving user privacy and autonomy.
+
+# [CodeRabbit Audit Trigger 1769364389]

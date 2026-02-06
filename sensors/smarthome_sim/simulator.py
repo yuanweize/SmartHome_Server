@@ -483,3 +483,5 @@ class Simulator:
                             c.loop_stop()
                         except Exception:
                             pass
+
+# [CodeRabbit Audit Trigger 1769364389]

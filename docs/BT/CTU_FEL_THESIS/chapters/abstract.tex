@@ -1,0 +1,33 @@
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+
+This thesis investigates the use of server-based architectures and Unix-like operating systems for sensor monitoring and control in smart home environments. The objective is to demonstrate how an open-source, self-hosted system can provide secure, scalable, and transparent management of distributed sensor devices without reliance on proprietary cloud services.
+
+The proposed system integrates physical sensor nodes based on ESP32 and ESP32-S3 microcontrollers—the latter implementing edge computing algorithms for real-time fall detection—with a Python-based sensor simulator used to emulate a large number of devices for scalability testing. Communication between IoT components is primarily realized using the MQTT protocol with mutual Transport Layer Security (mTLS), complemented by native API integrations within the Home Assistant platform for device management and automation. An EMQX broker deployed on a remote server acts as the central messaging component. Home Assistant serves as the control and visualization layer and is deployed using the official Home Assistant Operating System (HAOS), a Linux-based environment, running as a virtual machine on an ESXi hypervisor.
+
+Security is implemented using elliptic curve cryptography (ECC) certificates, with emphasis on practical deployment on resource-constrained IoT devices and on leveraging hardware features available on the ESP32-S3 platform. Basic experimental measurements are performed to observe connection establishment characteristics and message delivery behavior under load.
+
+Scalability experiments demonstrate that the proposed architecture is capable of handling over 1,000 concurrent device connections under realistic conditions, with the design supporting larger deployments. A qualitative comparison with selected commercial smart home platforms highlights trade-offs between ease of deployment, flexibility, and data sovereignty. The results indicate that Unix-based, open-source solutions represent a viable alternative for smart home sensor control, particularly in scenarios requiring customization and full control over data processing.
+
+\vspace{5mm}
+\noindent\textbf{Keywords:} smart home, IoT, MQTT, mTLS, ECC, ECDSA, X25519, ESPHome, Home Assistant, ESP32-S3, edge computing, fall detection
+
+% ============================================================================
+\newpage
+\chapter*{Abstrakt}
+\addcontentsline{toc}{chapter}{Abstrakt}
+
+Tato bakalářská práce se zabývá využitím serverově orientované architektury a operačních systémů typu Unix pro monitoring a řízení senzorů v prostředí chytré domácnosti. Cílem je ukázat, že open-source řešení s vlastním hostingem (self-hosted) může zajistit bezpečnou, škálovatelnou a transparentní správu distribuovaných senzorových zařízení bez závislosti na proprietárních cloudových službách.
+
+Navržený systém kombinuje fyzické uzly postavené na mikrokontrolérech ESP32 a ESP32-S3—přičemž druhý jmenovaný implementuje algoritmy edge computingu pro detekci pádu v reálném čase—s Python simulátorem senzorů, který umožňuje emulovat velké množství zařízení pro účely ověření škálovatelnosti. Komunikace mezi IoT komponentami je primárně realizována pomocí protokolu MQTT s oboustranným zabezpečením Transport Layer Security (mTLS), doplněná o nativní API integrace v rámci platformy Home Assistant určené pro správu zařízení a automatizaci. Centrálním prvkem messagingu je broker EMQX nasazený na vzdáleném serveru. Home Assistant plní roli řídicí a vizualizační vrstvy a je provozován jako oficiální Home Assistant Operating System (HAOS), založený na Linuxu, ve virtuálním stroji na hypervizoru ESXi.
+
+Bezpečnost je zajištěna certifikáty využívajícími eliptickou kryptografii (ECC) s důrazem na praktickou implementaci v IoT zařízeních s omezenými zdroji a na využití hardwarových vlastností platformy ESP32-S3. Jsou provedeny základní experimenty zaměřené na charakteristiky navazování spojení a chování doručování zpráv při zátěži.
+
+Experimenty škálovatelnosti ukazují, že navržená architektura je za realistických podmínek schopna obsloužit více než 1000 současně připojených zařízení, přičemž návrh podporuje i větší nasazení. Kvalitativní srovnání s vybranými komerčními platformami chytré domácnosti zdůrazňuje kompromisy mezi jednoduchostí nasazení, flexibilitou a suverenitou dat. Výsledky naznačují, že unixová open-source řešení představují životaschopnou alternativu pro řízení senzorů v chytré domácnosti, zejména v případech vyžadujících přizpůsobení a plnou kontrolu nad zpracováním dat.
+
+\vspace{5mm}
+\noindent\textbf{Klíčová slova:} chytrá domácnost, IoT, MQTT, mTLS, ECC, ECDSA, X25519, ESPHome, Home Assistant, ESP32-S3, edge computing, detekce pádu
+
+% ============================================================================
+\newpage
+# [CodeRabbit Audit Trigger 1769364389]

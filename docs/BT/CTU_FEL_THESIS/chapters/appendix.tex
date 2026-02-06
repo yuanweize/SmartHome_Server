@@ -1,0 +1,927 @@
+% ============================================================================
+%                           APPENDIX - Reorganized
+% ============================================================================
+% Order follows the three-layer network architecture for logical flow:
+%   1. Certificate Generation (Security Infrastructure)
+%   2. Home Assistant Reference (Controller Layer)
+%   3. ESPHome Configuration (Sensor Layer)
+%   4. EMQX Broker Deployment (Communication Layer)
+%   5. Python Simulator (Testing Tools)
+%   6. Simulator Output (Testing Results)
+%   7. Scalability Screenshots (Evaluation Data)
+% ============================================================================
+
+\noindent\textbf{Source Code Availability:} The complete source code, configuration files, and documentation for this thesis project are available at:
+\begin{center}
+\url{https://github.com/yuanweize/SmartHome_Server}
+\end{center}
+\noindent The GitHub repository may be updated with additional documentation and improvements; feedback and suggestions are welcome.
+\noindent A snapshot of the repository at the time of submission (06-01-2026) is also attached to this thesis in the CTU DSpace archive system\footnote{\url{https://dspace.cvut.cz/}}. 
+
+% ============================================================================
+\chapter{Certificate Generation}
+\label{app:certs}
+
+This appendix documents the certificate generation procedure used to establish the mutual TLS (mTLS) authentication implemented in this thesis. The system utilizes \textbf{ECDSA with NIST P-256} (\texttt{prime256v1}) for certificate signatures, as this algorithm is fully supported by the ESP-IDF's Mbed~TLS implementation for X.509 certificate parsing and verification~\cite{esp_tls_2024}. During TLS~1.3 handshake, \textbf{X25519} is automatically negotiated for ephemeral key exchange when supported by both endpoints.
+
+All certificates are organized in subdirectories: \texttt{ca/}, \texttt{server/}, \texttt{client/}, and \texttt{ha/}.
+
+\section{Certificate Authority (Root CA)}
+\label{app:ca-gen}
+
+The Root CA is self-signed and valid for 10 years (3650 days).
+
+\begin{lstlisting}[language=bash,basicstyle=\small\ttfamily,breaklines=true]
+# Create directory structure
+mkdir -p ca server client ha
+
+# Generate CA private key (ECDSA P-256)
+openssl ecparam -name prime256v1 -genkey -noout -out ca/ca.key
+
+# Generate self-signed CA certificate
+openssl req -new -x509 -sha256 -days 3650 \
+  -key ca/ca.key -out ca/ca.pem \
+  -subj "/CN=SmartHome Root CA/O=CTU FEL/C=CZ"
+\end{lstlisting}
+
+
+\section{Server Certificate (EMQX Broker)}
+\label{app:server-cert}
+
+The server certificate is signed by the Root CA, valid for 5 years (1825 days). The Common Name (\texttt{CN}) must match the actual MQTT broker domain name.
+
+\begin{lstlisting}[language=bash,basicstyle=\small\ttfamily,breaklines=true]
+# Generate server private key (ECDSA P-256)
+openssl ecparam -name prime256v1 -genkey -noout -out server/server.key
+
+# Generate Certificate Signing Request (CSR)
+openssl req -new -key server/server.key -out server/server.csr \
+  -subj "/CN=mqtt.example.com/O=SmartHome/OU=Broker"
+
+# Sign server certificate with CA
+openssl x509 -req -sha256 -days 1825 \
+  -in server/server.csr \
+  -CA ca/ca.pem -CAkey ca/ca.key -CAcreateserial \
+  -out server/server.pem
+\end{lstlisting}
+
+
+\section{Client Certificate (IoT Devices)}
+\label{app:client-cert}
+
+The client certificate for ESP32 devices is signed by the Root CA and valid for 1 year (365 days). A unique \texttt{CN} per device is recommended for device identification.
+
+\begin{lstlisting}[language=bash,basicstyle=\small\ttfamily,breaklines=true]
+# Generate client private key (ECDSA P-256)
+openssl ecparam -name prime256v1 -genkey -noout -out client/client.key
+
+# Generate CSR
+openssl req -new -key client/client.key -out client/client.csr \
+  -subj "/CN=esp-client/O=SmartHome/OU=Sensors"
+
+# Sign client certificate with CA
+openssl x509 -req -sha256 -days 365 \
+  -in client/client.csr \
+  -CA ca/ca.pem -CAkey ca/ca.key -CAcreateserial \
+  -out client/client.pem
+\end{lstlisting}
+
+
+\section{Home Assistant Client Certificate}
+\label{app:ha-cert}
+
+The Home Assistant controller requires a separate client certificate for mTLS authentication with the MQTT broker. This certificate is valid for 5 years (1825 days) to match the server certificate lifecycle.
+
+\begin{lstlisting}[language=bash,basicstyle=\small\ttfamily,breaklines=true]
+# Generate HA client private key (ECDSA P-256)
+openssl ecparam -name prime256v1 -genkey -noout -out ha/ha.key
+
+# Generate CSR
+openssl req -new -key ha/ha.key -out ha/ha.csr \
+  -subj "/CN=homeassistant/O=SmartHome/OU=Controller"
+
+# Sign HA client certificate with CA
+openssl x509 -req -sha256 -days 1825 \
+  -in ha/ha.csr \
+  -CA ca/ca.pem -CAkey ca/ca.key -CAcreateserial \
+  -out ha/ha.pem
+\end{lstlisting}
+
+% ============================================================================
+
+\chapter{Home Assistant Reference}
+\label{app:homeassistant}
+
+Home Assistant is the open-source home automation platform used as the central controller in this thesis. This appendix provides essential reference information for reproducing the experimental setup.
+
+\section{Official Resources}
+\label{app:ha-resources}
+
+\begin{itemize}
+    \item \textbf{Official Website:} \url{https://www.home-assistant.io/}
+    \item \textbf{Installation Guide:} \url{https://www.home-assistant.io/installation/}
+    \item \textbf{MQTT Integration:} \url{https://www.home-assistant.io/integrations/mqtt/}
+    \item \textbf{MQTT Discovery:} \url{https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery}
+    \item \textbf{GitHub Repository:} \url{https://github.com/home-assistant/core}
+\end{itemize}
+
+\section{Deployment Method}
+\label{app:ha-deployment}
+
+This thesis deploys \textbf{Home Assistant Operating System (HAOS) 16.3} as a virtual machine on VMware ESXi 8.0.0, using the official OVA appliance image\footnote{\url{https://github.com/home-assistant/operating-system/releases/download/16.3/haos_ova-16.3.ova}}. Unlike Home Assistant Container (Docker), HAOS provides native support for Supervisor and Add-ons such as Node-RED for visual automation workflows, file editors, and integrated backup management.
+
+The installation follows the official alternative installation guide\footnote{\url{https://www.home-assistant.io/installation/alternative/}}, which recommends minimum resources of 2~GB RAM, 32~GB storage, and 2~vCPUs. The deployment in this thesis exceeds these requirements to accommodate additional Add-ons.
+
+\subsection{Host Server Specifications}
+The ESXi hypervisor runs on the following hardware:
+\begin{itemize}
+    \item \textbf{CPU:} Intel Core i5-1135G7 @ 2.40~GHz (4 cores, 11th Gen Tiger Lake)
+    \item \textbf{Memory:} 31.75~GB DDR4
+    \item \textbf{Storage:} 913.75~GB VMFS6 datastore (689.67~GB used)
+    \item \textbf{ESXi Version:} 8.0.0 (Build 20513097, standalone)
+    \item \textbf{Install Date:} February 12, 2023
+\end{itemize}
+
+\subsection{HAOS Virtual Machine Configuration}
+The Home Assistant VM was deployed by importing the official \texttt{haos\_ova-16.3.ova} appliance directly into ESXi. The VM is configured with resources exceeding the minimum requirements (2~vCPU, 2~GB RAM, 32~GB storage) to support additional Add-ons:
+\begin{itemize}
+    \item \textbf{Guest OS:} Other (64-bit)
+    \item \textbf{VM Compatibility:} ESXi 5.5 virtual machine
+    \item \textbf{VMware Tools:} Installed (open-vm-tools)
+    \item \textbf{vCPUs:} 4
+    \item \textbf{Memory:} 4~GB
+    \item \textbf{Hostname:} \texttt{homeassistant}
+    \item \textbf{Network:} Bridged adapter (DHCP)
+\end{itemize}
+
+Figure~\ref{fig:haos-esxi} shows the ESXi management interface with the HAOS virtual machine configuration.
+
+\begin{figure}[htbp]
+\centering
+\IfFileExists{images/haos_esxi.png}{%
+    \includegraphics[width=0.95\linewidth]{images/haos_esxi.png}%
+}{%
+    \fbox{\parbox{0.9\linewidth}{\centering
+        Missing figure: \texttt{images/haos\_esxi.png}
+    }}%
+}
+\caption{HAOS virtual machine running on VMware ESXi 8.0.0}
+\label{fig:haos-esxi}
+\end{figure}
+
+% ============================================================================
+
+\chapter{ESPHome Configuration Files}
+\label{app:esphome}
+
+This appendix contains the ESPHome configuration files used for the ESP32 sensor nodes. ESPHome generates optimized C++ firmware from YAML configurations and supports direct Home Assistant integration.
+
+\section{Secrets Configuration Template}
+\label{app:esphome-secrets}
+
+Sensitive credentials are stored in a separate \texttt{secrets.yaml} file (excluded from version control). The following template shows the required fields:
+
+\begin{lstlisting}[language=yaml,basicstyle=\small\ttfamily,breaklines=true]
+# esphome/secrets.example.yaml
+# Copy to secrets.yaml and fill in actual values
+
+# Wi-Fi credentials
+wifi_ssid: "YOUR_WIFI_SSID"
+wifi_password: "YOUR_WIFI_PASSWORD"
+
+# OTA update password
+ota_password: "CHANGE_ME"
+
+# Native API encryption keys (32-byte base64)
+api_key_esp32s3: "CHANGE_ME_BASE64"
+api_key_esp32: "CHANGE_ME_BASE64"
+
+# MQTT broker (mTLS)
+mqtt_broker: "mqtt.example.com"
+mqtt_port: 8883
+
+# TLS certificates (PEM format, use |- for multiline)
+mqtt_ca_cert: |-
+  -----BEGIN CERTIFICATE-----
+  ... (CA certificate content)
+  -----END CERTIFICATE-----
+mqtt_client_cert: |-
+  -----BEGIN CERTIFICATE-----
+  ... (Client certificate content)
+  -----END CERTIFICATE-----
+mqtt_client_key: |-
+  -----BEGIN PRIVATE KEY-----
+  ... (Client private key content)
+  -----END PRIVATE KEY-----
+\end{lstlisting}
+
+\section{ESP32-S3 Edge Intelligence Node}
+\label{app:esp32s3-config}
+
+The ESP32-S3 node (Node~A) implements edge computing for fall detection using MPU6050 IMU data. Key features include TLS~1.3 support, 10Hz sensor sampling with 1Hz MQTT reporting, and dual-threshold fall detection algorithm.
+
+\begin{lstlisting}[language=yaml,basicstyle=\small\ttfamily,breaklines=true]
+# esphome/esp32s3.yaml (excerpt)
+esphome:
+  name: smarthome-esp32s3
+  friendly_name: "Edge Compute Node ESP32-S3 (Node A)"
+
+esp32:
+  board: esp32-s3-devkitc-1
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      # Certificate signatures: ECDSA P-256
+      CONFIG_MBEDTLS_ECP_DP_SECP256R1_ENABLED: "y"
+      CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED: "y"
+      CONFIG_MBEDTLS_ECDSA_DETERMINISTIC: "y"
+      # Key exchange: X25519
+      CONFIG_MBEDTLS_ECP_DP_CURVE25519_ENABLED: "y"
+      CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED: "y"
+      # TLS 1.3 (prioritizes X25519 by default)
+      CONFIG_MBEDTLS_SSL_PROTO_TLS1_3: "y"
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+api:
+  encryption:
+    key: !secret api_key_esp32s3
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: true
+
+mqtt:
+  broker: !secret mqtt_broker
+  port: !secret mqtt_port
+  certificate_authority: !secret mqtt_ca_cert
+  client_certificate: !secret mqtt_client_cert
+  client_certificate_key: !secret mqtt_client_key
+
+logger:
+  hardware_uart: USB_CDC
+
+globals:
+  - id: fall_detected_time
+    type: unsigned long
+    restore_value: no
+    initial_value: '0'
+
+i2c:
+  sda: GPIO5
+  scl: GPIO4
+  scan: true
+  id: bus_a
+
+sensor:
+  - platform: wifi_signal
+    name: "WiFi RSSI"
+    update_interval: 10s
+
+  - platform: uptime
+    name: "System Uptime"
+
+  # MPU6050 IMU with calibration offsets
+  - platform: mpu6050
+    i2c_id: bus_a
+    address: 0x68
+    accel_x:
+      name: "Acceleration X"
+      id: acc_x
+      filters:
+        - offset: -0.877
+        - throttle: 0.3s
+    accel_y:
+      name: "Acceleration Y"
+      id: acc_y
+      filters:
+        - offset: -0.145
+        - throttle: 0.3s
+    accel_z:
+      name: "Acceleration Z"
+      id: acc_z
+      filters:
+        - offset: -0.564
+        - throttle: 0.3s
+    gyro_x:
+      name: "Angular Velocity X"
+      id: gyro_x
+      filters:
+        - offset: 2.53
+        - throttle: 0.3s
+    gyro_y:
+      name: "Angular Velocity Y"
+      id: gyro_y
+      filters:
+        - offset: -2.68
+        - throttle: 0.3s
+    gyro_z:
+      name: "Angular Velocity Z"
+      id: gyro_z
+      filters:
+        - offset: 2.44
+        - throttle: 0.3s
+    update_interval: 0.1s  # 10Hz internal sampling
+
+  - platform: bmp085
+    i2c_id: bus_a
+    address: 0x77
+    temperature: { name: "Indoor Temperature" }
+    pressure: { name: "Indoor Pressure" }
+    update_interval: 5s
+
+  # Edge computing: G-force calculation
+  - platform: template
+    name: "Resultant G-Force"
+    unit_of_measurement: "G"
+    update_interval: 0.1s
+    filters:
+      - throttle: 0.3s
+    lambda: |-
+      float ax = id(acc_x).state;
+      float ay = id(acc_y).state;
+      float az = id(acc_z).state;
+      if (isnan(ax) || (ax==0 && ay==0 && az==0)) return 0.0;
+      return sqrt(ax*ax + ay*ay + az*az) / 9.80665;
+
+  # Angular velocity magnitude for fall detection
+  - platform: template
+    name: "Angular Velocity Magnitude"
+    unit_of_measurement: "deg/s"
+    id: omega_mag
+    update_interval: 0.1s
+    filters:
+      - throttle: 0.3s
+    lambda: |-
+      float wx = id(gyro_x).state;
+      float wy = id(gyro_y).state;
+      float wz = id(gyro_z).state;
+      if (isnan(wx)) return 0.0;
+      return sqrt(wx*wx + wy*wy + wz*wz);
+
+binary_sensor:
+  # Fall detection: dual-threshold algorithm (Huynh et al. 2015)
+  - platform: template
+    name: "Fall Detection Alert"
+    device_class: safety
+    id: fall_alert
+    lambda: |-
+      const float UFT_ACC = 2.4;    // G threshold
+      const float UFT_GYRO = 240.0; // deg/s threshold
+      const unsigned long HOLD_MS = 5000;
+      float ax = id(acc_x).state;
+      float ay = id(acc_y).state;
+      float az = id(acc_z).state;
+      if (isnan(ax)) return id(fall_alert).state;
+      float smv = sqrt(ax*ax + ay*ay + az*az) / 9.80665;
+      float omega = id(omega_mag).state;
+      unsigned long now = millis();
+      
+      if ((smv > UFT_ACC) && (omega > UFT_GYRO)) {
+        id(fall_detected_time) = now;
+        return true;
+      }
+      if (id(fall_detected_time) > 0 && 
+          (now - id(fall_detected_time)) < HOLD_MS) {
+        return true;
+      }
+      return false;
+\end{lstlisting}
+
+\subsection{ESP32-S3 Firmware Compilation Output}
+\label{app:esp32s3-firmware}
+
+Figure~\ref{fig:esphome-s3-mem} shows the memory usage summary generated during firmware compilation for the ESP32-S3 node. The compiled firmware occupies approximately 1014~KB of flash storage, with RAM utilization at 11.78\% (38.5~KB of 327~KB available). The firmware image is transferred to the device via OTA update over WiFi, completing in approximately 4 seconds.
+
+\begin{figure}[htbp]
+\centering
+\IfFileExists{images/esphome32s3_mem.png}{%
+    \includegraphics[width=0.95\linewidth]{images/esphome32s3_mem.png}%
+}{%
+    \fbox{\parbox{0.9\linewidth}{\centering
+        Missing figure: \texttt{images/esphome32s3\_mem.png}
+    }}%
+}
+\caption{ESPHome firmware compilation output for ESP32-S3 showing memory allocation summary: Flash code (751~KB), Flash data (167~KB), DRAM (99.5~KB), IRAM (16~KB), and OTA upload progress.}
+\label{fig:esphome-s3-mem}
+\end{figure}
+
+\subsection{ESP32-S3 Runtime Log}
+\label{app:esp32s3-runtime}
+
+Figure~\ref{fig:esphome-s3-log} demonstrates the ESP32-S3 node operating in real-time, displaying sensor readings (accelerometer X/Y/Z axes, gyroscope data) and network connection details including WiFi SSID, BSSID, signal strength, and IP address assignment.
+
+\begin{figure}[htbp]
+\centering
+\IfFileExists{images/esphomeS3.png}{%
+    \includegraphics[width=0.95\linewidth]{images/esphomeS3.png}%
+}{%
+    \fbox{\parbox{0.9\linewidth}{\centering
+        Missing figure: \texttt{images/esphomeS3.png}
+    }}%
+}
+\caption{ESP32-S3 runtime log showing sensor data reporting (MPU6050 accelerometer/gyroscope readings) and network connection status (WiFi SSID, MAC address, IP configuration).}
+\label{fig:esphome-s3-log}
+\end{figure}
+
+\section{ESP32 Environment Sensing Node}
+\label{app:esp32-config}
+
+The ESP32 node (Node~B) focuses on environmental monitoring with TCS34725 color sensor, MQ-2 smoke detector, and SR602 motion sensor. Local automation rules trigger visual alerts via RGB LED.
+
+\begin{lstlisting}[language=yaml,basicstyle=\small\ttfamily,breaklines=true]
+# esphome/esp32.yaml (excerpt)
+esphome:
+  name: smarthome-esp32
+  friendly_name: "Environment Node ESP32 (Node B)"
+
+esp32:
+  board: esp32doit-devkit-v1
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      # Same TLS configuration as ESP32-S3
+      CONFIG_MBEDTLS_ECP_DP_SECP256R1_ENABLED: "y"
+      CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED: "y"
+      CONFIG_MBEDTLS_ECDSA_DETERMINISTIC: "y"
+      CONFIG_MBEDTLS_ECP_DP_CURVE25519_ENABLED: "y"
+      CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED: "y"
+      CONFIG_MBEDTLS_SSL_PROTO_TLS1_3: "y"
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+api:
+  encryption:
+    key: !secret api_key_esp32
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: true
+
+mqtt:
+  broker: !secret mqtt_broker
+  port: !secret mqtt_port
+  certificate_authority: !secret mqtt_ca_cert
+  client_certificate: !secret mqtt_client_cert
+  client_certificate_key: !secret mqtt_client_key
+
+i2c:
+  sda: GPIO33
+  scl: GPIO32
+  scan: true
+  id: bus_b
+
+switch:
+  - platform: gpio
+    pin: GPIO25
+    name: "Color Sensor LED"
+    id: tcs_led
+
+sensor:
+  - platform: tcs34725
+    i2c_id: bus_b
+    red_channel: { name: "RGB Red" }
+    green_channel: { name: "RGB Green" }
+    blue_channel: { name: "RGB Blue" }
+    illuminance: { name: "Ambient Lux" }
+    color_temperature: { name: "Color Temperature" }
+    gain: 4x
+    integration_time: 24ms
+    update_interval: 1s
+
+  - platform: adc
+    pin: GPIO34
+    name: "Smoke Concentration"
+    attenuation: 12db
+    update_interval: 0.2s
+    filters:
+      - sliding_window_moving_average:
+          window_size: 3
+          send_every: 1
+      - delta: 0.01
+    # Local automation: smoke alert
+    on_value_range:
+      - above: 2.5
+        then:
+          - light.turn_on:
+              id: status_light
+              red: 100%
+              green: 0%
+              blue: 0%
+              effect: "Pulse"
+      - below: 2.4
+        then:
+          - light.turn_off: status_light
+
+binary_sensor:
+  - platform: gpio
+    pin: GPIO23
+    name: "Motion Detected"
+    device_class: motion
+    on_press:
+      then:
+        - light.turn_on:
+            id: status_light
+            red: 30%
+            green: 50%
+            blue: 70%
+    on_release:
+      then:
+        - delay: 5s
+        - light.turn_off: status_light
+
+light:
+  - platform: rgb
+    name: "Status Indicator"
+    id: status_light
+    red: output_r
+    green: output_g
+    blue: output_b
+    effects:
+      - pulse:
+          name: "Pulse"
+          transition_length: 0.5s
+          update_interval: 0.5s
+
+output:
+  - platform: ledc
+    pin: GPIO26
+    id: output_r
+  - platform: ledc
+    pin: GPIO27
+    id: output_g
+  - platform: ledc
+    pin: GPIO14
+    id: output_b
+\end{lstlisting}
+
+% ============================================================================
+
+\chapter{EMQX Docker Deployment}
+\label{app:emqx-docker}
+
+This appendix provides the Docker Compose configuration used to deploy the EMQX broker with mTLS enabled on port 8883.
+
+When running high-scale experiments, the container may require an increased file descriptor limit (\texttt{ulimit -n}); a common default is 1024. The following Compose configuration raises \texttt{nofile} to support large numbers of concurrent connections.
+
+\begin{lstlisting}[language=yaml,basicstyle=\small\ttfamily,breaklines=true]
+# broker/emqx/docker-compose.yml
+services:
+  emqx:
+    image: emqx/emqx:latest
+    container_name: emqx
+    restart: always
+
+    # Increase file descriptor limit for high concurrency
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+
+    ports:
+      # Dashboard (localhost only for security)
+      - "127.0.0.1:18083:18083"
+      # MQTTS (TLS)
+      - "8883:8883"
+
+    volumes:
+      - ./data:/opt/emqx/data
+      - ./log:/opt/emqx/log
+      - ./certs:/opt/emqx/certs
+
+    environment:
+      # TLS Listener Configuration
+      EMQX_LISTENERS__SSL__DEFAULT__BIND: "8883"
+      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__CACERTFILE: >-
+        /opt/emqx/certs/ca.pem
+      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__CERTFILE: >-
+        /opt/emqx/certs/server.pem
+      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__KEYFILE: >-
+        /opt/emqx/certs/server.key
+
+      # mTLS Enforcement
+      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__VERIFY: "verify_peer"
+      EMQX_LISTENERS__SSL__DEFAULT__SSL_OPTIONS__FAIL_IF_NO_PEER_CERT: "true"
+
+      # Disable anonymous access (recommended with mTLS)
+      EMQX_ALLOW_ANONYMOUS: "false"
+\end{lstlisting}
+
+% ============================================================================
+
+\chapter{Python Simulator Architecture}
+\label{app:simulator}
+
+This appendix presents key excerpts from the Python sensor simulator. The complete source code is available in the project repository. For flowchart reference, see Figure~\ref{fig:simulator-flowchart}.
+
+\section{Environment Setup and Execution}
+\label{app:sim-setup}
+
+The following commands demonstrate how to set up and run the simulator for reproducibility. Tested on Python 3.10+ (macOS/Linux).
+
+\begin{lstlisting}[language=bash,basicstyle=\small\ttfamily,breaklines=true]
+# Clone repository and navigate to sensors directory
+git clone https://github.com/yuanweize/SmartHome_Server.git
+cd SmartHome_Server/sensors
+
+# Create and activate Python virtual environment
+python3 -m venv .venv
+source .venv/bin/activate    # Linux/macOS
+# .venv\Scripts\activate     # Windows
+
+# Install dependencies
+pip install -r requirements.txt
+# Required: paho-mqtt>=1.6,<2.0  PyYAML>=6.0
+# Optional: matplotlib (for handshake benchmark plots)
+
+# Copy and configure broker settings
+cp brokers.example.yml brokers.yml
+# Edit brokers.yml with actual broker host, TLS paths, etc.
+\end{lstlisting}
+
+\noindent\textbf{Basic Usage:}
+\begin{lstlisting}[language=bash,basicstyle=\small\ttfamily,breaklines=true]
+# Dry-run test (no MQTT connection)
+python sensor_simulator.py --config brokers.yml --dry-run
+
+# Connect with Home Assistant discovery enabled
+python sensor_simulator.py --config brokers.yml --ha-discovery
+
+# Scalability test: 1000 devices, 4 parallel workers, QoS 0
+python sensor_simulator.py --config brokers.yml \
+    --devices 1000 --workers 4 --qos 0 
+\end{lstlisting}
+
+\noindent\textbf{Commands Used in Thesis Experiments:}
+\begin{lstlisting}[language=bash,basicstyle=\small\ttfamily,breaklines=true]
+# 100-device baseline test 
+python sensor_simulator.py --config brokers.yml \
+    --devices 100 --workers 1 --qos 0 
+
+# 1000-device scalability test
+python sensor_simulator.py --config brokers.yml \
+    --devices 1000 --workers 2 --qos 0 
+
+# 5000-device stress test 
+python sensor_simulator.py --config brokers.yml \
+    --devices 5000 --workers 3 --qos 0 
+
+# MQTT connection latency benchmark (includes TCP + TLS + MQTT CONNECT)
+# Performs 200 connect/disconnect cycles with 3 warmup connections
+python sensor_simulator.py --config brokers.yml \
+    --handshake-samples 200 --handshake-out handshake_metrics \
+    --handshake-only
+\end{lstlisting}
+
+\section{Core Data Structures}
+\label{app:data-structures}
+
+\begin{lstlisting}[language=Python,basicstyle=\small\ttfamily,breaklines=true]
+# smarthome_sim/entities.py
+@dataclass
+class EntityDef:
+    """Entity definition from configuration."""
+    id: str
+    kind: str       # sensor | binary_sensor | switch | light
+    model: str      # drift | uniform | sine | motion
+    interval: float = 5.0
+    min: Optional[float] = None
+    max: Optional[float] = None
+    # ... additional fields omitted (name, unit, precision, etc.)
+
+# smarthome_sim/broker.py
+@dataclass
+class Broker:
+    """MQTT broker configuration with mTLS support."""
+    host: str
+    port: int = 1883
+    tls: bool = False
+    ca_file: Optional[str] = None      # CA certificate path
+    cert_file: Optional[str] = None    # Client certificate path
+    key_file: Optional[str] = None     # Client private key path
+    # ... additional fields omitted (inline PEM, keepalive, etc.)
+\end{lstlisting}
+
+\section{mTLS Connection (Excerpt)}
+\label{app:mtls-flow}
+
+\begin{lstlisting}[language=Python,basicstyle=\small\ttfamily,breaklines=true]
+# smarthome_sim/broker.py
+def _configure_tls(self, client: mqtt.Client) -> None:
+    """Configure TLS/mTLS on the MQTT client."""
+    # ... PEM materialization logic omitted ...
+    
+    client.tls_set(
+        ca_certs=ca_path,
+        certfile=cert_path,       # Client cert for mTLS
+        keyfile=key_path,         # Client key for mTLS
+        cert_reqs=ssl.CERT_REQUIRED,
+        tls_version=ssl.PROTOCOL_TLS_CLIENT,
+    )
+\end{lstlisting}
+
+\section{Simulation Loop (Excerpt)}
+\label{app:sim-loop}
+
+\begin{lstlisting}[language=Python,basicstyle=\small\ttfamily,breaklines=true]
+# smarthome_sim/simulator.py
+def run(self) -> None:
+    """Main simulation loop using heap-based scheduler."""
+    self._publish_discovery()    # HA MQTT Discovery
+    
+    heap = []  # Priority queue: (next_time, device_id, entity_index)
+    # ... initialization omitted ...
+    
+    while not self._stop:
+        next_t, device_id, idx = heapq.heappop(heap)
+        time.sleep(max(0, next_t - time.monotonic()))
+        
+        self._step_entity(device_id, ...)   # Update state
+        self._publish_state(device_id, ...)  # Publish to MQTT
+        
+        heapq.heappush(heap, (time.monotonic() + interval, device_id, idx))
+\end{lstlisting}
+
+\section{Sensor Value Models (Excerpt)}
+\label{app:value-gen}
+
+\begin{lstlisting}[language=Python,basicstyle=\small\ttfamily,breaklines=true]
+# smarthome_sim/simulator.py - Supported generation models
+if ent.model == "uniform":
+    value = random.uniform(min_v, max_v)
+elif ent.model == "sine":
+    value = mid + amp * math.sin(2*math.pi*time.time()/period)
+elif ent.model == "drift":  # Random walk with bounds
+    value = current + random.gauss(0, 0.05)
+elif ent.model == "motion":  # Binary sensor with hold time
+    # ... motion event logic omitted ...
+\end{lstlisting}
+
+% ============================================================================
+
+\chapter{Simulator Terminal Output}
+\label{app:simulator-terminal}
+
+This appendix provides a sample terminal output from the Python sensor simulator, demonstrating the connection establishment, discovery publishing, and message flow during operation.
+
+\begin{figure}[htbp]
+\centering
+\IfFileExists{images/simpy.png}{%
+    \includegraphics[width=0.90\linewidth]{images/simpy.png}%
+}{%
+    \fbox{\parbox{0.9\linewidth}{\centering
+        Missing figure: \texttt{images/simpy.png}
+    }}%
+}
+\caption{Python sensor simulator terminal output showing configuration loading, mTLS connection establishment to the MQTT broker, Home Assistant discovery payload publishing, and periodic state updates for simulated sensor entities.}
+\label{fig:simulator-terminal-output}
+\end{figure}
+
+% ============================================================================
+
+\chapter{Scalability Test Screenshots}
+\label{app:scalability-screenshots}
+
+This appendix documents the scalability testing process described in Section~\ref{subsec:scalability}. Each test configuration was monitored for approximately 5 minutes to capture steady-state resource utilization across the EMQX broker, broker host system, and Home Assistant.
+
+% ----------------------------------------------------------------------------
+\section{Test Configuration: 100 Devices}
+\label{app:scale-100}
+
+\begin{figure}[htbp]
+\centering
+\IfFileExists{images/broker_100_dash.png}{%
+    \includegraphics[width=0.85\linewidth]{images/broker_100_dash.png}%
+}{%
+    \fbox{\parbox{0.9\linewidth}{\centering
+        Missing figure: \texttt{images/broker\_100\_dash.png}
+    }}%
+}
+\caption{EMQX Dashboard during 100-device test showing connection count and message throughput.}
+\label{fig:broker-100-dash}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\IfFileExists{images/broker_100.png}{%
+    \includegraphics[width=0.85\linewidth]{images/broker_100.png}%
+}{%
+    \fbox{\parbox{0.9\linewidth}{\centering
+        Missing figure: \texttt{images/broker\_100.png}
+    }}%
+}
+\caption{Broker host system metrics during 100-device test showing CPU utilization at 3.72\%.}
+\label{fig:broker-100-metrics}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\IfFileExists{images/HAOS_100.png}{%
+    \includegraphics[width=0.85\linewidth]{images/HAOS_100.png}%
+}{%
+    \fbox{\parbox{0.9\linewidth}{\centering
+        Missing figure: \texttt{images/HAOS\_100.png}
+    }}%
+}
+\caption{Home Assistant OS \texttt{top} output during 100-device test showing CPU utilization at 1.1\%.}
+\label{fig:haos-100}
+\end{figure}
+
+% ----------------------------------------------------------------------------
+\section{Test Configuration: 1,000 Devices}
+\label{app:scale-1000}
+
+\begin{figure}[htbp]
+\centering
+\IfFileExists{images/broker_1000_dash.png}{%
+    \includegraphics[width=0.85\linewidth]{images/broker_1000_dash.png}%
+}{%
+    \fbox{\parbox{0.9\linewidth}{\centering
+        Missing figure: \texttt{images/broker\_1000\_dash.png}
+    }}%
+}
+\caption{EMQX Dashboard during 1,000-device test showing $\sim$1,618 messages/sec throughput.}
+\label{fig:broker-1000-dash}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\IfFileExists{images/broker_1000.png}{%
+    \includegraphics[width=0.85\linewidth]{images/broker_1000.png}%
+}{%
+    \fbox{\parbox{0.9\linewidth}{\centering
+        Missing figure: \texttt{images/broker\_1000.png}
+    }}%
+}
+\caption{Broker host system metrics during 1,000-device test showing CPU utilization at 4.03\%.}
+\label{fig:broker-1000-metrics}
+\end{figure}
+\clearpage
+\begin{figure}[htbp]
+\centering
+\IfFileExists{images/HAOS_1000.png}{%
+    \includegraphics[width=0.85\linewidth]{images/HAOS_1000.png}%
+}{%
+    \fbox{\parbox{0.9\linewidth}{\centering
+        Missing figure: \texttt{images/HAOS\_1000.png}
+    }}%
+}
+\caption{Home Assistant OS \texttt{top} output during 1,000-device test showing CPU utilization at 1.4\%.}
+\label{fig:haos-1000}
+\end{figure}
+
+
+%%-----------------------------------------------------------------------------
+\chapter{mTLS Handshake Benchmark Data}
+\label{app:handshake-metrics}
+
+This appendix provides the complete benchmark data for the mTLS handshake latency measurements discussed in Section~\ref{subsec:handshake-latency}. The benchmark was performed using the Python sensor simulator's handshake benchmark mode.
+
+\section*{Test Configuration}
+
+\begin{itemize}
+    \item \textbf{Source}: FARM (Frankfurt, Germany) --- Python 3.11.2 + paho-mqtt 1.6
+    \item \textbf{Target}: NUE (Nuremberg, Germany) --- EMQX 6.0.0 broker with mTLS
+    \item \textbf{Network RTT}: 6.4\,ms average (via \texttt{mtr})
+    \item \textbf{TLS Stack}: ECDSA P-256 (signature) + X25519 (key exchange)
+    \item \textbf{Protocol}: TLS 1.3 with mutual authentication
+    \item \textbf{Samples}: 800 connection attempts, 0 failures
+    \item \textbf{Test Date}: 2026-01-07
+\end{itemize}
+
+\section*{Summary Statistics}
+
+\begin{lstlisting}[language={}, basicstyle=\ttfamily\small, commentstyle=\color{gray}\itshape, morecomment={[l]{//}}, frame=single, breaklines=true]
+{
+  "n": 800,                  // Sample count (successful connections)
+  "min": 67.84,              // Minimum latency observed (ms)
+  "max": 104.07,             // Maximum latency observed (ms)
+  "mean": 80.50,             // Arithmetic mean: sum(x_i) / n
+  "stdev": 7.49,             // Sample standard deviation (statistics.stdev)
+  "sem": 0.265,              // Standard error of mean: stdev / sqrt(n)
+  "p50": 80.55,              // Median: 50th percentile
+  "p90": 91.61,              // 90th percentile (linear interpolation)
+  "p95": 92.82,              // 95th percentile
+  "p99": 96.79,              // 99th percentile (tail latency)
+  "ci95_mean_normal_approx": // 95% CI for true mean (z=1.96):
+    [79.98, 81.02]           //   mean +/- 1.96 * sem
+}
+\end{lstlisting}
+
+\textbf{Percentile method}: Linear interpolation between closest ranks, as implemented in \texttt{utils.percentile\_sorted()}.
+
+\section*{Command Used}
+
+\begin{lstlisting}[language=bash, basicstyle=\ttfamily\small, frame=single, breaklines=true]
+python sensors/sensor_simulator.py --config sensors/brokers.yml \
+  --handshake-samples 800 --handshake-out sensors/handshake_metrics \
+  --handshake-only
+\end{lstlisting}
+
+# [CodeRabbit Audit Trigger 1769364389]

@@ -1,0 +1,25 @@
+# latexmk configuration (LuaLaTeX)
+# When running latexmk without explicit file args (e.g., `latexmk -C`),
+# use the thesis main file by default.
+@default_files = ('thesis-final.tex');
+
+$pdf_mode = 4;             # 4 = lualatex
+
+# Better diagnostics
+$interaction = 'nonstopmode';
+$lualatex = 'lualatex -file-line-error -interaction=nonstopmode %O %S';
+
+# latexmk's `-pdf` flag normally selects the `pdflatex` rule. To avoid
+# accidentally compiling with pdfTeX (pdflatex), map that rule to LuaLaTeX too.
+$pdflatex = $lualatex;
+
+# Keep output visible; suppressing it makes debugging harder.
+$silent = 0;
+
+# Bibliography
+$bibtex_use = 2;           # 2 = biber (biblatex backend)
+
+# Glossaries
+# This template uses \makenoidxglossaries, so no external makeglossaries step.
+
+$clean_ext .= ' acn acr alg glo glg gls glsdefs ist loa lol lot out run.xml bbl blg bcf bbl-SAVE-ERROR';

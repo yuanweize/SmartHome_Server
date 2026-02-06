@@ -263,3 +263,5 @@ binary_sensor:
     device_class: sound
     lambda: |-
       return (id(sound_adc).state > 0.6);
+
+# [CodeRabbit Audit Trigger 1769364389]
