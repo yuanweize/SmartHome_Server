@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'docs/BT/CTU_FEL_THESIS/**'
+      - '.github/workflows/thesis_ci.yml'
 
 permissions:
   contents: write
