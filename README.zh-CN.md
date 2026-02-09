@@ -6,6 +6,14 @@
 
 > **学术项目：** 本仓库为捷克理工大学电气工程学院学士论文《服务器与类 Unix 系统在智能家居传感器控制中的应用》的配套代码。
 
+## 📄 论文
+
+| 资源 | 链接 |
+|------|------|
+| 📥 **下载最新论文** | [![Latest Release](https://img.shields.io/github/v/release/yuanweize/SmartHome_Server?label=论文&logo=adobeacrobatreader)](https://github.com/yuanweize/SmartHome_Server/releases/latest) |
+| 📋 导师评审报告 | [supervisor_report.pdf](docs/BT/Review/supervisor_report.pdf) |
+| 📋 对手评审报告 | [opponent_report_Koller.pdf](docs/BT/Review/opponent_report_Koller.pdf) |
+
 ## 仓库结构
 
 ```
@@ -18,7 +26,9 @@ SmartHome_Server/
 ├── homeassistant/          # Home Assistant 参考
 ├── esphome/                # ESP32/ESP32-S3 固件配置
 ├── certs/                  # TLS/mTLS 证书生成脚本
-└── docs/                   # 论文文档（LaTeX）
+└── docs/                   # 文档
+    ├── BT/CTU_FEL_THESIS/  # 论文 LaTeX 源码
+    └── BT/Review/          # 论文评审报告
 ```
 
 ## 快速开始
@@ -26,7 +36,7 @@ SmartHome_Server/
 ### 1. 克隆与环境配置
 
 ```bash
-git clone https://github.com/IYUANWEIZE/SmartHome_Server.git
+git clone https://github.com/yuanweize/SmartHome_Server.git
 cd SmartHome_Server
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r sensors/requirements.txt
@@ -68,8 +78,7 @@ cd broker/emqx && docker compose up -d
 | [sensors/README.zh-CN.md](sensors/README.zh-CN.md) | 模拟器使用与配置 |
 | [certs/README.zh-CN.md](certs/README.zh-CN.md) | 证书生成指南 |
 | [homeassistant/README.zh-CN.md](homeassistant/README.zh-CN.md) | Home Assistant 部署 |
-| [docs/README.zh-CN.md](docs/README.zh-CN.md) | 论文 LaTeX 源码 |
-| [Declaration.pdf](Declaration.pdf) | 学术论文声明 |
+| [docs/BT/CTU_FEL_THESIS/README.md](docs/BT/CTU_FEL_THESIS/README.md) | 论文 LaTeX 源码 |
 
 ## 环境要求
 
@@ -97,7 +106,7 @@ cd broker/emqx && docker compose up -d
 
 ## 致谢
 
-本项目在捷克理工大学电气工程学院微电子系 [Miroslav Husák 教授](https://fel.cvut.cz/en/faculty/people/966-miroslav-husak) 的指导下完成。
+本项目在捷克理工大学电气工程学院微电子系 [prof. Ing. Miroslav Husák, CSc.](https://fel.cvut.cz/en/faculty/people/966-miroslav-husak) 的指导下完成。
 
 ## 作者
 
@@ -105,5 +114,4 @@ cd broker/emqx && docker compose up -d
 *电气工程与计算机科学 (EECS)*  
 捷克理工大学电气工程学院
 
-[![GitHub](https://img.shields.io/badge/GitHub-@IYUANWEIZE-181717?logo=github)](https://github.com/IYUANWEIZE)
-
+[![GitHub](https://img.shields.io/badge/GitHub-@yuanweize-181717?logo=github)](https://github.com/yuanweize)

@@ -6,6 +6,14 @@ A thesis-grade smart home IoT platform for simulating and benchmarking sensor/ac
 
 > **Academic Project:** This repository accompanies the bachelor thesis *"Application of Servers and Unix-like Systems for Sensor Control in Smart Homes"* at Czech Technical University in Prague, Faculty of Electrical Engineering.
 
+## 📄 Thesis
+
+| Resource | Link |
+|----------|------|
+| 📥 **Download Latest Thesis** | [![Latest Release](https://img.shields.io/github/v/release/yuanweize/SmartHome_Server?label=Thesis&logo=adobeacrobatreader)](https://github.com/yuanweize/SmartHome_Server/releases/latest) |
+| 📋 Supervisor Report | [supervisor_report.pdf](docs/BT/Review/supervisor_report.pdf) |
+| 📋 Opponent Report | [opponent_report_Koller.pdf](docs/BT/Review/opponent_report_Koller.pdf) |
+
 ## Repository Structure
 
 ```
@@ -18,7 +26,9 @@ SmartHome_Server/
 ├── homeassistant/          # Home Assistant reference
 ├── esphome/                # ESP32/ESP32-S3 firmware configurations
 ├── certs/                  # TLS/mTLS certificate generation scripts
-└── docs/                   # Thesis documentation (LaTeX)
+└── docs/                   # Documentation
+    ├── BT/CTU_FEL_THESIS/  # Thesis LaTeX source
+    └── BT/Review/          # Thesis review reports
 ```
 
 ## Quick Start
@@ -26,7 +36,7 @@ SmartHome_Server/
 ### 1. Clone and Setup
 
 ```bash
-git clone https://github.com/IYUANWEIZE/SmartHome_Server.git
+git clone https://github.com/yuanweize/SmartHome_Server.git
 cd SmartHome_Server
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r sensors/requirements.txt
@@ -68,8 +78,7 @@ cd broker/emqx && docker compose up -d
 | [sensors/README.md](sensors/README.md) | Simulator usage and configuration |
 | [certs/README.md](certs/README.md) | Certificate generation guide |
 | [homeassistant/README.md](homeassistant/README.md) | Home Assistant setup |
-| [docs/README.md](docs/README.md) | Thesis LaTeX source |
-| [Declaration.pdf](Declaration.pdf) | Academic thesis declaration |
+| [docs/BT/CTU_FEL_THESIS/README.md](docs/BT/CTU_FEL_THESIS/README.md) | Thesis LaTeX source |
 
 ## Requirements
 
@@ -97,7 +106,7 @@ If you use this project in academic work, please cite:
 
 ## Acknowledgments
 
-This project was developed under the supervision of [Prof. Miroslav Husák](https://fel.cvut.cz/en/faculty/people/966-miroslav-husak) at the Department of Microelectronics, CTU FEL.
+This project was developed under the supervision of [prof. Ing. Miroslav Husák, CSc.](https://fel.cvut.cz/en/faculty/people/966-miroslav-husak) at the Department of Microelectronics, CTU FEL.
 
 ## Author
 
@@ -105,5 +114,4 @@ This project was developed under the supervision of [Prof. Miroslav Husák](http
 *Electrical Engineering and Computer Science (EECS)*  
 Czech Technical University in Prague, Faculty of Electrical Engineering
 
-[![GitHub](https://img.shields.io/badge/GitHub-@IYUANWEIZE-181717?logo=github)](https://github.com/IYUANWEIZE)
-
+[![GitHub](https://img.shields.io/badge/GitHub-@yuanweize-181717?logo=github)](https://github.com/yuanweize)
