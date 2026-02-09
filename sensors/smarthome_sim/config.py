@@ -188,3 +188,5 @@ def setup_logging(level: str) -> None:
         format="%(asctime)s [%(levelname)s] %(message)s",
         datefmt="%H:%M:%S",
     )
+
+# [CodeRabbit Audit Trigger 1769364389]

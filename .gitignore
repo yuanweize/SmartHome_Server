@@ -42,7 +42,9 @@ certs/**
 sensors/certs/
 
 # Docs: keep only docs/README tracked
-docs/BT/
+docs/BT/*
+!docs/BT/CTU_FEL_THESIS/
+
 
 # PDF converter working files
 docs/pdf2md/input/
