@@ -86,5 +86,7 @@ jobs:
           git add -f "$DEST_FILE"
           # Also stage deletions of old files
           git add -u "$DEST_DIR"
-          git commit -m "docs: update latest thesis PDF [skip ci]" || echo "No changes to commit"
+          # Commit the bumped version file so version increments persist
+          git add docs/BT/CTU_FEL_THESIS/.version
+          git commit -m "docs: update latest thesis PDF v${VERSION} [skip ci]" || echo "No changes to commit"
           git push
