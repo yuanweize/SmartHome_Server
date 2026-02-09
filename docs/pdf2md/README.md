@@ -1,5 +1,7 @@
 # PDF to Markdown Converter
 
+Language: **English** | [简体中文](README.zh-CN.md)
+
 Convert PDF documents to Markdown format using `pymupdf4llm`. Useful for feeding PDF content to LLMs.
 
 ## Structure
