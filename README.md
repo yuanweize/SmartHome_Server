@@ -14,6 +14,8 @@ A thesis-grade smart home IoT platform for simulating and benchmarking sensor/ac
 | 📥 **Download Release** | [![Latest Release](https://img.shields.io/github/v/release/yuanweize/SmartHome_Server?label=Release&logo=github)](https://github.com/yuanweize/SmartHome_Server/releases/latest) |
 | 📋 Supervisor Report | [supervisor_report.pdf](docs/BT/Review/supervisor_report.pdf) |
 | 📋 Opponent Report | [opponent_report_Koller.pdf](docs/BT/Review/opponent_report_Koller.pdf) |
+| 📋 Defense Record | [Prubeh-obhajoby.pdf](docs/BT/Review/Prubeh-obhajoby.pdf) |
+| 🏛️ Official Archive | [CTU Digital Library (DSpace)](https://hdl.handle.net/10467/178631) |
 
 ## Repository Structure
 
