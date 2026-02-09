@@ -99,6 +99,6 @@ jobs:
           sed -i "s|BT/Yuan_Weize_Bachelor_Thesis_.*\.pdf|BT/${OUTPUT_NAME}|g" docs/README.zh-CN.md
 
           # 6. Commit and Push
-          git add "$DEST_FILE" README.md README.zh-CN.md docs/README.md docs/README.zh-CN.md
+          git add -f "$DEST_FILE" README.md README.zh-CN.md docs/README.md docs/README.zh-CN.md
           git commit -m "docs: update thesis PDF to ${OUTPUT_NAME} and refresh links [skip ci]" || echo "No changes to commit"
           git push
