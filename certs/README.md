@@ -86,4 +86,3 @@ For deployment examples, see:
 - [esphome/*.yaml](../esphome/) - ESP32 client certificate configuration
 - [sensors/brokers.example.yml](../sensors/brokers.example.yml) - Simulator TLS configuration
 
-# [CodeRabbit Audit Trigger 1769364389]

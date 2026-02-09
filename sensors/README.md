@@ -297,4 +297,3 @@ MIT License - See [LICENSE](../LICENSE)
 
 This simulator is part of the bachelor thesis *"Application of Servers and Unix-like Systems for Sensor Control in Smart Homes"* at Czech Technical University in Prague. See the [main README](../README.md) for citation information.
 
-# [CodeRabbit Audit Trigger 1769364389]

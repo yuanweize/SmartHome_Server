@@ -182,4 +182,3 @@ class Broker:
 
         return client
 
-# [CodeRabbit Audit Trigger 1769364389]

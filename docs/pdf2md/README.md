@@ -70,4 +70,3 @@ Cache is stored in `.cache.json`. Use `--force` to bypass.
 
 Converted Markdown files are saved to `output/` with the same name as the source PDF.
 
-# [CodeRabbit Audit Trigger 1769364389]

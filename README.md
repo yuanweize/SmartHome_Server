@@ -107,4 +107,3 @@ Czech Technical University in Prague, Faculty of Electrical Engineering
 
 [![GitHub](https://img.shields.io/badge/GitHub-@IYUANWEIZE-181717?logo=github)](https://github.com/IYUANWEIZE)
 
-# [CodeRabbit Audit Trigger 1769364389]

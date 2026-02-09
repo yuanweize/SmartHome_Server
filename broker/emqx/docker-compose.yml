@@ -26,4 +26,3 @@ services:
       # Authentication
       EMQX_ALLOW_ANONYMOUS: "false"
 
-# [CodeRabbit Audit Trigger 1769364389]

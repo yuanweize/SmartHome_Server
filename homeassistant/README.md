@@ -95,4 +95,3 @@ Node-RED flow template for fall detection notifications:
 
 See [`../certs/README.md`](../certs/README.md) for mTLS certificate generation.
 
-# [CodeRabbit Audit Trigger 1769364389]

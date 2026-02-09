@@ -67,4 +67,3 @@ docker compose up -d
 - [EMQX 文档](https://www.emqx.io/docs/zh/latest/)
 - [Mosquitto 文档](https://mosquitto.org/documentation/)
 
-# [CodeRabbit Audit Trigger 1769364389]

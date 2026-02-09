@@ -85,4 +85,3 @@ openssl x509 -in ha/ha.pem -noout -subject -dates
 - [esphome/*.yaml](../esphome/) - ESP32 客户端证书配置
 - [sensors/brokers.example.yml](../sensors/brokers.example.yml) - 模拟器 TLS 配置
 
-# [CodeRabbit Audit Trigger 1769364389]

@@ -127,4 +127,3 @@ This component and the examples are provided under Apache 2.0 license, see [LICE
 
 TensorFlow library code and third_party code contains their own license specified under respective [repos](https://github.com/tensorflow/tflite-micro).
 
-# [CodeRabbit Audit Trigger 1769364389]

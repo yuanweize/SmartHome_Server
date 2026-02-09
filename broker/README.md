@@ -67,4 +67,3 @@ See [`../certs/README.md`](../certs/README.md) for certificate generation instru
 - [EMQX Documentation](https://www.emqx.io/docs/en/latest/)
 - [Mosquitto Documentation](https://mosquitto.org/documentation/)
 
-# [CodeRabbit Audit Trigger 1769364389]

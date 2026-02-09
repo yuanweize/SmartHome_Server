@@ -298,4 +298,3 @@ MIT 许可证 - 详见 [LICENSE](../LICENSE)
 本模拟器是捷克理工大学学士论文《服务器与类 Unix 系统在智能家居传感器控制中的应用》的组成部分。引用信息请参阅 [主 README](../README.zh-CN.md)。
 
 
-# [CodeRabbit Audit Trigger 1769364389]

@@ -92,4 +92,3 @@ mqtt_client_key: |
 - [ESP32-S3 Datasheet](https://www.espressif.com/en/products/socs/esp32-s3)
 - [Certificate Setup](../certs/README.md)
 
-# [CodeRabbit Audit Trigger 1769364389]

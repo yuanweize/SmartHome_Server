@@ -107,4 +107,3 @@ cd broker/emqx && docker compose up -d
 
 [![GitHub](https://img.shields.io/badge/GitHub-@IYUANWEIZE-181717?logo=github)](https://github.com/IYUANWEIZE)
 
-# [CodeRabbit Audit Trigger 1769364389]

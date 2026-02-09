@@ -86,4 +86,3 @@ latexmk -C   # Remove PDF
 - [CTU FEL Thesis Template (Overleaf)](https://www.overleaf.com/latex/templates/sablona-pro-psani-disertacni-prace-na-cvut-fel/ptpvbxhsjdmg)
 - [LaTeX Wikibook](https://en.wikibooks.org/wiki/LaTeX)
 
-# [CodeRabbit Audit Trigger 1769364389]

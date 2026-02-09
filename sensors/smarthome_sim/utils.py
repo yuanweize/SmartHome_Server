@@ -104,4 +104,3 @@ def now_ts() -> int:
     """Return current Unix timestamp as integer."""
     return int(time.time())
 
-# [CodeRabbit Audit Trigger 1769364389]

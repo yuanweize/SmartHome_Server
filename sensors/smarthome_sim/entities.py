@@ -94,4 +94,3 @@ def get_default_entities() -> List[EntityDef]:
         ),
     ]
 
-# [CodeRabbit Audit Trigger 1769364389]

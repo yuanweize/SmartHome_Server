@@ -10,4 +10,3 @@ services:
     environment:
       - TZ=Europe/Prague
 
-# [CodeRabbit Audit Trigger 1769364389]

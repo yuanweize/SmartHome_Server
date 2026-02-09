@@ -46,4 +46,3 @@ services:
 
     restart: unless-stopped
 
-# [CodeRabbit Audit Trigger 1769364389]

@@ -189,4 +189,3 @@ def setup_logging(level: str) -> None:
         datefmt="%H:%M:%S",
     )
 
-# [CodeRabbit Audit Trigger 1769364389]

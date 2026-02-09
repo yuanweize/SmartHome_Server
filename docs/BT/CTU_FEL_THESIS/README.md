@@ -95,4 +95,3 @@ rm -f output.*
 - Some Czech words remain where they are official names.
 - Logo/image assets are optional; missing assets should not break compilation.
 
-# [CodeRabbit Audit Trigger 1769364389]
