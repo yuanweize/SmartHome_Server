@@ -101,3 +101,20 @@ latexmk -C   # 删除 PDF
 
 - [CTU FEL 论文模板 (Overleaf)](https://www.overleaf.com/latex/templates/sablona-pro-psani-disertacni-prace-na-cvut-fel/ptpvbxhsjdmg)
 - [LaTeX 教程](https://en.wikibooks.org/wiki/LaTeX)
+
+## 引用
+
+如在学术工作中使用本项目，请引用：
+
+```bibtex
+@thesis{yuan2026smarthome,
+    author  = {Yuan, Weize},
+    title   = {Application of Servers and Unix-like Systems for Sensor Control in Smart Homes},
+    school  = {Czech Technical University in Prague, Faculty of Electrical Engineering},
+    year    = {2026},
+    type    = {Bachelor's Thesis},
+    url     = {https://hdl.handle.net/10467/178631}
+}
+```
+
+**永久链接 (Permanent Link):** [https://hdl.handle.net/10467/178631](https://hdl.handle.net/10467/178631)
