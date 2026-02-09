@@ -4,6 +4,14 @@
 
 本目录包含论文文档、LaTeX 源码及相关材料。
 
+## 📄 论文
+
+| 资源 | 链接 |
+|------|------|
+| 📥 **下载最新论文** | [![Latest Release](https://img.shields.io/github/v/release/yuanweize/SmartHome_Server?label=论文&logo=adobeacrobatreader)](https://github.com/yuanweize/SmartHome_Server/releases/latest) |
+| 📋 导师评审报告 | [supervisor_report.pdf](BT/Review/supervisor_report.pdf) |
+| 📋 对手评审报告 | [opponent_report_Koller.pdf](BT/Review/opponent_report_Koller.pdf) |
+
 ## 目录结构
 
 ```
@@ -13,8 +21,11 @@ docs/
 │   │   ├── thesis-final.tex # 入口文件（编译此文件）
 │   │   ├── chapters/        # 章节源文件
 │   │   └── images/          # 图表
-│   ├── thesis_doc/          # 规划笔记与草稿
-│   └── FIG/                 # 附加图表
+│   └── Review/              # 论文评审报告
+│       ├── supervisor_report.pdf
+│       └── opponent_report_Koller.pdf
+├── pdf2md/                  # PDF 转 Markdown 工具
+├── thesis_doc/              # 规划笔记与草稿
 └── README.md                # 本文件
 ```
 
@@ -85,4 +96,3 @@ latexmk -C   # 删除 PDF
 
 - [CTU FEL 论文模板 (Overleaf)](https://www.overleaf.com/latex/templates/sablona-pro-psani-disertacni-prace-na-cvut-fel/ptpvbxhsjdmg)
 - [LaTeX 教程](https://en.wikibooks.org/wiki/LaTeX)
-

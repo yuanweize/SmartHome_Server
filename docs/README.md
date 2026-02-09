@@ -4,6 +4,14 @@ Language: **English** | [简体中文](README.zh-CN.md)
 
 This directory contains all thesis documentation, LaTeX sources, and supporting materials.
 
+## 📄 Thesis
+
+| Resource | Link |
+|----------|------|
+| 📥 **Download Latest Thesis** | [![Latest Release](https://img.shields.io/github/v/release/yuanweize/SmartHome_Server?label=Thesis&logo=adobeacrobatreader)](https://github.com/yuanweize/SmartHome_Server/releases/latest) |
+| 📋 Supervisor Report | [supervisor_report.pdf](BT/Review/supervisor_report.pdf) |
+| 📋 Opponent Report | [opponent_report_Koller.pdf](BT/Review/opponent_report_Koller.pdf) |
+
 ## Directory Structure
 
 ```
@@ -13,8 +21,11 @@ docs/
 │   │   ├── thesis-final.tex # Entry file (compile this)
 │   │   ├── chapters/        # Chapter source files
 │   │   └── images/          # Figures and diagrams
-│   ├── thesis_doc/          # Planning notes and drafts
-│   └── FIG/                 # Additional figures
+│   └── Review/              # Thesis review reports
+│       ├── supervisor_report.pdf
+│       └── opponent_report_Koller.pdf
+├── pdf2md/                  # PDF to Markdown converter
+├── thesis_doc/              # Planning notes and drafts
 └── README.md                # This file
 ```
 
@@ -85,4 +96,3 @@ latexmk -C   # Remove PDF
 
 - [CTU FEL Thesis Template (Overleaf)](https://www.overleaf.com/latex/templates/sablona-pro-psani-disertacni-prace-na-cvut-fel/ptpvbxhsjdmg)
 - [LaTeX Wikibook](https://en.wikibooks.org/wiki/LaTeX)
-
