@@ -29,8 +29,7 @@ SmartHome_Server/
 ├── docs/                   # Documentation & Thesis
 │   ├── BT/                 # Bachelor Thesis (LaTeX source, reviews, figures)
 │   ├── pdf2md/             # Datasheet to Markdown converter tools
-│   └── thesis_doc/         # Thesis drafts and planning notes
-└── test/                   # Unit and integration tests
+└── thesis_doc/         # Thesis drafts and planning notes
 ```
 
 ## Quick Start

@@ -29,8 +29,7 @@ SmartHome_Server/
 ├── docs/                   # 文档与论文
 │   ├── BT/                 # 学士论文（LaTeX 源码、评审、图表）
 │   ├── pdf2md/             # Datasheet 转 Markdown 工具
-│   └── thesis_doc/         # 论文草稿与规划笔记
-└── test/                   # 单元测试与集成测试
+└── thesis_doc/         # 论文草稿与规划笔记
 ```
 
 ## 快速开始
