@@ -16,16 +16,18 @@ This directory contains all thesis documentation, LaTeX sources, and supporting 
 
 ```
 docs/
-├── BT/
-│   ├── CTU_FEL_THESIS/      # LaTeX thesis template (main)
-│   │   ├── thesis-final.tex # Entry file (compile this)
-│   │   ├── chapters/        # Chapter source files
-│   │   └── images/          # Figures and diagrams
-│   └── Review/              # Thesis review reports
-│       ├── supervisor_report.pdf
-│       └── opponent_report_Koller.pdf
-├── pdf2md/                  # PDF to Markdown converter
-├── thesis_doc/              # Planning notes and drafts
+├── BT/                      # Bachelor Thesis (Main)
+│   ├── CTU_FEL_THESIS/      # LaTeX thesis template & source
+│   │   ├── thesis-final.tex # Entry file
+│   │   ├── chapters/        # Chapter sources
+│   │   └── images/          # Figures
+│   ├── Review/              # Thesis review reports
+│   │   ├── supervisor_report.pdf
+│   │   └── opponent_report_Koller.pdf
+│   ├── FIG/                 # Additional figures & assets
+│   └── 论文/                 # Drafts & resources (legacy name)
+├── pdf2md/                  # PDF to Markdown converter tools
+├── thesis_doc/              # Planning notes, drafts & standards
 └── README.md                # This file
 ```
 

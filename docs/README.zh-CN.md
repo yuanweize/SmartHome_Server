@@ -16,16 +16,18 @@
 
 ```
 docs/
-├── BT/
-│   ├── CTU_FEL_THESIS/      # LaTeX 论文模板（主目录）
-│   │   ├── thesis-final.tex # 入口文件（编译此文件）
-│   │   ├── chapters/        # 章节源文件
+├── BT/                      # 学士论文（主目录）
+│   ├── CTU_FEL_THESIS/      # LaTeX 论文模板与源码
+│   │   ├── thesis-final.tex # 入口文件
+│   │   ├── chapters/        # 章节源码
 │   │   └── images/          # 图表
-│   └── Review/              # 论文评审报告
-│       ├── supervisor_report.pdf
-│       └── opponent_report_Koller.pdf
+│   ├── Review/              # 论文评审报告
+│   │   ├── supervisor_report.pdf
+│   │   └── opponent_report_Koller.pdf
+│   ├── FIG/                 # 附加图表资源
+│   └── 论文/                 # 草稿与资源文件（旧目录名）
 ├── pdf2md/                  # PDF 转 Markdown 工具
-├── thesis_doc/              # 规划笔记与草稿
+├── thesis_doc/              # 规划笔记、草稿与标准文档
 └── README.md                # 本文件
 ```
 

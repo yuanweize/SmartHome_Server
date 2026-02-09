@@ -26,9 +26,11 @@ SmartHome_Server/
 ├── homeassistant/          # Home Assistant reference
 ├── esphome/                # ESP32/ESP32-S3 firmware configurations
 ├── certs/                  # TLS/mTLS certificate generation scripts
-└── docs/                   # Documentation
-    ├── BT/CTU_FEL_THESIS/  # Thesis LaTeX source
-    └── BT/Review/          # Thesis review reports
+├── docs/                   # Documentation & Thesis
+│   ├── BT/                 # Bachelor Thesis (LaTeX source, reviews, figures)
+│   ├── pdf2md/             # Datasheet to Markdown converter tools
+│   └── thesis_doc/         # Thesis drafts and planning notes
+└── test/                   # Unit and integration tests
 ```
 
 ## Quick Start

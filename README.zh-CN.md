@@ -26,9 +26,11 @@ SmartHome_Server/
 ├── homeassistant/          # Home Assistant 参考
 ├── esphome/                # ESP32/ESP32-S3 固件配置
 ├── certs/                  # TLS/mTLS 证书生成脚本
-└── docs/                   # 文档
-    ├── BT/CTU_FEL_THESIS/  # 论文 LaTeX 源码
-    └── BT/Review/          # 论文评审报告
+├── docs/                   # 文档与论文
+│   ├── BT/                 # 学士论文（LaTeX 源码、评审、图表）
+│   ├── pdf2md/             # Datasheet 转 Markdown 工具
+│   └── thesis_doc/         # 论文草稿与规划笔记
+└── test/                   # 单元测试与集成测试
 ```
 
 ## 快速开始
