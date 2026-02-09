@@ -9,7 +9,23 @@ This folder is the canonical LaTeX thesis template for this repo.
 
 Chapters live in `chapters/` and are included from `thesis-final.tex`.
 
-## Build (local)
+## Build (Recommended)
+This project includes a `Makefile` for automated building and versioning.
+
+```bash
+# Build PDF with current version
+make pdf
+
+# Increment version number and build
+make all
+
+# Clean build artifacts
+make clean
+```
+
+The output PDF will be named `Yuan_Weize_Bachelor_Thesis_v<VERSION>_<DATE>.pdf`.
+
+## Build (Manual / Latexmk)
 
 This template uses **LuaLaTeX + biblatex/biber**.
 
