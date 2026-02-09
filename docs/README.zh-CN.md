@@ -8,7 +8,7 @@
 
 | 资源 | 链接 |
 |------|------|
-| 📖 **在线阅读** | [![Read PDF](https://img.shields.io/badge/Read-PDF-red?logo=adobeacrobatreader)](../BT/bachelor_thesis_latest.pdf) |
+| 📖 **在线阅读** | [![Read PDF](https://img.shields.io/badge/Read-PDF-red?logo=adobeacrobatreader)](BT/Yuan_Weize_Bachelor_Thesis_v25.9_09-02-2026.pdf) |
 | 📥 **下载 Release** | [![Latest Release](https://img.shields.io/github/v/release/yuanweize/SmartHome_Server?label=Release&logo=github)](https://github.com/yuanweize/SmartHome_Server/releases/latest) |
 | 📋 导师评审报告 | [supervisor_report.pdf](BT/Review/supervisor_report.pdf) |
 | 📋 对手评审报告 | [opponent_report_Koller.pdf](BT/Review/opponent_report_Koller.pdf) |
