@@ -104,7 +104,6 @@ cd broker/emqx && docker compose up -d
     title   = {Application of Servers and Unix-like Systems for Sensor Control in Smart Homes},
     school  = {Czech Technical University in Prague, Faculty of Electrical Engineering},
     year    = {2026},
-    type    = {Bachelor's Thesis},
     url     = {https://hdl.handle.net/10467/178631}
 }
 ```
