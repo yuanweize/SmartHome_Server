@@ -62,14 +62,42 @@ jobs:
         env:
           OUTPUT_NAME: ${{ env.OUTPUT_NAME }}
         run: |
-          # Copy the compiled PDF to docs/BT/bachelor_thesis_latest.pdf
-          LATEST_PDF="docs/BT/bachelor_thesis_latest.pdf"
-          cp "$OUTPUT_NAME" "$LATEST_PDF"
+          # 1. Setup paths
+          DEST_DIR="docs/BT"
+          DEST_FILE="${DEST_DIR}/${OUTPUT_NAME}"
           
-          # Commit and push
+          # 2. Configure Git
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add "$LATEST_PDF"
-          # Use [skip ci] to prevent infinite loop, though path filter should also prevent it
-          git commit -m "docs: auto-update latest thesis PDF [skip ci]" || echo "No changes to commit"
+          
+          # 3. Clean up old thesis PDFs in docs/BT/ (exclude other files)
+          # Assuming format: Yuan_Weize_Bachelor_Thesis_*.pdf or bachelor_thesis_latest.pdf
+          find "$DEST_DIR" -maxdepth 1 -name "Yuan_Weize_Bachelor_Thesis_*.pdf" -delete
+          find "$DEST_DIR" -maxdepth 1 -name "bachelor_thesis_latest.pdf" -delete
+          
+          # 4. Copy new PDF
+          cp "$OUTPUT_NAME" "$DEST_FILE"
+          
+          # 5. Update README links using sed
+          # Root READMEs: docs/BT/filename
+          sed -i "s|docs/BT/bachelor_thesis_.*\.pdf|docs/BT/${OUTPUT_NAME}|g" README.md
+          sed -i "s|docs/BT/bachelor_thesis_.*\.pdf|docs/BT/${OUTPUT_NAME}|g" README.zh-CN.md
+          
+          # Docs READMEs: BT/filename (Previously ../BT/..., fixing that too if present)
+          # Fix potential relative path error from previous manual edit if it exists
+          sed -i "s|\.\./BT/bachelor_thesis_.*\.pdf|BT/${OUTPUT_NAME}|g" docs/README.md || true
+          sed -i "s|\.\./BT/bachelor_thesis_.*\.pdf|BT/${OUTPUT_NAME}|g" docs/README.zh-CN.md || true
+          # Standard update
+          sed -i "s|BT/bachelor_thesis_.*\.pdf|BT/${OUTPUT_NAME}|g" docs/README.md
+          sed -i "s|BT/bachelor_thesis_.*\.pdf|BT/${OUTPUT_NAME}|g" docs/README.zh-CN.md
+          
+          # Also update logic to support replacing the specific 'Yuan_Weize...' name in future runs
+          sed -i "s|docs/BT/Yuan_Weize_Bachelor_Thesis_.*\.pdf|docs/BT/${OUTPUT_NAME}|g" README.md
+          sed -i "s|docs/BT/Yuan_Weize_Bachelor_Thesis_.*\.pdf|docs/BT/${OUTPUT_NAME}|g" README.zh-CN.md
+          sed -i "s|BT/Yuan_Weize_Bachelor_Thesis_.*\.pdf|BT/${OUTPUT_NAME}|g" docs/README.md
+          sed -i "s|BT/Yuan_Weize_Bachelor_Thesis_.*\.pdf|BT/${OUTPUT_NAME}|g" docs/README.zh-CN.md
+
+          # 6. Commit and Push
+          git add "$DEST_FILE" README.md README.zh-CN.md docs/README.md docs/README.zh-CN.md
+          git commit -m "docs: update thesis PDF to ${OUTPUT_NAME} and refresh links [skip ci]" || echo "No changes to commit"
           git push
