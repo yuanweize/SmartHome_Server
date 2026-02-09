@@ -1,8 +1,9 @@
 # Thesis build with auto-versioning
-BASENAME = bachelor_thesis_Yuan
+BASENAME = Yuan_Weize_Bachelor_Thesis
 VERSION_FILE = .version
 VERSION = $(shell cat $(VERSION_FILE) 2>/dev/null || echo "1.0")
-JOBNAME = $(BASENAME)_v$(VERSION)
+DATE = $(shell date +%d-%m-%Y)
+JOBNAME = $(BASENAME)_v$(VERSION)_$(DATE)
 
 .PHONY: all pdf bump clean
 

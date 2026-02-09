@@ -28,8 +28,9 @@ jobs:
           cd docs/BT/CTU_FEL_THESIS
           # Read version from .version file
           VERSION=$(cat .version | tr -d '[:space:]')
-          # The makefile produces $(BASENAME)_v$(VERSION).pdf - use sort -V for version sorting
-          PDF_FILE=$(find . -maxdepth 1 -name "bachelor_thesis_Yuan_v*.pdf" | sort -V | tail -n 1)
+          # The makefile produces $(BASENAME)_v$(VERSION)_$(DATE).pdf - use sort -V for version sorting
+          # Note: Makefile now includes date in filename, so we match the new pattern
+          PDF_FILE=$(find . -maxdepth 1 -name "Yuan_Weize_Bachelor_Thesis_v*.pdf" | sort -V | tail -n 1)
           # European date format: DD-MM-YYYY
           BUILD_DATE=$(date +%d-%m-%Y)
           OUTPUT_NAME="Yuan_Weize_Bachelor_Thesis_v${VERSION}_${BUILD_DATE}.pdf"
