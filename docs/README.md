@@ -8,7 +8,8 @@ This directory contains all thesis documentation, LaTeX sources, and supporting 
 
 | Resource | Link |
 |----------|------|
-| 📥 **Download Latest Thesis** | [![Latest Release](https://img.shields.io/github/v/release/yuanweize/SmartHome_Server?label=Thesis&logo=adobeacrobatreader)](https://github.com/yuanweize/SmartHome_Server/releases/latest) |
+| 📖 **Read Online** | [![Read PDF](https://img.shields.io/badge/Read-PDF-red?logo=adobeacrobatreader)](../BT/bachelor_thesis_latest.pdf) |
+| 📥 **Download Release** | [![Latest Release](https://img.shields.io/github/v/release/yuanweize/SmartHome_Server?label=Release&logo=github)](https://github.com/yuanweize/SmartHome_Server/releases/latest) |
 | 📋 Supervisor Report | [supervisor_report.pdf](BT/Review/supervisor_report.pdf) |
 | 📋 Opponent Report | [opponent_report_Koller.pdf](BT/Review/opponent_report_Koller.pdf) |
 
