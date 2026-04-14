@@ -1,0 +1,305 @@
+# ============================================================
+# 蘑菇房 (MROOM) 智能恒温控制系统
+# Mushroom Room Smart Temperature Control System
+#
+# 主控:     ESP32-S3 (esp32-s3-devkitc-1)
+# 目标物种: Copelandia Cyanescens (蓝光盖伞)
+# 当前阶段: 菌丝殖民/发菌期 (Colonization) — 目标温度 26°C
+#
+# 硬件清单:
+#   - BMP180 温度/气压传感器 (I2C: SDA=GPIO5, SCL=GPIO4)
+#   - 28W 加热垫 (继电器 IN1 = GPIO14, 低电平触发)
+#
+# 安全策略:
+#   1. restore_mode: ALWAYS_OFF    — 断电后继电器默认关闭
+#   2. Thermostat Hysteresis 2°C   — 死区防止继电器颤振
+#   3. min_heating_run/off_time    — 防止触点频繁启停损坏
+#   4. Sensor Watchdog (30s)       — BMP180 故障时紧急断电
+# ============================================================
+
+
+# ============================================================
+# 基础配置
+# ============================================================
+
+esphome:
+  name: smarthome-esp32s3
+  friendly_name: "Mushroom Room Controller (MROOM)"
+
+  # 开机初始化序列
+  # 未来新增多个继电器时，在 then 中添加延迟步骤防止浪涌
+  on_boot:
+    priority: -100
+    then:
+      - logger.log: "=== MROOM Boot: Initializing ==="
+      - delay: 2s
+      # 自动激活 HEAT 模式，防止重启后恒温器停留在 OFF
+      - climate.control:
+          id: mroom_thermostat
+          mode: HEAT
+      - logger.log: "=== MROOM Boot: Complete. Thermostat HEAT active. ==="
+
+esp32:
+  board: esp32-s3-devkitc-1
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      CONFIG_MBEDTLS_ECP_DP_SECP256R1_ENABLED: "y"
+      CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED: "y"
+      CONFIG_MBEDTLS_ECDSA_DETERMINISTIC: "y"
+      CONFIG_MBEDTLS_ECP_DP_CURVE25519_ENABLED: "y"
+      CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED: "y"
+      CONFIG_MBEDTLS_SSL_PROTO_TLS1_3: "y"
+
+
+# ============================================================
+# 网络与通信
+# ============================================================
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+api:
+  encryption:
+    key: !secret api_key_esp32
+  reboot_timeout: 0s
+
+wifi:
+  fast_connect: false
+  reboot_timeout: 15min
+  networks:
+    - ssid: !secret wifi_ssid_main
+      password: !secret wifi_password_main
+      priority: 20
+    - ssid: !secret wifi_ssid_backup
+      password: !secret wifi_password_backup
+      priority: 10
+  ap:
+    ssid: "ESP32-S3-AP"
+    password: !secret wifi_ssid_ap_password
+
+# WiFi 掉线时，连接 AP 热点会弹出配置页面
+captive_portal:
+
+mqtt:
+  broker: !secret mqtt_broker
+  port: !secret mqtt_port
+  discovery: true
+  discovery_prefix: homeassistant
+  reboot_timeout: 5min
+  certificate_authority: !secret mqtt_ca_cert
+  client_certificate: !secret mqtt_client_cert
+  client_certificate_key: !secret mqtt_client_key
+
+
+# ============================================================
+# 工具
+# ============================================================
+
+button:
+  - platform: restart
+    name: "Emergency Restart(Force via MQTT)"
+    id: mqtt_restart_btn
+
+logger:
+  hardware_uart: USB_CDC
+  level: DEBUG
+
+
+# ============================================================
+# 全局变量
+# ============================================================
+
+globals:
+  # BMP180 最后一次成功读取的时间戳 (毫秒)
+  # 看门狗通过此变量判断传感器是否失联
+  - id: last_temp_update_ms
+    type: unsigned long
+    restore_value: no
+    initial_value: '0'
+
+
+# ============================================================
+# I2C 总线
+# ============================================================
+
+i2c:
+  sda: GPIO5
+  scl: GPIO4
+  scan: true
+  id: bus_a
+  frequency: 100kHz
+
+
+# ============================================================
+# 继电器开关 — 硬件抽象层
+#
+# 低电平触发 (inverted: true)
+# 断电后默认关闭 (restore_mode: ALWAYS_OFF)
+# ============================================================
+
+switch:
+  # 加热垫 (28W) — GPIO14 / IN1
+  - platform: gpio
+    pin:
+      number: GPIO14
+      inverted: true
+    name: "MROOM Heater Pad"
+    id: relay_heater
+    icon: "mdi:radiator"
+    restore_mode: ALWAYS_OFF
+
+  # ┌──────────────────────────────────────────────────────────┐
+  # │ 预留继电器模板 — 添加新设备时复制修改                      │
+  # │                                                          │
+  # │ - platform: gpio                                         │
+  # │   pin:                                                   │
+  # │     number: GPIO_XX                                      │
+  # │     inverted: true                                       │
+  # │   name: "MROOM Device Name"                              │
+  # │   id: relay_xxx                                          │
+  # │   restore_mode: ALWAYS_OFF                               │
+  # │                                                          │
+  # │ 建议通道:                                                │
+  # │   IN2 → 排风扇    IN3 → 加湿器    IN5 → 生长灯          │
+  # │                                                          │
+  # │ 互斥: 加湿器 ↔ 排风扇 不能同时运行                       │
+  # │   interlock: [relay_humidifier, relay_exhaust]            │
+  # │   interlock_wait_time: 500ms                              │
+  # └──────────────────────────────────────────────────────────┘
+
+
+# ============================================================
+# 恒温器 — Thermostat (带滞后区间控温)
+#
+# 温控原理:
+#   26.5°C ── 停止加热 (target + 0.5 overrun)
+#   26.0°C ── 目标温度
+#   24.5°C ── 启动加热 (target - 1.5 deadband)
+#
+#   死区 24.5~26.5°C (2°C): 继电器在此区间不改变状态
+# ============================================================
+
+climate:
+  - platform: thermostat
+    name: "MROOM Temperature Controller"
+    id: mroom_thermostat
+    sensor: bmp180_temp
+
+    # 滞后区间
+    heat_deadband: 1.5     # 低于 (目标-1.5)°C 才启动加热
+    heat_overrun: 0.5      # 高于 (目标+0.5)°C 才停止加热
+
+    # 设备保护计时器 — 防止继电器触点频繁启停损坏
+    min_heating_run_time: 180s   # 启动后至少运行 3 分钟
+    min_heating_off_time: 120s   # 关闭后至少等待 2 分钟
+    min_idle_time: 60s           # 空闲至少 1 分钟
+
+    # 首次收到有效温度读数前不动作
+    startup_delay: true
+
+    # 预设温度
+    # Home    → 殖民/发菌期 26°C
+    # Comfort → 出菇期 22°C (未来切换)
+    default_preset: "Home"
+    preset:
+      - name: "Home"
+        default_target_temperature_low: 26.0
+      - name: "Comfort"
+        default_target_temperature_low: 22.0
+
+    visual:
+      min_temperature: 15
+      max_temperature: 35
+      temperature_step: 0.5
+
+    heat_action:
+      - logger.log: "Thermostat → HEAT: Heater ON"
+      - switch.turn_on: relay_heater
+
+    idle_action:
+      - logger.log: "Thermostat → IDLE: Heater OFF"
+      - switch.turn_off: relay_heater
+
+
+# ============================================================
+# 传感器看门狗 — Fail-Safe
+#
+# 每 30 秒检查 BMP180 健康状态:
+#   Case 1: state = NaN (从未初始化)
+#   Case 2: 超过 60 秒无新数据 (I2C 断线)
+#   Case 3: 启动 90 秒后仍无读数 (硬件故障)
+#
+# 触发故障 → 立即切断加热垫 → 防止过热烤死菌丝
+# ============================================================
+
+interval:
+  - interval: 30s
+    then:
+      - lambda: |-
+          unsigned long now = millis();
+          bool sensor_fault = false;
+
+          // Case 1: 传感器从未成功读取
+          if (isnan(id(bmp180_temp).state)) {
+            sensor_fault = true;
+            ESP_LOGE("WATCHDOG", "BMP180 state is NaN");
+          }
+
+          // Case 2: 超过 60 秒未更新
+          if (id(last_temp_update_ms) > 0 && (now - id(last_temp_update_ms)) > 60000) {
+            sensor_fault = true;
+            ESP_LOGE("WATCHDOG", "BMP180 stale >60s");
+          }
+
+          // Case 3: 启动 90 秒后仍无读数
+          if (id(last_temp_update_ms) == 0 && now > 90000) {
+            sensor_fault = true;
+            ESP_LOGE("WATCHDOG", "BMP180 no response after 90s");
+          }
+
+          if (sensor_fault) {
+            ESP_LOGE("WATCHDOG", ">>> EMERGENCY: Heater OFF <<<");
+            id(relay_heater).turn_off();
+          }
+
+
+# ============================================================
+# 传感器
+# ============================================================
+
+sensor:
+  - platform: wifi_signal
+    name: "WiFi RSSI ESP32S3"
+    id: wifi_rssi
+    unit_of_measurement: "dBm"
+    update_interval: 10s
+
+  - platform: uptime
+    name: "System Uptime ESP32S3"
+    unit_of_measurement: "s"
+
+  # BMP180 温度 + 气压
+  # update_interval 10s: 蘑菇房温度变化缓慢
+  # 滑动窗口均值滤波: 平滑噪声，减少恒温器误判
+  - platform: bmp085
+    i2c_id: bus_a
+    address: 0x77
+    temperature:
+      name: "MROOM Temperature"
+      id: bmp180_temp
+      accuracy_decimals: 1
+      filters:
+        - sliding_window_moving_average:
+            window_size: 3
+            send_every: 1
+      # 每次成功读取时更新看门狗时间戳
+      on_value:
+        then:
+          - lambda: |-
+              id(last_temp_update_ms) = millis();
+    pressure:
+      name: "MROOM Pressure"
+      accuracy_decimals: 2
+    update_interval: 10s
