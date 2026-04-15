@@ -2,16 +2,16 @@
   {
     "id": "f100a1b2c3d4e5f6",
     "type": "tab",
-    "label": "MROOM Alarm System / 蘑菇房报警",
+    "label": "MROOM Alarm System / \u8611\u83c7\u623f\u62a5\u8b66",
     "disabled": false,
-    "info": "蘑菇房设备故障报警系统\nMushroom Room Device Alarm System\n\n报警类型:\n1. 🔴 高温报警 (>30°C) — 冷却 30min\n2. 🟠 加热垫故障 (加热15min温度不升) — 冷却 60min\n3. 🟠 温度持续过低 (<20°C × 30min) — 冷却 120min\n4. 🟡 设备离线 (>5min无数据) — 冷却 30min\n5. 🍄 每日状态摘要 (09:00)\n\n⚠️ 部署前请确认 entity_id:\n   在 HA → 开发者工具 → 状态 中搜索 mroom"
+    "info": "\u8611\u83c7\u623f\u8bbe\u5907\u6545\u969c\u62a5\u8b66\u7cfb\u7edf\nMushroom Room Device Alarm System\n\n\u62a5\u8b66\u7c7b\u578b:\n1. \ud83d\udd34 \u9ad8\u6e29\u62a5\u8b66 (>30\u00b0C) \u2014 \u51b7\u5374 30min\n2. \ud83d\udfe0 \u52a0\u70ed\u57ab\u6545\u969c (\u52a0\u70ed15min\u6e29\u5ea6\u4e0d\u5347) \u2014 \u51b7\u5374 60min\n3. \ud83d\udfe0 \u6e29\u5ea6\u6301\u7eed\u8fc7\u4f4e (<20\u00b0C \u00d7 30min) \u2014 \u51b7\u5374 120min\n4. \ud83d\udfe1 \u8bbe\u5907\u79bb\u7ebf (>5min\u65e0\u6570\u636e) \u2014 \u51b7\u5374 30min\n5. \ud83c\udf44 \u6bcf\u65e5\u72b6\u6001\u6458\u8981 (09:00)\n\n\u26a0\ufe0f \u90e8\u7f72\u524d\u8bf7\u786e\u8ba4 entity_id:\n   \u5728 HA \u2192 \u5f00\u53d1\u8005\u5de5\u5177 \u2192 \u72b6\u6001 \u4e2d\u641c\u7d22 mroom"
   },
   {
     "id": "f200a1b2c3d4e5f6",
     "type": "comment",
     "z": "f100a1b2c3d4e5f6",
-    "name": "⚠️ 部署说明 / Setup Instructions",
-    "info": "## 部署前必须确认:\n\n### 1. Entity ID\n请在 HA → 开发者工具 → 状态 中搜索 'mroom'，\n确认以下 Entity ID 是否正确：\n- 温度: `sensor.mushroom_room_controller_mroom_mroom_temperature_2`\n- 加热垫: `binary_sensor.mushroom_room_controller_mroom_mroom_heater_active_2`\n\n如果不同，请修改下方两个 State Changed 节点中的 entity 配置。\n\n### 2. 通知服务\n确认 iOS 通知 service 名称：`notify.mobile_app_iphonep`\n在 HA → 开发者工具 → 服务 中搜索 notify 确认。\n\n### 3. HA 服务器\n确认 Home Assistant 服务器连接节点已正确配置。",
+    "name": "\u26a0\ufe0f \u90e8\u7f72\u8bf4\u660e / Setup Instructions",
+    "info": "## \u90e8\u7f72\u524d\u5fc5\u987b\u786e\u8ba4:\n\n### 1. Entity ID\n\u8bf7\u5728 HA \u2192 \u5f00\u53d1\u8005\u5de5\u5177 \u2192 \u72b6\u6001 \u4e2d\u641c\u7d22 'mroom'\uff0c\n\u786e\u8ba4\u4ee5\u4e0b Entity ID \u662f\u5426\u6b63\u786e\uff1a\n- \u6e29\u5ea6: `sensor.mushroom_room_controller_mroom_mroom_temperature_2`\n- \u52a0\u70ed\u57ab: `binary_sensor.mushroom_room_controller_mroom_mroom_heater_active_2`\n\n\u5982\u679c\u4e0d\u540c\uff0c\u8bf7\u4fee\u6539\u4e0b\u65b9\u4e24\u4e2a State Changed \u8282\u70b9\u4e2d\u7684 entity \u914d\u7f6e\u3002\n\n### 2. \u901a\u77e5\u670d\u52a1\n\u786e\u8ba4 iOS \u901a\u77e5 service \u540d\u79f0\uff1a`notify.mobile_app_iphonep`\n\u5728 HA \u2192 \u5f00\u53d1\u8005\u5de5\u5177 \u2192 \u670d\u52a1 \u4e2d\u641c\u7d22 notify \u786e\u8ba4\u3002\n\n### 3. HA \u670d\u52a1\u5668\n\u786e\u8ba4 Home Assistant \u670d\u52a1\u5668\u8fde\u63a5\u8282\u70b9\u5df2\u6b63\u786e\u914d\u7f6e\u3002",
     "x": 220,
     "y": 60,
     "wires": []
@@ -20,13 +20,15 @@
     "id": "f300a1b2c3d4e5f6",
     "type": "server-state-changed",
     "z": "f100a1b2c3d4e5f6",
-    "name": "🌡️ MROOM Temperature",
+    "name": "\ud83c\udf21\ufe0f MROOM Temperature",
     "server": "95e75a8c.0c1288",
     "version": 6,
     "outputs": 1,
     "exposeAsEntityConfig": "",
     "entities": {
-      "entity": ["sensor.mushroom_room_controller_mroom_mroom_temperature_2"],
+      "entity": [
+        "sensor.mushroom_room_controller_mroom_mroom_temperature_2"
+      ],
       "substring": [],
       "regex": []
     },
@@ -54,14 +56,18 @@
     ],
     "x": 150,
     "y": 200,
-    "wires": [["f400a1b2c3d4e5f6"]]
+    "wires": [
+      [
+        "f400a1b2c3d4e5f6"
+      ]
+    ]
   },
   {
     "id": "f400a1b2c3d4e5f6",
     "type": "function",
     "z": "f100a1b2c3d4e5f6",
-    "name": "🧠 Temp Alarm Logic",
-    "func": "const temp = parseFloat(msg.payload);\nif (isNaN(temp)) return null;\n\nconst now = Date.now();\nflow.set('current_temp', temp);\nflow.set('last_temp_time', now);\n\n// --- Track daily min/max ---\nlet dMin = flow.get('daily_min');\nlet dMax = flow.get('daily_max');\nif (dMin === undefined || dMin === null) dMin = temp;\nif (dMax === undefined || dMax === null) dMax = temp;\nif (temp < dMin) flow.set('daily_min', temp);\nif (temp > dMax) flow.set('daily_max', temp);\n\n// ═══════════════════════════════════════\n// Alert 1: High Temp >30°C (cooldown 30min)\n// ═══════════════════════════════════════\nif (temp > 30) {\n    const last = flow.get('last_alert_high_temp') || 0;\n    if (now - last > 1800000) {\n        flow.set('last_alert_high_temp', now);\n        flow.set('high_temp_recovered', false);\n        return { payload: {\n            title: '🔴 MROOM 高温报警!',\n            message: '温度 ' + temp.toFixed(1) + '°C 超过 30°C！菌丝可能受损，请立即检查加热垫和传感器。',\n            critical: true,\n            id: 'high_temp'\n        }};\n    }\n}\n\n// Recovery after high temp\nif (temp < 28 && (flow.get('last_alert_high_temp') || 0) > 0 && !flow.get('high_temp_recovered')) {\n    flow.set('high_temp_recovered', true);\n    return { payload: {\n        title: '🟢 MROOM 温度已恢复',\n        message: '温度回到 ' + temp.toFixed(1) + '°C，系统恢复正常。',\n        critical: false,\n        id: 'recovery'\n    }};\n}\n\n// ═══════════════════════════════════════\n// Alert 2: Heater Fault (cooldown 60min)\n// Heater ON >15min but temp rise <0.5°C\n// ═══════════════════════════════════════\nconst hOn = flow.get('heater_on') || false;\nconst hTime = flow.get('heater_on_time') || 0;\nconst hTemp = flow.get('heater_on_temp') || 0;\n\nif (hOn && hTime > 0) {\n    const dur = now - hTime;\n    if (dur > 900000) {\n        const rise = temp - hTemp;\n        if (rise < 0.5) {\n            const last = flow.get('last_alert_heater_fault') || 0;\n            if (now - last > 3600000) {\n                flow.set('last_alert_heater_fault', now);\n                return { payload: {\n                    title: '🟠 MROOM 加热垫疑似故障!',\n                    message: '加热垫已运行 ' + Math.round(dur / 60000) + ' 分钟，温度仅变化 ' + rise.toFixed(1) + '°C (' + hTemp.toFixed(1) + ' → ' + temp.toFixed(1) + '°C)。请检查加热垫是否损坏。',\n                    critical: false,\n                    id: 'heater_fault'\n                }};\n            }\n        }\n    }\n}\n\n// ═══════════════════════════════════════\n// Alert 3: Low Temp <20°C >30min (cooldown 120min)\n// ═══════════════════════════════════════\nif (temp < 20) {\n    let start = flow.get('low_temp_start');\n    if (!start) {\n        flow.set('low_temp_start', now);\n    } else if (now - start > 1800000) {\n        const last = flow.get('last_alert_low_temp') || 0;\n        if (now - last > 7200000) {\n            flow.set('last_alert_low_temp', now);\n            return { payload: {\n                title: '🟠 MROOM 温度持续过低!',\n                message: '温度 ' + temp.toFixed(1) + '°C 持续低于 20°C 超过 30 分钟。加热系统可能故障或环境温度异常。',\n                critical: false,\n                id: 'low_temp'\n            }};\n        }\n    }\n} else {\n    flow.set('low_temp_start', null);\n}\n\nreturn null;",
+    "name": "\ud83e\udde0 Temp Alarm Logic",
+    "func": "const temp = parseFloat(msg.payload);\nif (isNaN(temp)) return null;\n\nconst now = Date.now();\nflow.set('current_temp', temp);\nflow.set('last_temp_time', now);\n\n// --- Track daily min/max ---\nlet dMin = flow.get('daily_min');\nlet dMax = flow.get('daily_max');\nif (dMin === undefined || dMin === null) dMin = temp;\nif (dMax === undefined || dMax === null) dMax = temp;\nif (temp < dMin) flow.set('daily_min', temp);\nif (temp > dMax) flow.set('daily_max', temp);\n\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n// Alert 1: High Temp >30\u00b0C (cooldown 30min)\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\nif (temp > 30) {\n    const last = flow.get('last_alert_high_temp') || 0;\n    if (now - last > 1800000) {\n        flow.set('last_alert_high_temp', now);\n        flow.set('high_temp_recovered', false);\n        return { payload: {\n            title: '\ud83d\udd34 MROOM \u9ad8\u6e29\u62a5\u8b66!',\n            message: '\u6e29\u5ea6 ' + temp.toFixed(1) + '\u00b0C \u8d85\u8fc7 30\u00b0C\uff01\u83cc\u4e1d\u53ef\u80fd\u53d7\u635f\uff0c\u8bf7\u7acb\u5373\u68c0\u67e5\u52a0\u70ed\u57ab\u548c\u4f20\u611f\u5668\u3002',\n            critical: true,\n            id: 'high_temp'\n        }};\n    }\n}\n\n// Recovery after high temp\nif (temp < 28 && (flow.get('last_alert_high_temp') || 0) > 0 && !flow.get('high_temp_recovered')) {\n    flow.set('high_temp_recovered', true);\n    return { payload: {\n        title: '\ud83d\udfe2 MROOM \u6e29\u5ea6\u5df2\u6062\u590d',\n        message: '\u6e29\u5ea6\u56de\u5230 ' + temp.toFixed(1) + '\u00b0C\uff0c\u7cfb\u7edf\u6062\u590d\u6b63\u5e38\u3002',\n        critical: false,\n        id: 'recovery'\n    }};\n}\n\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n// Alert 2: Heater Fault (cooldown 60min)\n// Heater ON >15min but temp rise <0.5\u00b0C\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\nconst hOn = flow.get('heater_on') || false;\nconst hTime = flow.get('heater_on_time') || 0;\nconst hTemp = flow.get('heater_on_temp') || 0;\n\nif (hOn && hTime > 0) {\n    const dur = now - hTime;\n    if (dur > 900000) {\n        const rise = temp - hTemp;\n        if (rise < 0.5) {\n            const last = flow.get('last_alert_heater_fault') || 0;\n            if (now - last > 3600000) {\n                flow.set('last_alert_heater_fault', now);\n                return { payload: {\n                    title: '\ud83d\udfe0 MROOM \u52a0\u70ed\u57ab\u7591\u4f3c\u6545\u969c!',\n                    message: '\u52a0\u70ed\u57ab\u5df2\u8fd0\u884c ' + Math.round(dur / 60000) + ' \u5206\u949f\uff0c\u6e29\u5ea6\u4ec5\u53d8\u5316 ' + rise.toFixed(1) + '\u00b0C (' + hTemp.toFixed(1) + ' \u2192 ' + temp.toFixed(1) + '\u00b0C)\u3002\u8bf7\u68c0\u67e5\u52a0\u70ed\u57ab\u662f\u5426\u635f\u574f\u3002',\n                    critical: false,\n                    id: 'heater_fault'\n                }};\n            }\n        }\n    }\n}\n\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n// Alert 3: Low Temp <20\u00b0C >30min (cooldown 120min)\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\nif (temp < 20) {\n    let start = flow.get('low_temp_start');\n    if (!start) {\n        flow.set('low_temp_start', now);\n    } else if (now - start > 1800000) {\n        const last = flow.get('last_alert_low_temp') || 0;\n        if (now - last > 7200000) {\n            flow.set('last_alert_low_temp', now);\n            return { payload: {\n                title: '\ud83d\udfe0 MROOM \u6e29\u5ea6\u6301\u7eed\u8fc7\u4f4e!',\n                message: '\u6e29\u5ea6 ' + temp.toFixed(1) + '\u00b0C \u6301\u7eed\u4f4e\u4e8e 20\u00b0C \u8d85\u8fc7 30 \u5206\u949f\u3002\u52a0\u70ed\u7cfb\u7edf\u53ef\u80fd\u6545\u969c\u6216\u73af\u5883\u6e29\u5ea6\u5f02\u5e38\u3002',\n                critical: false,\n                id: 'low_temp'\n            }};\n        }\n    }\n} else {\n    flow.set('low_temp_start', null);\n}\n\nreturn null;",
     "outputs": 1,
     "timeout": 0,
     "noerr": 0,
@@ -70,19 +76,25 @@
     "libs": [],
     "x": 420,
     "y": 200,
-    "wires": [["fb00a1b2c3d4e5f6"]]
+    "wires": [
+      [
+        "fb00a1b2c3d4e5f6"
+      ]
+    ]
   },
   {
     "id": "f500a1b2c3d4e5f6",
     "type": "server-state-changed",
     "z": "f100a1b2c3d4e5f6",
-    "name": "🔥 MROOM Heater Pad",
+    "name": "\ud83d\udd25 MROOM Heater Pad",
     "server": "95e75a8c.0c1288",
     "version": 6,
     "outputs": 1,
     "exposeAsEntityConfig": "",
     "entities": {
-      "entity": ["binary_sensor.mushroom_room_controller_mroom_mroom_heater_active_2"],
+      "entity": [
+        "binary_sensor.mushroom_room_controller_mroom_mroom_heater_active_2"
+      ],
       "substring": [],
       "regex": []
     },
@@ -110,13 +122,17 @@
     ],
     "x": 150,
     "y": 340,
-    "wires": [["f600a1b2c3d4e5f6"]]
+    "wires": [
+      [
+        "f600a1b2c3d4e5f6"
+      ]
+    ]
   },
   {
     "id": "f600a1b2c3d4e5f6",
     "type": "function",
     "z": "f100a1b2c3d4e5f6",
-    "name": "📝 Heater State Tracker",
+    "name": "\ud83d\udcdd Heater State Tracker",
     "func": "// Track heater ON/OFF state for fault detection\n// Stores state in flow context for temp_alarm to read\nconst state = msg.payload;\nconst now = Date.now();\nconst temp = flow.get('current_temp') || 0;\n\nif (state === 'on') {\n    if (!flow.get('heater_on')) {\n        flow.set('heater_on', true);\n        flow.set('heater_on_time', now);\n        flow.set('heater_on_temp', temp);\n        // Increment daily heating cycle count\n        const count = (flow.get('daily_heat_count') || 0) + 1;\n        flow.set('daily_heat_count', count);\n    }\n} else {\n    flow.set('heater_on', false);\n    flow.set('heater_on_time', 0);\n    flow.set('heater_on_temp', 0);\n}\n\nreturn null;",
     "outputs": 1,
     "timeout": 0,
@@ -126,13 +142,15 @@
     "libs": [],
     "x": 440,
     "y": 340,
-    "wires": [[]]
+    "wires": [
+      []
+    ]
   },
   {
     "id": "f700a1b2c3d4e5f6",
     "type": "inject",
     "z": "f100a1b2c3d4e5f6",
-    "name": "⏱️ Every 60s",
+    "name": "\u23f1\ufe0f Every 60s",
     "props": [],
     "repeat": "60",
     "crontab": "",
@@ -141,14 +159,18 @@
     "topic": "",
     "x": 150,
     "y": 440,
-    "wires": [["f800a1b2c3d4e5f6"]]
+    "wires": [
+      [
+        "f800a1b2c3d4e5f6"
+      ]
+    ]
   },
   {
     "id": "f800a1b2c3d4e5f6",
     "type": "function",
     "z": "f100a1b2c3d4e5f6",
-    "name": "📡 Offline Detection",
-    "func": "// Check if device has stopped sending data\n// Triggers if no temp update for >5 minutes\nconst now = Date.now();\nconst lastTempTime = flow.get('last_temp_time') || 0;\n\n// Skip check if we never received data yet\nif (lastTempTime === 0) return null;\n\n// Check for >5min stale data\nif ((now - lastTempTime) > 300000) {\n    const last = flow.get('last_alert_offline') || 0;\n    // Cooldown: 30 minutes\n    if (now - last > 1800000) {\n        flow.set('last_alert_offline', now);\n        const staleMins = Math.round((now - lastTempTime) / 60000);\n        return { payload: {\n            title: '🟡 MROOM 设备离线!',\n            message: 'ESP32-S3 已 ' + staleMins + ' 分钟无数据更新。可能原因：WiFi断连 / 设备死机 / 停电。恒温器仍在本地独立运行。',\n            critical: false,\n            id: 'offline'\n        }};\n    }\n} else {\n    // Device is online, clear offline alert state\n    flow.set('last_alert_offline', 0);\n}\n\nreturn null;",
+    "name": "\ud83d\udce1 Offline Detection",
+    "func": "// Check if device has stopped sending data\n// Triggers if no temp update for >5 minutes\nconst now = Date.now();\nconst lastTempTime = flow.get('last_temp_time') || 0;\n\n// Skip check if we never received data yet\nif (lastTempTime === 0) return null;\n\n// Check for >5min stale data\nif ((now - lastTempTime) > 300000) {\n    const last = flow.get('last_alert_offline') || 0;\n    // Cooldown: 30 minutes\n    if (now - last > 1800000) {\n        flow.set('last_alert_offline', now);\n        const staleMins = Math.round((now - lastTempTime) / 60000);\n        return { payload: {\n            title: '\ud83d\udfe1 MROOM \u8bbe\u5907\u79bb\u7ebf!',\n            message: 'ESP32-S3 \u5df2 ' + staleMins + ' \u5206\u949f\u65e0\u6570\u636e\u66f4\u65b0\u3002\u53ef\u80fd\u539f\u56e0\uff1aWiFi\u65ad\u8fde / \u8bbe\u5907\u6b7b\u673a / \u505c\u7535\u3002\u6052\u6e29\u5668\u4ecd\u5728\u672c\u5730\u72ec\u7acb\u8fd0\u884c\u3002',\n            critical: false,\n            id: 'offline'\n        }};\n    }\n} else {\n    // Device is online, clear offline alert state\n    flow.set('last_alert_offline', 0);\n}\n\nreturn null;",
     "outputs": 1,
     "timeout": 0,
     "noerr": 0,
@@ -157,13 +179,17 @@
     "libs": [],
     "x": 430,
     "y": 440,
-    "wires": [["fb00a1b2c3d4e5f6"]]
+    "wires": [
+      [
+        "fb00a1b2c3d4e5f6"
+      ]
+    ]
   },
   {
     "id": "f900a1b2c3d4e5f6",
     "type": "inject",
     "z": "f100a1b2c3d4e5f6",
-    "name": "🕘 Daily 09:00",
+    "name": "\ud83d\udd58 Daily 09:00",
     "props": [],
     "repeat": "",
     "crontab": "0 9 * * *",
@@ -172,14 +198,18 @@
     "topic": "",
     "x": 150,
     "y": 540,
-    "wires": [["fa00a1b2c3d4e5f6"]]
+    "wires": [
+      [
+        "fa00a1b2c3d4e5f6"
+      ]
+    ]
   },
   {
     "id": "fa00a1b2c3d4e5f6",
     "type": "function",
     "z": "f100a1b2c3d4e5f6",
-    "name": "🍄 Daily Summary",
-    "func": "// Compile daily mushroom room status report\nconst temp = flow.get('current_temp');\nconst hOn = flow.get('heater_on') || false;\nconst count = flow.get('daily_heat_count') || 0;\nconst dMin = flow.get('daily_min');\nconst dMax = flow.get('daily_max');\n\nconst t = (temp !== undefined && temp !== null) ? temp.toFixed(1) + '°C' : 'N/A';\nconst mn = (dMin !== undefined && dMin !== null) ? dMin.toFixed(1) + '°C' : 'N/A';\nconst mx = (dMax !== undefined && dMax !== null) ? dMax.toFixed(1) + '°C' : 'N/A';\nconst st = hOn ? '🔥 加热中' : '💤 待机';\n\nconst message = '📊 每日蘑菇房状态报告\\n━━━━━━━━━━━━━━━━\\n🌡️ 当前温度: ' + t + '\\n📈 今日最高: ' + mx + '\\n📉 今日最低: ' + mn + '\\n🔥 加热垫: ' + st + '\\n🔄 今日加热次数: ' + count + ' 次';\n\n// Reset daily counters\nflow.set('daily_heat_count', 0);\nflow.set('daily_min', null);\nflow.set('daily_max', null);\n\nreturn { payload: {\n    title: '🍄 MROOM 每日报告',\n    message: message,\n    critical: false,\n    id: 'daily_summary'\n}};",
+    "name": "\ud83c\udf44 Daily Summary",
+    "func": "// Compile daily mushroom room status report\nconst temp = flow.get('current_temp');\nconst hOn = flow.get('heater_on') || false;\nconst count = flow.get('daily_heat_count') || 0;\nconst dMin = flow.get('daily_min');\nconst dMax = flow.get('daily_max');\n\nconst t = (temp !== undefined && temp !== null) ? temp.toFixed(1) + '\u00b0C' : 'N/A';\nconst mn = (dMin !== undefined && dMin !== null) ? dMin.toFixed(1) + '\u00b0C' : 'N/A';\nconst mx = (dMax !== undefined && dMax !== null) ? dMax.toFixed(1) + '\u00b0C' : 'N/A';\nconst st = hOn ? '\ud83d\udd25 \u52a0\u70ed\u4e2d' : '\ud83d\udca4 \u5f85\u673a';\n\nconst message = '\ud83d\udcca \u6bcf\u65e5\u8611\u83c7\u623f\u72b6\u6001\u62a5\u544a\\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\\n\ud83c\udf21\ufe0f \u5f53\u524d\u6e29\u5ea6: ' + t + '\\n\ud83d\udcc8 \u4eca\u65e5\u6700\u9ad8: ' + mx + '\\n\ud83d\udcc9 \u4eca\u65e5\u6700\u4f4e: ' + mn + '\\n\ud83d\udd25 \u52a0\u70ed\u57ab: ' + st + '\\n\ud83d\udd04 \u4eca\u65e5\u52a0\u70ed\u6b21\u6570: ' + count + ' \u6b21';\n\n// Reset daily counters\nflow.set('daily_heat_count', 0);\nflow.set('daily_min', null);\nflow.set('daily_max', null);\n\nreturn { payload: {\n    title: '\ud83c\udf44 MROOM \u6bcf\u65e5\u62a5\u544a',\n    message: message,\n    critical: false,\n    id: 'daily_summary'\n}};",
     "outputs": 1,
     "timeout": 0,
     "noerr": 0,
@@ -188,13 +218,17 @@
     "libs": [],
     "x": 430,
     "y": 540,
-    "wires": [["fb00a1b2c3d4e5f6"]]
+    "wires": [
+      [
+        "fb00a1b2c3d4e5f6"
+      ]
+    ]
   },
   {
     "id": "fb00a1b2c3d4e5f6",
     "type": "function",
     "z": "f100a1b2c3d4e5f6",
-    "name": "📨 Notification Hub",
+    "name": "\ud83d\udce8 Notification Hub",
     "func": "// Route alerts to iOS Push + HA Persistent Notification\n// Input: msg.payload = { title, message, critical, id }\nconst alert = msg.payload;\nif (!alert || !alert.title) return [null, null];\n\n// Output 1: iOS Push Notification\nconst iosMsg = {\n    payload: {\n        data: {\n            title: alert.title,\n            message: alert.message,\n            data: {\n                push: {\n                    sound: alert.critical\n                        ? { name: 'default', critical: 1, volume: 1.0 }\n                        : { name: 'default' }\n                }\n            }\n        }\n    }\n};\n\n// Output 2: HA Persistent Notification\nconst haMsg = {\n    payload: {\n        data: {\n            title: alert.title,\n            message: alert.message,\n            notification_id: 'mroom_' + (alert.id || 'alert')\n        }\n    }\n};\n\nreturn [iosMsg, haMsg];",
     "outputs": 2,
     "timeout": 0,
@@ -204,13 +238,20 @@
     "libs": [],
     "x": 700,
     "y": 340,
-    "wires": [["fc00a1b2c3d4e5f6"], ["fd00a1b2c3d4e5f6"]]
+    "wires": [
+      [
+        "fc00a1b2c3d4e5f6"
+      ],
+      [
+        "fd00a1b2c3d4e5f6"
+      ]
+    ]
   },
   {
     "id": "fc00a1b2c3d4e5f6",
     "type": "api-call-service",
     "z": "f100a1b2c3d4e5f6",
-    "name": "📱 iOS Push",
+    "name": "\ud83d\udcf1 iOS Push",
     "server": "95e75a8c.0c1288",
     "version": 7,
     "debugenabled": true,
@@ -231,13 +272,17 @@
     "service": "mobile_app_iphonep",
     "x": 940,
     "y": 300,
-    "wires": [["fe00a1b2c3d4e5f6"]]
+    "wires": [
+      [
+        "fe00a1b2c3d4e5f6"
+      ]
+    ]
   },
   {
     "id": "fd00a1b2c3d4e5f6",
     "type": "api-call-service",
     "z": "f100a1b2c3d4e5f6",
-    "name": "🏠 HA Persistent",
+    "name": "\ud83c\udfe0 HA Persistent",
     "server": "95e75a8c.0c1288",
     "version": 7,
     "debugenabled": false,
@@ -258,13 +303,15 @@
     "service": "create",
     "x": 960,
     "y": 400,
-    "wires": [[]]
+    "wires": [
+      []
+    ]
   },
   {
     "id": "fe00a1b2c3d4e5f6",
     "type": "debug",
     "z": "f100a1b2c3d4e5f6",
-    "name": "📋 Alert Log",
+    "name": "\ud83d\udccb Alert Log",
     "active": true,
     "tosidebar": true,
     "console": false,
@@ -298,5 +345,69 @@
     "modules": {
       "node-red-contrib-home-assistant-websocket": "0.80.3"
     }
+  },
+  {
+    "id": "g100a1b2c3d4e5f6",
+    "type": "server-state-changed",
+    "z": "f100a1b2c3d4e5f6",
+    "name": "\u23f1\ufe0f MROOM Uptime",
+    "server": "95e75a8c.0c1288",
+    "version": 6,
+    "outputs": 1,
+    "exposeAsEntityConfig": "",
+    "entities": {
+      "entity": [
+        "sensor.mushroom_room_controller_mroom_system_uptime_esp32s3_2"
+      ],
+      "substring": [],
+      "regex": []
+    },
+    "outputInitially": false,
+    "stateType": "str",
+    "ifState": "",
+    "ifStateType": "str",
+    "ifStateOperator": "is",
+    "outputOnlyOnStateChange": true,
+    "for": "0",
+    "forType": "num",
+    "forUnits": "seconds",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": true,
+    "ignoreCurrentStateUnavailable": true,
+    "outputProperties": [
+      {
+        "property": "payload",
+        "propertyType": "msg",
+        "value": "",
+        "valueType": "entityState"
+      }
+    ],
+    "x": 150,
+    "y": 270,
+    "wires": [
+      [
+        "g200a1b2c3d4e5f6"
+      ]
+    ]
+  },
+  {
+    "id": "g200a1b2c3d4e5f6",
+    "type": "function",
+    "z": "f100a1b2c3d4e5f6",
+    "name": "\ud83d\udc93 Heartbeat",
+    "func": "flow.set('last_temp_time', Date.now());\nreturn null;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 420,
+    "y": 270,
+    "wires": [
+      []
+    ]
   }
 ]
