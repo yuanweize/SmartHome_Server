@@ -15,6 +15,8 @@
 #   2. Thermostat Hysteresis 2°C   — 死区防止继电器颤振
 #   3. min_heating_run/off_time    — 防止触点频繁启停损坏
 #   4. Sensor Watchdog (30s)       — BMP180 故障时紧急断电
+#   5. internal: true              — 禁止外部(MQTT/HA)直接控制继电器
+#   6. Consistency Guard (30s)     — 看门狗强制继电器状态与恒温器一致
 # ============================================================
 
 
@@ -91,6 +93,17 @@ mqtt:
   certificate_authority: !secret mqtt_ca_cert
   client_certificate: !secret mqtt_client_cert
   client_certificate_key: !secret mqtt_client_key
+  # MQTT 重连后强制恢复 HEAT 模式
+  # 原理: MQTT retained 消息会在连接时立即重放,
+  #   如果上次手动设了 OFF, 重连后会被重放导致恒温器停机.
+  #   等待 15 秒让 retained 消息处理完, 然后强制覆盖为 HEAT.
+  on_connect:
+    then:
+      - delay: 15s
+      - climate.control:
+          id: mroom_thermostat
+          mode: HEAT
+      - logger.log: "MQTT connected → Thermostat forced to HEAT mode"
 
 
 # ============================================================
@@ -141,6 +154,10 @@ i2c:
 
 switch:
   # 加热垫 (28W) — GPIO14 / IN1
+  #
+  # internal: true — 禁止 HA/MQTT 直接操控此开关
+  #   只允许恒温器通过 heat_action/idle_action 控制
+  #   防止 MQTT retained 消息 或 HA 面板误操作导致继电器被外部开启
   - platform: gpio
     pin:
       number: GPIO14
@@ -149,6 +166,7 @@ switch:
     id: relay_heater
     icon: "mdi:radiator"
     restore_mode: ALWAYS_OFF
+    internal: true
 
   # ┌──────────────────────────────────────────────────────────┐
   # │ 预留继电器模板 — 添加新设备时复制修改                      │
@@ -224,14 +242,18 @@ climate:
 
 
 # ============================================================
-# 传感器看门狗 — Fail-Safe
+# 传感器看门狗 + 一致性守卫 — Fail-Safe
 #
-# 每 30 秒检查 BMP180 健康状态:
-#   Case 1: state = NaN (从未初始化)
-#   Case 2: 超过 60 秒无新数据 (I2C 断线)
-#   Case 3: 启动 90 秒后仍无读数 (硬件故障)
+# 每 30 秒检查:
+#   A. BMP180 健康状态:
+#     Case 1: state = NaN (从未初始化)
+#     Case 2: 超过 60 秒无新数据 (I2C 断线)
+#     Case 3: 启动 90 秒后仍无读数 (硬件故障)
+#     触发故障 → 立即切断加热垫 → 防止过热烤死菌丝
 #
-# 触发故障 → 立即切断加热垫 → 防止过热烤死菌丝
+#   B. 恒温器-继电器一致性守卫:
+#     恒温器 IDLE 但继电器仍通电 → 强制关闭
+#     防止 MQTT retained 消息或其他外部操作导致继电器失控
 # ============================================================
 
 interval:
@@ -240,6 +262,8 @@ interval:
       - lambda: |-
           unsigned long now = millis();
           bool sensor_fault = false;
+
+          // === A. 传感器健康检查 ===
 
           // Case 1: 传感器从未成功读取
           if (isnan(id(bmp180_temp).state)) {
@@ -263,6 +287,32 @@ interval:
             ESP_LOGE("WATCHDOG", ">>> EMERGENCY: Heater OFF <<<");
             id(relay_heater).turn_off();
           }
+
+          // === B. 恒温器-继电器一致性守卫 ===
+          // 如果恒温器处于 IDLE 但继电器仍在通电 → 强制关闭
+          // 这可以捕获所有外部干扰: MQTT retained msg, HA误操作, 状态漂移等
+          if (!sensor_fault && id(relay_heater).state) {
+            auto action = id(mroom_thermostat).action;
+            if (action == climate::CLIMATE_ACTION_IDLE || action == climate::CLIMATE_ACTION_OFF) {
+              ESP_LOGW("WATCHDOG", ">>> CONSISTENCY GUARD: Heater ON but thermostat IDLE/OFF — forcing OFF <<<");
+              id(relay_heater).turn_off();
+            }
+          }
+
+
+# ============================================================
+# 加热状态监控 — 只读 (替代 internal switch 在 HA 中的可见性)
+#
+# binary_sensor 只能读不能写，Node-RED 和 HA 可以监控但无法控制
+# ============================================================
+
+binary_sensor:
+  - platform: template
+    name: "MROOM Heater Active"
+    id: heater_status_sensor
+    lambda: 'return id(relay_heater).state;'
+    device_class: heat
+    icon: "mdi:radiator"
 
 
 # ============================================================
