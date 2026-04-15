@@ -87,7 +87,7 @@ captive_portal:
 mqtt:
   broker: !secret mqtt_broker
   port: !secret mqtt_port
-  discovery: true
+  discovery: false
   discovery_prefix: homeassistant
   reboot_timeout: 5min
   certificate_authority: !secret mqtt_ca_cert
@@ -341,11 +341,14 @@ sensor:
       id: bmp180_temp
       accuracy_decimals: 1
       filters:
-        - sliding_window_moving_average:
-            window_size: 3
+        # 1. 中值滤波: 彻底无视任何离谱的瞬间乱码尖峰 (取最近5次排中间的数)
+        - median:
+            window_size: 5
             send_every: 1
-      # 每次成功读取时更新看门狗时间戳
-      on_value:
+        # 2. 突变拦截: 只有变化超过 0.1 度才汇报，减轻系统判断压力
+        - delta: 0.1
+      # 每次成功读取时更新看门狗时间戳 (必须用 on_raw_value，否则会被 delta 过滤掉导致稳态下触发看门狗断电)
+      on_raw_value:
         then:
           - lambda: |-
               id(last_temp_update_ms) = millis();

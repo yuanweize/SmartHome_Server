@@ -11,7 +11,7 @@
     "type": "comment",
     "z": "f100a1b2c3d4e5f6",
     "name": "⚠️ 部署说明 / Setup Instructions",
-    "info": "## 部署前必须确认:\n\n### 1. Entity ID\n请在 HA → 开发者工具 → 状态 中搜索 'mroom'，\n确认以下 Entity ID 是否正确：\n- 温度: `sensor.mushroom_room_controller_mroom_mroom_temperature`\n- 加热垫: `binary_sensor.mushroom_room_controller_mroom_mroom_heater_active`\n\n如果不同，请修改下方两个 State Changed 节点中的 entity 配置。\n\n### 2. 通知服务\n确认 iOS 通知 service 名称：`notify.mobile_app_iphonep`\n在 HA → 开发者工具 → 服务 中搜索 notify 确认。\n\n### 3. HA 服务器\n确认 Home Assistant 服务器连接节点已正确配置。",
+    "info": "## 部署前必须确认:\n\n### 1. Entity ID\n请在 HA → 开发者工具 → 状态 中搜索 'mroom'，\n确认以下 Entity ID 是否正确：\n- 温度: `sensor.mushroom_room_controller_mroom_mroom_temperature_2`\n- 加热垫: `binary_sensor.mushroom_room_controller_mroom_mroom_heater_active_2`\n\n如果不同，请修改下方两个 State Changed 节点中的 entity 配置。\n\n### 2. 通知服务\n确认 iOS 通知 service 名称：`notify.mobile_app_iphonep`\n在 HA → 开发者工具 → 服务 中搜索 notify 确认。\n\n### 3. HA 服务器\n确认 Home Assistant 服务器连接节点已正确配置。",
     "x": 220,
     "y": 60,
     "wires": []
@@ -26,7 +26,7 @@
     "outputs": 1,
     "exposeAsEntityConfig": "",
     "entities": {
-      "entity": ["sensor.mushroom_room_controller_mroom_mroom_temperature"],
+      "entity": ["sensor.mushroom_room_controller_mroom_mroom_temperature_2"],
       "substring": [],
       "regex": []
     },
@@ -82,7 +82,7 @@
     "outputs": 1,
     "exposeAsEntityConfig": "",
     "entities": {
-      "entity": ["binary_sensor.mushroom_room_controller_mroom_mroom_heater_active"],
+      "entity": ["binary_sensor.mushroom_room_controller_mroom_mroom_heater_active_2"],
       "substring": [],
       "regex": []
     },
