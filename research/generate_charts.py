@@ -517,6 +517,103 @@ def chart_marketing_mix():
 
 
 # =====================================================================
+# EUR/CZK EXCHANGE RATE — from ČNB API
+#
+# VERIFIED (Czech National Bank API, real-time):
+#   Annual average EUR/CZK exchange rates 2018–2025
+#
+# WHY IN THESIS: Franui is produced in Spain (EUR zone) and imported.
+#   Exchange rate volatility directly affects import costs.
+#   A stronger CZK (lower rate) = cheaper imports = more competition.
+#   This supports the argument for local production (Berrie).
+# =====================================================================
+def chart_eur_czk():
+    csv_path = DATA_DIR / 'cnb_eur_czk.csv'
+    if not csv_path.exists():
+        print("    ⚠ cnb_eur_czk.csv not found. Run fetch_api_data.py first.")
+        return
+    
+    df = pd.read_csv(csv_path)
+    
+    fig, ax = plt.subplots(figsize=(9, 5))
+    ax.plot(df['year'], df['avg_rate'], 'o-', color=BERRIE_BLUE,
+            linewidth=2.5, markersize=8, zorder=3)
+    
+    for _, row in df.iterrows():
+        ax.text(row['year'], row['avg_rate'] + 0.2,
+                f"{row['avg_rate']:.2f}", ha='center', fontsize=9, fontweight='bold')
+    
+    # Highlight the impact zone
+    ax.axhspan(25.0, 27.0, alpha=0.05, color='red')
+    ax.axhspan(23.0, 25.0, alpha=0.05, color='green')
+    
+    ax.set_xlabel("Rok")
+    ax.set_ylabel("Prumerny rocni kurz EUR/CZK")
+    ax.set_title("Vyvoj kurzu EUR/CZK (2018-2025)",
+                 fontweight='bold', pad=12)
+    ax.set_ylim(22, 28)
+    
+    ax.annotate('Zdroj: Ceska narodni banka (CNB) - API',
+                xy=(0.99, 0.01), xycoords='axes fraction',
+                fontsize=7, color='gray', ha='right', va='bottom')
+    
+    sns.despine()
+    fig.tight_layout()
+    save(fig, "eur_czk_rate")
+
+
+# =====================================================================
+# GDP PPP PER CAPITA — from World Bank API
+#
+# VERIFIED (World Bank Open Data API):
+#   CZ GDP per capita, PPP (current international $), 2018–2024
+#
+# WHY IN THESIS: Growing purchasing power supports the thesis that
+#   Czech consumers can increasingly afford premium products like Berrie.
+#   Directly relevant for PSM analysis and pricing justification.
+# =====================================================================
+def chart_gdp_ppp():
+    csv_path = DATA_DIR / 'worldbank_gdp_ppp.csv'
+    if not csv_path.exists():
+        print("    ⚠ worldbank_gdp_ppp.csv not found. Run fetch_api_data.py first.")
+        return
+    
+    df = pd.read_csv(csv_path)
+    
+    fig, ax = plt.subplots(figsize=(9, 5))
+    bars = ax.bar(df['year'], df['gdp_ppp_per_capita_usd'] / 1000,
+                  color=BERRIE_BLUE, alpha=0.7, width=0.55, edgecolor='white')
+    
+    for bar, val in zip(bars, df['gdp_ppp_per_capita_usd']):
+        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.3,
+                f"${val/1000:.1f}k", ha='center', fontsize=9, fontweight='bold')
+    
+    # Growth annotation
+    first_val = df['gdp_ppp_per_capita_usd'].iloc[0]
+    last_val = df['gdp_ppp_per_capita_usd'].iloc[-1]
+    growth = (last_val / first_val - 1) * 100
+    ax.annotate(f'+{growth:.0f} % za {len(df)-1} let',
+                xy=(df['year'].iloc[-1], last_val/1000),
+                xytext=(df['year'].iloc[-2]-0.5, last_val/1000 + 3),
+                fontsize=10, color=BERRIE_PINK, fontweight='bold',
+                arrowprops=dict(arrowstyle='->', color=BERRIE_PINK))
+    
+    ax.set_xlabel("Rok")
+    ax.set_ylabel("HDP na osobu, PPP (tis. USD)")
+    ax.set_title("Kupni sila: HDP na osobu v CR (PPP, 2018-2024)",
+                 fontweight='bold', pad=12)
+    ax.set_ylim(0, 65)
+    
+    ax.annotate('Zdroj: World Bank Open Data API',
+                xy=(0.99, 0.01), xycoords='axes fraction',
+                fontsize=7, color='gray', ha='right', va='bottom')
+    
+    sns.despine()
+    fig.tight_layout()
+    save(fig, "gdp_ppp_cz")
+
+
+# =====================================================================
 # UTILITY
 # =====================================================================
 def save(fig, name):
@@ -537,32 +634,38 @@ if __name__ == "__main__":
     print("  Data source: research/data/*.csv")
     print("=" * 60)
 
-    print("\n[1/9] Market size – Eastern Europe (VERIFIED)...")
+    print("\n[1/11] Market size – Eastern Europe (VERIFIED)...")
     chart_market_size()
 
-    print("[2/9] Fruit consumption – Czech Republic (VERIFIED ČSÚ)...")
+    print("[2/11] Fruit consumption – Czech Republic (VERIFIED ČSÚ)...")
     chart_fruit_consumption()
 
-    print("[3/9] Price comparison (VERIFIED Rohlík.cz)...")
+    print("[3/11] Price comparison (VERIFIED Rohlík.cz)...")
     chart_price_comparison()
 
-    print("[4/9] PSM analysis – SIMULATION...")
+    print("[4/11] PSM analysis – SIMULATION...")
     chart_psm_analysis()
 
-    print("[5/9] Chocolate consumption – Czech Republic (VERIFIED ČSÚ)...")
+    print("[5/11] Chocolate consumption – Czech Republic (VERIFIED ČSÚ)...")
     chart_chocolate_consumption()
 
-    print("[6/9] Ice cream consumption – Czech Republic (ESTIMATE)...")
+    print("[6/11] Ice cream consumption – Czech Republic (ESTIMATE)...")
     chart_ice_cream_consumption()
 
-    print("[7/9] Segmentation radar (SUBJECTIVE)...")
+    print("[7/11] Segmentation radar (SUBJECTIVE)...")
     chart_segmentation()
 
-    print("[8/9] Per capita spending EE vs WE (VERIFIED)...")
+    print("[8/11] Per capita spending EE vs WE (VERIFIED)...")
     chart_percapita_comparison()
 
-    print("[9/9] Marketing mix 4P (SUBJECTIVE)...")
+    print("[9/11] Marketing mix 4P (SUBJECTIVE)...")
     chart_marketing_mix()
+
+    print("[10/11] EUR/CZK exchange rate (VERIFIED ČNB API)...")
+    chart_eur_czk()
+
+    print("[11/11] GDP PPP per capita (VERIFIED World Bank API)...")
+    chart_gdp_ppp()
 
     print("\n" + "=" * 60)
     print(f"  All charts saved to:")
