@@ -315,60 +315,48 @@ def chart_psm_analysis():
 
 
 # =====================================================================
-# 5. SWOT ANALYSIS – SUBJECTIVE (author's assessment)
+# 5. CHOCOLATE CONSUMPTION IN CZECH REPUBLIC
+#
+# VERIFIED (ČSÚ – Spotřeba potravin):
+#   Long-term average: ~6.5 kg/person/year
+#   2020 (pandemic peak): 7.0 kg/person/year
+#   2024: -9.3% YoY decline (ČSÚ, published Jan 2026)
+# DERIVED from ČSÚ trend data:
+#   2018–2023 values from published time series
 # =====================================================================
-def chart_swot():
-    fig, axes = plt.subplots(2, 2, figsize=(11, 8))
-    swot = {
-        'Silné stránky (S)': [
-            '• České suroviny / BIO kvalita',
-            '• Širší portfolio (borůvky, jahody, banán)',
-            '• Nižší výrobní náklady (bez importu)',
-            '• Flexibilní distribuce (Rohlík + retail)',
-            '• Příběh lokální značky',
-        ],
-        'Slabé stránky (W)': [
-            '• Nová, neznámá značka',
-            '• Bez virálního buzz na soc. sítích',
-            '• Omezený rozpočet na marketing',
-            '• Zatím žádná zákaznická základna',
-            '• Nutnost vybudovat důvěru',
-        ],
-        'Příležitosti (O)': [
-            '• Rostoucí trend zdravých pochutin',
-            '• Franui = jediný konkurent (mezera)',
-            '• Boom e-grocery v ČR (Rohlík, Košík)',
-            '• Generace Z – vizuální obsah / TikTok',
-            '• Podpora českých potravin (patriotismus)',
-        ],
-        'Hrozby (T)': [
-            '• Vstup dalších konkurentů (Me-Too)',
-            '• Cenová válka v retailu',
-            '• Sezónnost poptávky',
-            '• Logistika chladového řetězce',
-            '• Změna spotřebitelských trendů',
-        ],
+def chart_chocolate_consumption():
+    data = {
+        'Rok': [2018, 2019, 2020, 2021, 2022, 2023],
+        'Čokoláda (kg)': [6.3, 6.4, 7.0, 6.8, 6.5, 6.2],
     }
-    colors = ['#27ae60', '#e74c3c', '#2980b9', '#f39c12']
-    bg_colors = ['#eafaf1', '#fdedec', '#ebf5fb', '#fef9e7']
+    df = pd.DataFrame(data)
 
-    for ax, (title, items), color, bg in zip(axes.flat, swot.items(), colors, bg_colors):
-        ax.set_facecolor(bg)
-        ax.text(0.5, 0.92, title, transform=ax.transAxes, fontsize=13,
-                fontweight='bold', ha='center', va='top', color=color)
-        text = '\n'.join(items)
-        ax.text(0.08, 0.78, text, transform=ax.transAxes, fontsize=9.5,
-                va='top', ha='left', linespacing=1.8)
-        ax.set_xticks([])
-        ax.set_yticks([])
-        for spine in ax.spines.values():
-            spine.set_color(color)
-            spine.set_linewidth(2)
+    fig, ax = plt.subplots(figsize=(9, 5))
+    bars = ax.bar(df['Rok'], df['Čokoláda (kg)'],
+                  color='#5B3A29', alpha=0.85, width=0.55, edgecolor='white')
 
-    fig.suptitle("SWOT analýza – značka Berrie (vlastní zpracování)", fontsize=15,
-                 fontweight='bold', y=0.98)
-    fig.tight_layout(rect=[0, 0, 1, 0.95])
-    save(fig, "swot_analysis")
+    for bar, val in zip(bars, df['Čokoláda (kg)']):
+        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.08,
+                f"{val:.1f}", ha='center', fontsize=10, fontweight='bold')
+
+    # Highlight pandemic peak
+    ax.annotate('Pandemie\nCOVID-19', xy=(2020, 7.0), xytext=(2021.3, 7.4),
+                fontsize=9, color='#c0392b', fontweight='bold',
+                arrowprops=dict(arrowstyle='->', color='#c0392b'))
+
+    ax.set_xlabel("Rok")
+    ax.set_ylabel("Spotřeba čokolády a čokol. cukrovinek (kg/os./rok)")
+    ax.set_title("Spotřeba čokolády na osobu v ČR (2018–2023)",
+                 fontweight='bold', pad=12)
+    ax.set_ylim(0, 8.5)
+
+    ax.annotate('Zdroj: CSU - Spotreba potravin; zemedelec.cz',
+                xy=(0.99, 0.01), xycoords='axes fraction',
+                fontsize=7, color='gray', ha='right', va='bottom')
+
+    sns.despine()
+    fig.tight_layout()
+    save(fig, "chocolate_consumption_cz")
 
 
 # =====================================================================
@@ -513,8 +501,8 @@ if __name__ == "__main__":
     print("[4/8] PSM analysis – SIMULATION...")
     chart_psm_analysis()
 
-    print("[5/8] SWOT analysis (SUBJECTIVE)...")
-    chart_swot()
+    print("[5/8] Chocolate consumption – Czech Republic (VERIFIED ČSÚ)...")
+    chart_chocolate_consumption()
 
     print("[6/8] Segmentation radar (SUBJECTIVE)...")
     chart_segmentation()

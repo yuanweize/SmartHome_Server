@@ -124,10 +124,9 @@
 }
 
 % ============================================================================
-% Bibliografie – APA 7. vydání
+% Bibliografie – ISO 690 (číslované odkazy)
 % ============================================================================
-\RequirePackage[style=apa,backend=biber]{biblatex}
-\DeclareLanguageMapping{czech}{czech-apa}
+\RequirePackage[style=numeric,sorting=none,backend=biber]{biblatex}
 
 \DeclareBibliographyCategory{fullcited}
 \newcommand{\bibentry}[1]{\fullcite{#1}\addtocategory{fullcited}{#1}}
