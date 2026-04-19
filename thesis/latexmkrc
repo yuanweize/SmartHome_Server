@@ -1,0 +1,23 @@
+# latexmk konfigurace (LuaLaTeX)
+@default_files = ('main.tex');
+
+$pdf_mode = 4;             # 4 = lualatex
+
+# Diagnostika
+$interaction = 'nonstopmode';
+$lualatex = 'lualatex -file-line-error -interaction=nonstopmode %O %S';
+
+# Mapování -pdf na lualatex
+$pdflatex = $lualatex;
+
+# Nezpotlačovat výstup
+$silent = 0;
+
+# Bibliografie
+$bibtex_use = 2;           # 2 = biber (biblatex backend)
+
+# Výstup do adresáře build/
+$out_dir = 'build';
+
+# Čištění
+$clean_ext .= ' acn acr alg glo glg gls glsdefs ist loa lol lot out run.xml bbl blg bcf bbl-SAVE-ERROR';

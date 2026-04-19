@@ -1,0 +1,101 @@
+% !TeX program = lualatex
+% !TeX spellcheck = cs_CZ
+\documentclass{thesis}
+% \documentclass[print]{thesis}
+
+% Zajistit správné konce řádků v .aux/.toc
+\endlinechar=13
+\usepackage[czech]{babel}
+\usepackage{csquotes}
+
+%% Balíčky pro diplomovou práci
+\usepackage{booktabs}       % Kvalitní tabulky
+\usepackage{multirow}       % Víceřádkové buňky
+\usepackage{graphicx}       % Obrázky
+\usepackage{tabularx}       % Flexibilní tabulky
+\usepackage{array}
+\usepackage{amsmath}        % Matematika
+\usepackage{float}          % Přesné umístění [H]
+\usepackage{pdfpages}       % Vkládání PDF stran
+\usepackage{enumitem}       % Konfigurace seznamů
+\usepackage{threeparttable} % Poznámky pod tabulkou
+
+% Typografická robustnost
+\emergencystretch=1em
+
+%% Zkratky
+\usepackage[acronym,toc]{glossaries}
+\makenoidxglossaries
+\input{acronyms}
+
+%% Bibliografie
+\addbibresource{literature.bib}
+
+% ============================================================================
+% Metadata
+% ============================================================================
+\university{Panevropská univerzita, a.s.}
+\faculty{Fakulta podnikání a práva}
+
+\thesistype{Diplomová práce}
+\studyprogram{Marketingové komunikace}
+
+\title{Marketingový výzkum pro vstup nové značky mraženého ovoce v čokoládě na český trh}
+\author{Bc. Catherine Zoë Meijer}
+
+\supervisor{doc. RNDr. Ivan TOMEK, CSc.}
+\supervisorAffiliation{%
+  Panevropská univerzita, a.s.\\
+  Fakulta podnikání a práva}
+
+\placeyear{Praha 2026}
+\date{2026}
+
+% ============================================================================
+\begin{document}
+
+%% Titulní strana
+\maketitle
+
+%% Zadání práce (naskenované) – vložit po obdržení
+% \includepdf[pages=-]{chapters/zadani.pdf}
+
+%% Čestné prohlášení
+\input{chapters/declaration}
+
+%% Poděkování
+\input{chapters/acknowledgements}
+
+%% Abstrakt (CZ + EN)
+\input{chapters/abstract}
+
+%% Obsah
+\tableofcontents
+
+%% Seznam zkratek
+\glsaddallunused
+\printnoidxglossary[type=\acronymtype,title=Seznam zkratek,toctitle=Seznam zkratek]
+
+%% Seznam obrázků a tabulek
+\listoffigures
+\listoftables
+
+%% Hlavní text
+\mainmatter
+\input{chapters/introduction}
+\input{chapters/theory}
+\input{chapters/methodology}
+\input{chapters/research}
+\input{chapters/results}
+\input{chapters/conclusion}
+
+%% Bibliografie
+\printbibliography[heading=bibintoc,title={Seznam použité literatury}]
+
+%% Přílohy
+\appendix
+\input{chapters/appendix}
+
+\backmatter
+
+\end{document}

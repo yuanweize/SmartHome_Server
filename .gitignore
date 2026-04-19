@@ -1,56 +1,17 @@
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.venv/
-venv/
-.env
+# === Citlivé / soukromé soubory ===
+private/*
+!private/.gitkeep
 
-# macOS
+# === LaTeX sestavení ===
+thesis/build/
+
+# === Vygenerované PDF ===
+dst/
+
+# === macOS ===
 .DS_Store
 
-# VSCode
+# === Editor ===
 .vscode/
-
-# GitHub metadata (user request: exclude .github)
-.github/
-
-# Project-specific (secrets / local config)
-sensors/brokers.yml
-sensors/*.local.yml
-sensors/*.dev.yml
-sensors/*.secrets.*
-
-# ESPHome secrets
-esphome/secrets.yaml
-
-# Docker / runtime logs
-*.log
-
-# Certificates / keys (avoid committing any private key material)
-*.key
-*.p12
-*.pfx
-*.crt
-*.pem
-
-# Local TLS material (keep documentation only)
-certs/**
-!certs/README.md
-!certs/README.zh-CN.md
-sensors/certs/
-
-# Docs: keep only docs/README tracked
-docs/BT/*
-!docs/BT/CTU_FEL_THESIS/
-!docs/BT/Review/
-!docs/BT/*.pdf
-
-
-# PDF converter working files
-docs/pdf2md/input/
-docs/pdf2md/output/
-docs/pdf2md/urls.txt
-docs/pdf2md/.cache.json
-test/*
+*.swp
+*~
