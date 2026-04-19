@@ -4,7 +4,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import urllib.parse
 import os
 
-DB_NAME = "survey_data.db"
+DB_NAME = os.path.join(os.path.dirname(__file__), "survey_data.db")
 
 def init_db():
     conn = sqlite3.connect(DB_NAME)

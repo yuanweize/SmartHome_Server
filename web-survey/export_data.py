@@ -2,8 +2,8 @@ import sqlite3
 import csv
 import os
 
-DB_PATH = "survey_data.db"
-CSV_OUT = "research/data/real_survey_responses.csv"
+DB_PATH = os.path.join(os.path.dirname(__file__), "survey_data.db")
+CSV_OUT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "research", "data", "real_survey_responses.csv")
 
 def export_to_csv():
     if not os.path.exists(DB_PATH):

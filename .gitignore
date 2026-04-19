@@ -15,4 +15,4 @@ dst/
 .vscode/
 *.swp
 *~
-survey_data.db
+web-survey/survey_data.db
