@@ -28,22 +28,18 @@ Repozitář je navržen tak, aby striktně odděloval zdrojové kódy práce od 
 
 ## 🛠 Jak zkompilovat PDF
 
-Pro kompilaci dokumentu do formátu PDF se používá zrychlená a zmenšená verze LaTeXu s názvem **TinyTeX**, která nevyžaduje práva administrátora. K překladu se používá `LuaLaTeX` a pro bibliografii `Biber`.
+Pro kompilaci dokumentu do formátu PDF se používá plnohodnotná instalace **MacTeX**. K překladu se používá engine `LuaLaTeX` a pro bibliografii nástroj `Biber`.
 
-### 1. Požadavky a instalace (Mac/Linux)
+### 1. Požadavky a instalace (macOS)
 
-Pokud na počítači nemáte nainstalovaný LaTeX, můžete využít odlehčený **TinyTeX**:
+Pokud na počítači nemáte nainstalovaný LaTeX, nainstalujte distribuci MacTeX:
 
 ```bash
-# Stažení a instalace TinyTeX (bez nutnosti sudo/root)
-curl -sL "https://yihui.org/tinytex/install-bin-unix.sh" | sh
-
-# Přidání TinyTeX do systémové cesty (upravte cestu podle vašeho systému)
-export PATH=$PATH:$HOME/Library/TinyTeX/bin/universal-darwin
-
-# Instalace potřebných LaTeX balíčků pro tuto práci
-tlmgr install biber biblatex biblatex-apa babel-czech csquotes glossaries mfirstuc xfor datatool multirow booktabs pdfpages enumitem threeparttable microtype latexmk xcolor hyperref lualatex-math
+# Instalace MacTeX přes Homebrew
+brew install --cask mactex
 ```
+
+*(Poznámka: Po dokončení instalace MacTeXu je obvykle nutné restartovat terminál, aby se aktualizovaly systémové cesty.)*
 
 ### 2. Kompilace práce
 
