@@ -87,12 +87,12 @@ class SurveyHandler(BaseHTTPRequestHandler):
                     e = int(data.get('psm_expensive', 0))
                     te = int(data.get('psm_too_expensive', 0))
                     
-                    if not (tc < c < e < te):
+                    if not (tc <= c <= e <= te):
                         self.send_response(400)
                         self.send_header('Content-type', 'application/json')
                         self.send_header('Access-Control-Allow-Origin', '*')
                         self.end_headers()
-                        self.wfile.write(json.dumps({'error': 'PSM logic validation failed'}).encode())
+                        self.wfile.write(json.dumps({'error': 'PSM logic validation failed: prices must be ascending'}).encode())
                         return
                 except ValueError:
                     pass # Ignore if they are not integers here, sqlite will handle or we enforce in frontend
