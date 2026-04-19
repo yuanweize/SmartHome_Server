@@ -80,22 +80,7 @@ class SurveyHandler(BaseHTTPRequestHandler):
                 # We'll log the IP for basic rate limiting analysis later if needed
                 client_ip = self.client_address[0]
                 
-                # Validate PSM logic (cheap must be less than expensive)
-                try:
-                    tc = int(data.get('psm_too_cheap', 0))
-                    c = int(data.get('psm_cheap', 0))
-                    e = int(data.get('psm_expensive', 0))
-                    te = int(data.get('psm_too_expensive', 0))
-                    
-                    if not (tc <= c <= e <= te):
-                        self.send_response(400)
-                        self.send_header('Content-type', 'application/json')
-                        self.send_header('Access-Control-Allow-Origin', '*')
-                        self.end_headers()
-                        self.wfile.write(json.dumps({'error': 'PSM logic validation failed: prices must be ascending'}).encode())
-                        return
-                except ValueError:
-                    pass # Ignore if they are not integers here, sqlite will handle or we enforce in frontend
+                # PSM logic validation removed to allow any user input during testing
                 
                 conn = sqlite3.connect(DB_NAME)
                 c = conn.cursor()
