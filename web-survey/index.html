@@ -3,126 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Výzkum trhu: Prémiové mražené pochutiny</title>
+    <title>Výzkum trhu: Prémiové mražené pochutiny | Market Research</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="lang-switcher">
+        <button class="lang-btn active" data-lang="cs">🇨🇿 CS</button>
+        <button class="lang-btn" data-lang="en">🇬🇧 EN</button>
+    </div>
+
     <div class="survey-container">
         <div class="progress-bar-container">
             <div class="progress-bar" id="progress"></div>
         </div>
 
         <header>
-            <h1>Spotřebitelský výzkum (CAWI)</h1>
-            <p>Akademický výzkum pro diplomovou práci na téma vstupu značky prémiových potravin na český trh.</p>
+            <h1 data-i18n="title">Spotřebitelský výzkum (CAWI)</h1>
+            <p data-i18n="subtitle">Akademický výzkum pro diplomovou práci na téma vstupu značky prémiových potravin na trh.</p>
         </header>
 
         <form id="survey-form">
+            <!-- ANTI-SPAM HONEYPOT (Hidden from real users) -->
+            <input type="text" name="website_url" class="honeypot" tabindex="-1" autocomplete="off" style="display:none;">
+            <input type="hidden" name="lang" id="lang-input" value="cs">
+
             <!-- PŘIVÍTÁNÍ -->
             <div class="question-group active" id="step-0">
-                <h2>Vítejte ve výzkumu</h2>
-                <p>Tento dotazník je součástí výzkumu trhu pro uvedení nové české značky "Berrie" (mražené ovoce v čokoládě). Vyplnění zabere přibližně 3 minuty. Vaše odpovědi jsou plně anonymní a slouží výhradně pro akademické účely.</p>
-                <div class="privacy-note">
+                <h2 data-i18n="welcome">Vítejte ve výzkumu</h2>
+                <p data-i18n="intro_text">Tento dotazník je součástí výzkumu trhu pro uvedení nové značky "Berrie" (mražené ovoce v čokoládě). Vyplnění zabere 3-4 minuty. Odpovědi jsou plně anonymní a slouží výhradně pro akademické účely.</p>
+                <div class="privacy-note" data-i18n="privacy">
                     🔒 Data nebudou poskytnuta třetím stranám.
                 </div>
-                <button type="button" class="btn btn-primary next-btn" data-target="1">Začít výzkum</button>
+                <button type="button" class="btn btn-primary next-btn" data-target="1" data-i18n="start_btn">Začít výzkum</button>
             </div>
 
-            <!-- DEMOGRAFIE A SCREENING -->
+            <!-- DEMOGRAFIE -->
             <div class="question-group" id="step-1">
-                <h2>1. Demografické údaje</h2>
+                <h2 data-i18n="q1_title">1. Demografické údaje</h2>
                 
                 <div class="form-group">
-                    <label>Do jaké věkové kategorie spadáte?</label>
+                    <label data-i18n="q1_age">Do jaké věkové kategorie spadáte?</label>
                     <div class="radio-options">
-                        <label class="radio-card"><input type="radio" name="age" value="18-24" required> <span>18–24 let</span></label>
-                        <label class="radio-card"><input type="radio" name="age" value="25-34"> <span>25–34 let</span></label>
-                        <label class="radio-card"><input type="radio" name="age" value="35-44"> <span>35–44 let</span></label>
-                        <label class="radio-card"><input type="radio" name="age" value="45+"> <span>45+ let</span></label>
+                        <label class="radio-card"><input type="radio" name="age" value="18-24" required> <span>18–24</span></label>
+                        <label class="radio-card"><input type="radio" name="age" value="25-34"> <span>25–34</span></label>
+                        <label class="radio-card"><input type="radio" name="age" value="35-44"> <span>35–44</span></label>
+                        <label class="radio-card"><input type="radio" name="age" value="45+"> <span>45+</span></label>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Máte v domácnosti děti mladší 15 let?</label>
+                    <label data-i18n="q1_children">Máte v domácnosti děti mladší 15 let?</label>
                     <div class="radio-options">
-                        <label class="radio-card"><input type="radio" name="children" value="yes" required> <span>Ano</span></label>
-                        <label class="radio-card"><input type="radio" name="children" value="no"> <span>Ne</span></label>
+                        <label class="radio-card"><input type="radio" name="children" value="yes" required> <span data-i18n="yes">Ano</span></label>
+                        <label class="radio-card"><input type="radio" name="children" value="no"> <span data-i18n="no">Ne</span></label>
                     </div>
                 </div>
 
                 <div class="nav-buttons">
-                    <button type="button" class="btn btn-secondary prev-btn" data-target="0">Zpět</button>
-                    <button type="button" class="btn btn-primary next-btn" data-target="2">Další</button>
+                    <button type="button" class="btn btn-secondary prev-btn" data-target="0" data-i18n="back">Zpět</button>
+                    <button type="button" class="btn btn-primary next-btn" data-target="2" data-i18n="next">Další</button>
                 </div>
             </div>
 
-            <!-- CONCEPT TEST -->
+            <!-- SROVNÁVACÍ HODNOCENÍ (4P & Vnímání) -->
             <div class="question-group" id="step-2">
-                <h2>2. Hodnocení produktu</h2>
-                <div class="concept-board">
-                    <div class="concept-image">🍓🫐🍌</div>
-                    <div class="concept-text">
-                        <h3>Představujeme značku Berrie</h3>
-                        <p>Zcela nový koncept české zdravé pochutiny: <strong>Šokově mražené české ovoce obalené v prémiové dvojité vrstvě čokolády.</strong></p>
-                        <ul>
-                            <li>✓ Pouze přírodní suroviny, žádná chemie</li>
-                            <li>✓ Křupavá čokoláda na povrchu, mražené ovoce uvnitř</li>
-                            <li>✓ Vyráběno lokálně v ČR</li>
-                        </ul>
+                <h2 data-i18n="q2_title">2. Srovnání produktů (Franui vs. Berrie)</h2>
+                
+                <p class="psm-intro" data-i18n="q2_intro">Ohodnoťte na škále 1-10 (1 = nejhorší, 10 = nejlepší) následující parametry pro existující argentinskou značku <strong>Franui</strong> (mražené maliny v čokoládě) a náš nový český koncept <strong>Berrie</strong> (mix českého ovoce, šokové mražení IQF, české BIO suroviny).</p>
+
+                <div class="comparison-grid">
+                    <!-- Franui Column -->
+                    <div class="competitor-card">
+                        <h3>Franui (Argentina)</h3>
+                        <div class="form-group">
+                            <label data-i18n="visual_appeal">Vizuální atraktivita</label>
+                            <input type="range" name="franui_visual" min="1" max="10" value="5" class="slider">
+                            <div class="val-display">5/10</div>
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="quality_perception">Vnímaná kvalita surovin</label>
+                            <input type="range" name="franui_quality" min="1" max="10" value="5" class="slider">
+                            <div class="val-display">5/10</div>
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="health_perception">Vnímání jako zdravá pochutina</label>
+                            <input type="range" name="franui_health" min="1" max="10" value="5" class="slider">
+                            <div class="val-display">5/10</div>
+                        </div>
+                    </div>
+
+                    <!-- Berrie Column -->
+                    <div class="competitor-card berrie-card">
+                        <h3>Berrie (Česká republika)</h3>
+                        <div class="form-group">
+                            <label data-i18n="visual_appeal">Vizuální atraktivita</label>
+                            <input type="range" name="berrie_visual" min="1" max="10" value="5" class="slider">
+                            <div class="val-display">5/10</div>
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="quality_perception">Vnímaná kvalita surovin</label>
+                            <input type="range" name="berrie_quality" min="1" max="10" value="5" class="slider">
+                            <div class="val-display">5/10</div>
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="health_perception">Vnímání jako zdravá pochutina</label>
+                            <input type="range" name="berrie_health" min="1" max="10" value="5" class="slider">
+                            <div class="val-display">5/10</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Která z těchto produktových variant vás zaujala nejvíce?</label>
-                    <div class="radio-options grid-2">
-                        <label class="radio-card product-card">
-                            <span class="emoji">🫐</span>
-                            <input type="radio" name="preference" value="blueberry" required>
-                            <span>Borůvky v bílé čokoládě</span>
-                        </label>
-                        <label class="radio-card product-card">
-                            <span class="emoji">🍓</span>
-                            <input type="radio" name="preference" value="strawberry">
-                            <span>Jahody v hořké čokoládě</span>
-                        </label>
-                        <label class="radio-card product-card">
-                            <span class="emoji">🍌</span>
-                            <input type="radio" name="preference" value="banana">
-                            <span>Banán v mléčné čokoládě</span>
-                        </label>
-                        <label class="radio-card product-card">
-                            <span class="emoji">🎨</span>
-                            <input type="radio" name="preference" value="mix">
-                            <span>Mix ovoce</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Koupili byste si tento produkt, pokud by byl dostupný ve vašem oblíbeném obchodě (např. na Rohlík.cz)?</label>
+                <div class="form-group" style="margin-top: 30px;">
+                    <label data-i18n="q2_intent">Koupili byste si značku Berrie, pokud by byla dostupná ve vašem obchodě?</label>
                     <div class="likert-scale">
-                        <label><input type="radio" name="intent" value="1" required><span>Určitě ne</span></label>
-                        <label><input type="radio" name="intent" value="2"><span>Spíše ne</span></label>
-                        <label><input type="radio" name="intent" value="3"><span>Nevím</span></label>
-                        <label><input type="radio" name="intent" value="4"><span>Spíše ano</span></label>
-                        <label><input type="radio" name="intent" value="5"><span>Určitě ano</span></label>
+                        <label><input type="radio" name="intent" value="1" required><span data-i18n="intent_1">Určitě ne</span></label>
+                        <label><input type="radio" name="intent" value="2"><span data-i18n="intent_2">Spíše ne</span></label>
+                        <label><input type="radio" name="intent" value="3"><span data-i18n="intent_3">Nevím</span></label>
+                        <label><input type="radio" name="intent" value="4"><span data-i18n="intent_4">Spíše ano</span></label>
+                        <label><input type="radio" name="intent" value="5"><span data-i18n="intent_5">Určitě ano</span></label>
                     </div>
                 </div>
 
                 <div class="nav-buttons">
-                    <button type="button" class="btn btn-secondary prev-btn" data-target="1">Zpět</button>
-                    <button type="button" class="btn btn-primary next-btn" data-target="3">Další</button>
+                    <button type="button" class="btn btn-secondary prev-btn" data-target="1" data-i18n="back">Zpět</button>
+                    <button type="button" class="btn btn-primary next-btn" data-target="3" data-i18n="next">Další</button>
                 </div>
             </div>
 
             <!-- PRICE SENSITIVITY METER (PSM) -->
             <div class="question-group" id="step-3">
-                <h2>3. Cenová citlivost (150g balení)</h2>
-                <p class="psm-intro">Běžná velikost balení je 150 gramů (zhruba velikost menší bonboniéry). Na základě vašich dojmů, při jaké ceně za toto balení byste produkt považovali za:</p>
+                <h2 data-i18n="q3_title">3. Cenová citlivost (Berrie 150g)</h2>
+                <p class="psm-intro" data-i18n="q3_intro">Běžná velikost balení je 150 gramů (zhruba velikost menší bonboniéry). Na základě vašich dojmů, při jaké ceně za toto balení byste produkt považovali za:</p>
                 
                 <div class="form-group psm-group">
-                    <label>Příliš <strong>levný</strong> (pochybovali byste o kvalitě)</label>
+                    <label data-i18n="psm_1">Příliš <strong>levný</strong> (pochybovali byste o kvalitě)</label>
                     <div class="input-with-currency">
                         <input type="number" name="psm_too_cheap" min="10" max="500" required>
                         <span class="currency">Kč</span>
@@ -130,7 +145,7 @@
                 </div>
 
                 <div class="form-group psm-group">
-                    <label><strong>Výhodný</strong> (skvělý nákup za tuto cenu)</label>
+                    <label data-i18n="psm_2"><strong>Výhodný</strong> (skvělý nákup za tuto cenu)</label>
                     <div class="input-with-currency">
                         <input type="number" name="psm_cheap" min="10" max="500" required>
                         <span class="currency">Kč</span>
@@ -138,7 +153,7 @@
                 </div>
 
                 <div class="form-group psm-group">
-                    <label><strong>Drahý</strong> (stále byste zvažovali koupi)</label>
+                    <label data-i18n="psm_3"><strong>Drahý</strong> (stále byste zvažovali koupi)</label>
                     <div class="input-with-currency">
                         <input type="number" name="psm_expensive" min="10" max="500" required>
                         <span class="currency">Kč</span>
@@ -146,7 +161,7 @@
                 </div>
 
                 <div class="form-group psm-group">
-                    <label>Příliš <strong>drahý</strong> (už byste jej nekoupili)</label>
+                    <label data-i18n="psm_4">Příliš <strong>drahý</strong> (už byste jej nekoupili)</label>
                     <div class="input-with-currency">
                         <input type="number" name="psm_too_expensive" min="10" max="500" required>
                         <span class="currency">Kč</span>
@@ -154,53 +169,51 @@
                 </div>
 
                 <div class="nav-buttons">
-                    <button type="button" class="btn btn-secondary prev-btn" data-target="2">Zpět</button>
-                    <button type="button" class="btn btn-primary next-btn" data-target="4">Další</button>
+                    <button type="button" class="btn btn-secondary prev-btn" data-target="2" data-i18n="back">Zpět</button>
+                    <button type="button" class="btn btn-primary next-btn" data-target="4" data-i18n="next">Další</button>
                 </div>
             </div>
 
-            <!-- LOCAL PATRIOTISM (CETSCALE) -->
+            <!-- LOCAL PATRIOTISM -->
             <div class="question-group" id="step-4">
-                <h2>4. Postoje k potravinám</h2>
+                <h2 data-i18n="q4_title">4. Postoje k lokálním potravinám</h2>
                 
                 <div class="form-group">
-                    <label>Nakolik je pro vás důležité, aby potraviny byly vyrobeny v České republice?</label>
+                    <label data-i18n="q4_local">Nakolik je pro vás důležité, aby potraviny byly vyrobeny lokálně?</label>
                     <div class="slider-container">
-                        <input type="range" name="local_importance" min="1" max="10" value="5" class="slider" id="localSlider">
+                        <input type="range" name="local_importance" min="1" max="10" value="5" class="slider">
                         <div class="slider-labels">
-                            <span>Vůbec ne (1)</span>
-                            <span id="localVal" class="slider-val">5</span>
-                            <span>Zcela klíčové (10)</span>
+                            <span data-i18n="scale_low">Vůbec (1)</span>
+                            <span class="val-display">5/10</span>
+                            <span data-i18n="scale_high">Zcela (10)</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Jste ochotni zaplatit vyšší cenu za český výrobek oproti importovanému zahraničnímu?</label>
+                    <label data-i18n="q4_premium">Jste ochotni zaplatit vyšší cenu za lokální výrobek oproti importovanému?</label>
                     <div class="radio-options">
-                        <label class="radio-card"><input type="radio" name="premium_wtp" value="no" required> <span>Ne, kupuji to nejlevnější</span></label>
-                        <label class="radio-card"><input type="radio" name="premium_wtp" value="up_to_10"> <span>Ano, maximálně do +10 %</span></label>
-                        <label class="radio-card"><input type="radio" name="premium_wtp" value="10_to_25"> <span>Ano, mezi +10 % až +25 %</span></label>
-                        <label class="radio-card"><input type="radio" name="premium_wtp" value="over_25"> <span>Ano, i o více než 25 % dráž</span></label>
+                        <label class="radio-card"><input type="radio" name="premium_wtp" value="no" required> <span data-i18n="premium_no">Ne</span></label>
+                        <label class="radio-card"><input type="radio" name="premium_wtp" value="up_to_10"> <span data-i18n="premium_10">Ano, max do +10 %</span></label>
+                        <label class="radio-card"><input type="radio" name="premium_wtp" value="10_to_25"> <span data-i18n="premium_25">Ano, +10 % až +25 %</span></label>
+                        <label class="radio-card"><input type="radio" name="premium_wtp" value="over_25"> <span data-i18n="premium_more">Ano, i o více než 25 %</span></label>
                     </div>
                 </div>
 
                 <div class="nav-buttons">
-                    <button type="button" class="btn btn-secondary prev-btn" data-target="3">Zpět</button>
-                    <button type="submit" class="btn btn-success">Odeslat dotazník</button>
+                    <button type="button" class="btn btn-secondary prev-btn" data-target="3" data-i18n="back">Zpět</button>
+                    <button type="submit" class="btn btn-success" data-i18n="submit">Odeslat dotazník</button>
                 </div>
             </div>
 
-            <!-- DĚKOVAČKA -->
+            <!-- SUCCESS -->
             <div class="question-group" id="step-success">
                 <div class="success-message">
                     <div class="checkmark">✅</div>
-                    <h2>Děkujeme za vyplnění!</h2>
-                    <p>Vaše odpovědi byly bezpečně odeslány do akademické databáze.</p>
-                    <p class="small">Tato data budou sloužit jako podklad pro validaci PSM simulace a preferencí lokálního původu v diplomové práci.</p>
+                    <h2 data-i18n="success_title">Děkujeme za vyplnění!</h2>
+                    <p data-i18n="success_text">Vaše odpovědi byly úspěšně odeslány do akademické databáze.</p>
                 </div>
             </div>
-
         </form>
     </div>
 
