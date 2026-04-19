@@ -105,10 +105,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.dataset.i18n;
-            if (translations[lang][key]) {
+            if (translations[lang] && translations[lang][key]) {
                 el.innerHTML = translations[lang][key];
             }
         });
+    }
+
+    // Auto-detect browser language
+    const browserLang = navigator.language || navigator.userLanguage;
+    if (browserLang && browserLang.toLowerCase().startsWith('en')) {
+        updateLanguage('en');
+    } else {
+        updateLanguage('cs');
     }
 
     langBtns.forEach(btn => {
