@@ -1,44 +1,69 @@
-# Diplomová práce — Marketingový výzkum pro vstup značky Berrie na český trh
+# Diplomová práce – Marketingový výzkum a vstup na trh (Značka Berrie)
 
-**Bc. Catherine Zoë Meijer**
-Panevropská univerzita, a.s. · Fakulta podnikání a práva
-Navazující magisterský program: Marketingové komunikace
-Vedoucí práce: doc. RNDr. Ivan TOMEK, CSc.
+Tento repozitář obsahuje kompletní zdrojové kódy a strukturu pro diplomovou práci v oboru Marketingové komunikace na Panevropské univerzitě. 
 
-## Kompilace
+**Téma:** Marketingový výzkum pro vstup nové značky mraženého ovoce v čokoládě na český trh  
+**Značka:** Berrie  
+**Autor:** Bc. Catherine Zoë Meijer  
 
-### Požadavky
+---
 
-- [MacTeX](https://www.tug.org/mactex/) (obsahuje LuaLaTeX, Biber, Latexmk)
+## 📂 Struktura repozitáře
+
+Repozitář je navržen tak, aby striktně odděloval zdrojové kódy práce od vygenerovaných souborů a citlivých dat.
+
+- `thesis/` — Zdrojové soubory diplomové práce (LaTeX).
+  - `main.tex` — Hlavní soubor práce (spojuje všechny kapitoly).
+  - `thesis.cls` — Šablona práce přizpůsobená pro Panevropskou univerzitu (obsahuje formátování a APA 7).
+  - `literature.bib` — Seznam literatury a zdrojů (BibLaTeX).
+  - `acronyms.tex` — Seznam zkratek.
+  - `Makefile` a `latexmkrc` — Skripty pro automatickou kompilaci PDF.
+  - `chapters/` — Jednotlivé kapitoly práce (Úvod, Teorie, Metodologie, Výzkum, Výsledky, Závěr, Abstrakt).
+  - `images/` — Obrázky použité v práci (např. logo univerzity).
+- `private/` — Složka pro citlivé dokumenty (zadání práce, podklady k výzkumu). Tato složka je ignorována Githem, aby nedošlo k úniku dat na GitHub.
+- `dst/` — Složka, do které se automaticky uloží výsledné zkompilované PDF (`Meijer_Catherine_Diplomova_Prace.pdf`).
+- `.gitignore` — Konfigurace Gitu, která ignoruje složky `dst/`, `private/` a dočasné kompilační soubory z `thesis/build/`.
+
+---
+
+## 🛠 Jak zkompilovat PDF
+
+Pro kompilaci dokumentu do formátu PDF se používá zrychlená a zmenšená verze LaTeXu s názvem **TinyTeX**, která nevyžaduje práva administrátora. K překladu se používá `LuaLaTeX` a pro bibliografii `Biber`.
+
+### 1. Požadavky a instalace (Mac/Linux)
+
+Pokud na počítači nemáte nainstalovaný LaTeX, můžete využít odlehčený **TinyTeX**:
 
 ```bash
-brew install --cask mactex
+# Stažení a instalace TinyTeX (bez nutnosti sudo/root)
+curl -sL "https://yihui.org/tinytex/install-bin-unix.sh" | sh
+
+# Přidání TinyTeX do systémové cesty (upravte cestu podle vašeho systému)
+export PATH=$PATH:$HOME/Library/TinyTeX/bin/universal-darwin
+
+# Instalace potřebných LaTeX balíčků pro tuto práci
+tlmgr install biber biblatex biblatex-apa babel-czech csquotes glossaries mfirstuc xfor datatool multirow booktabs pdfpages enumitem threeparttable microtype latexmk xcolor hyperref lualatex-math
 ```
 
-### Sestavení PDF
+### 2. Kompilace práce
+
+Pro vygenerování PDF stačí vstoupit do složky `thesis` a spustit `make pdf`.
 
 ```bash
 cd thesis
 make pdf
 ```
 
-Výstupní soubor: `thesis/Meijer_Catherine_Diplomova_Prace.pdf`
+Tento příkaz spustí `latexmk`, který provede všechny potřebné kroky (včetně překladu citací přes Biber a tvorby seznamu zkratek) a finální PDF s názvem `Meijer_Catherine_Diplomova_Prace.pdf` umístí do složky `dst/` v kořenovém adresáři repozitáře. 
 
-## Struktura projektu
+Všechny dočasné kompilační soubory (jako `.aux`, `.log`, `.toc` atd.) jsou ukládány izolovaně do složky `thesis/build/`, takže zdrojová složka zůstane čistá.
 
+### 3. Čištění dočasných souborů
+
+Pro smazání dočasných kompilačních souborů a vyčištění složky `build/` spusťte:
+
+```bash
+cd thesis
+make clean
 ```
-frozen-fruit-market-entry/
-├── thesis/              # LaTeX zdrojové soubory
-│   ├── main.tex         # Hlavní soubor
-│   ├── thesis.cls       # Třída dokumentu
-│   ├── chapters/        # Kapitoly práce
-│   ├── images/          # Obrázky a grafy
-│   ├── literature.bib   # Bibliografie
-│   └── Makefile         # Build systém
-├── private/             # Citlivé soubory (vyloučeno z gitu)
-└── README.md
-```
-
-## Akademický rok
-
-2025/2026
+Tento příkaz navíc smaže i staré PDF ze složky `dst/`.
