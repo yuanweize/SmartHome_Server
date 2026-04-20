@@ -4,13 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Výzkum trhu: Prémiové mražené pochutiny | Market Research</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="lang-switcher">
-        <button class="lang-btn active" data-lang="cs">🇨🇿 CS</button>
-        <button class="lang-btn" data-lang="en">🇬🇧 EN</button>
+        <select id="lang-select" class="lang-select">
+            <option value="cs">🇨🇿 Čeština</option>
+            <option value="sk">🇸🇰 Slovenčina</option>
+            <option value="en">🇬🇧 English</option>
+            <option value="de">🇩🇪 Deutsch</option>
+            <option value="pl">🇵🇱 Polski</option>
+            <option value="fr">🇫🇷 Français</option>
+            <option value="it">🇮🇹 Italiano</option>
+            <option value="es">🇪🇸 Español</option>
+            <option value="hu">🇭🇺 Magyar</option>
+            <option value="ro">🇷🇴 Română</option>
+            <option value="nl">🇳🇱 Nederlands</option>
+            <option value="pt">🇵🇹 Português</option>
+            <option value="el">🇬🇷 Ελληνικά</option>
+            <option value="sv">🇸🇪 Svenska</option>
+            <option value="da">🇩🇰 Dansk</option>
+            <option value="fi">🇫🇮 Suomi</option>
+            <option value="uk">🇺🇦 Українська</option>
+            <option value="ru">🇷🇺 Русский</option>
+            <option value="vi">🇻🇳 Tiếng Việt</option>
+            <option value="zh">🇨🇳 中文</option>
+        </select>
     </div>
 
     <div class="survey-container">
@@ -23,7 +43,7 @@
             <p data-i18n="subtitle">Akademický výzkum pro diplomovou práci na téma vstupu značky prémiových potravin na trh.</p>
         </header>
 
-        <form id="survey-form">
+        <form id="survey-form" novalidate>
             <!-- ANTI-SPAM HONEYPOT (Hidden from real users) -->
             <input type="text" name="website_url" class="honeypot" tabindex="-1" autocomplete="off" style="display:none;">
             <input type="hidden" name="lang" id="lang-input" value="cs">
@@ -73,7 +93,9 @@
                 <p class="psm-intro" data-i18n="q2_intro">Ohodnoťte na škále 1-10 (1 = nejhorší, 10 = nejlepší) následující parametry pro existující argentinskou značku <strong>Franui</strong> (mražené maliny v čokoládě) a náš nový český koncept <strong>Berrie</strong>.</p>
 
                 <div class="concept-board">
-                    <div class="concept-image">🍓🫐🍌</div>
+                    <div class="concept-image">
+                        <img src="images/berrie_mockup.png" alt="Berrie Premium Packaging Mockup">
+                    </div>
                     <div class="concept-text">
                         <h3 data-i18n="concept_title">Představujeme koncept Berrie</h3>
                         <p data-i18n="concept_desc">Zcela nový koncept české zdravé pochutiny: <strong>Šokově mražené české ovoce obalené v prémiové dvojité vrstvě čokolády.</strong></p>

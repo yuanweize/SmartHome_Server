@@ -1,15 +1,15 @@
 :root {
-    --primary: #5A2B81;     /* Berrie Blue/Purple */
-    --primary-light: #7E4AA8;
-    --secondary: #E91E63;   /* Berrie Pink */
-    --bg-color: #F8F9FA;
+    --primary: #2B0F3A;     /* Deep Luxury Berry */
+    --primary-light: #4A1A63;
+    --secondary: #D4AF37;   /* Premium Gold */
+    --bg-color: #F8F5F9;    /* Soft pastel berry tint */
     --surface: #FFFFFF;
     --text-main: #212529;
     --text-muted: #6C757D;
-    --border: #DEE2E6;
+    --border: #E2D9E6;
     --success: #20C997;
-    --radius: 12px;
-    --shadow: 0 4px 12px rgba(0,0,0,0.05);
+    --radius: 16px;
+    --shadow: 0 10px 40px rgba(43, 15, 58, 0.08);
 }
 
 * {
@@ -20,10 +20,15 @@
 
 body {
     font-family: 'Inter', -apple-system, sans-serif;
-    background-color: var(--bg-color);
+    background: linear-gradient(135deg, #F8F5F9 0%, #EAE0F0 100%);
+    background-attachment: fixed;
     color: var(--text-main);
     line-height: 1.6;
     padding: 20px;
+}
+
+h1, h2, h3, .concept-title {
+    font-family: 'Outfit', sans-serif;
 }
 
 .survey-container {
@@ -237,21 +242,31 @@ h2 {
 
 /* Concept Board */
 .concept-board {
-    background: #F4EEF9;
+    background: linear-gradient(120deg, #FFFFFF 0%, #F8F5F9 100%);
     border-radius: var(--radius);
-    padding: 20px;
+    padding: 24px;
     margin-bottom: 24px;
     display: flex;
-    gap: 20px;
+    gap: 24px;
     align-items: center;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
 }
 
 .concept-image {
-    font-size: 48px;
-    background: white;
-    padding: 20px;
-    border-radius: 50%;
-    box-shadow: var(--shadow);
+    width: 140px;
+    height: 140px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(43, 15, 58, 0.15);
+    flex-shrink: 0;
+}
+
+.concept-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .concept-text h3 {
@@ -333,10 +348,13 @@ h2 {
     background: var(--primary);
     color: white;
     flex: 1;
+    box-shadow: 0 4px 14px rgba(43, 15, 58, 0.2);
 }
 
 .btn-primary:hover {
     background: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(43, 15, 58, 0.25);
 }
 
 .btn-secondary {
@@ -402,7 +420,7 @@ h2 {
     z-index: 100;
 }
 
-.lang-btn {
+.lang-select {
     border: none;
     background: transparent;
     padding: 6px 12px;
@@ -410,13 +428,14 @@ h2 {
     cursor: pointer;
     font-weight: 600;
     font-size: 13px;
-    color: var(--text-muted);
-    transition: all 0.2s;
+    color: var(--text-main);
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
 }
 
-.lang-btn.active {
-    background: var(--primary);
-    color: white;
+.lang-select:focus {
+    background: #F4EEF9;
 }
 
 /* Comparison Grid (Franui vs Berrie) */

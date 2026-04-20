@@ -47,8 +47,13 @@ class SurveyHandler(BaseHTTPRequestHandler):
             self.path = '/index.html'
             
         try:
-            # Prevent directory traversal
-            safe_path = os.path.basename(self.path)
+            # Prevent directory traversal but allow subdirectories
+            safe_path = os.path.normpath(self.path).lstrip('/')
+            if '..' in safe_path or safe_path.startswith('/'):
+                self.send_response(403)
+                self.end_headers()
+                return
+
             file_path = os.path.join(os.path.dirname(__file__), safe_path)
             
             with open(file_path, 'rb') as f:
@@ -61,6 +66,10 @@ class SurveyHandler(BaseHTTPRequestHandler):
                 self.send_header('Content-type', 'text/css')
             elif self.path.endswith('.js'):
                 self.send_header('Content-type', 'application/javascript')
+            elif self.path.endswith('.png'):
+                self.send_header('Content-type', 'image/png')
+            elif self.path.endswith('.jpg') or self.path.endswith('.jpeg'):
+                self.send_header('Content-type', 'image/jpeg')
             self.end_headers()
             self.wfile.write(content)
         except FileNotFoundError:
