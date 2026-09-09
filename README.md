@@ -6,16 +6,21 @@ A thesis-grade smart home IoT platform for simulating and benchmarking sensor/ac
 
 > **Academic Project:** This repository accompanies the bachelor thesis *"Application of Servers and Unix-like Systems for Sensor Control in Smart Homes"* at Czech Technical University in Prague, Faculty of Electrical Engineering.
 
-## 📄 Thesis
+<div align="center">
+  <img src="docs/assets/architecture.png" width="850" alt="SmartHome IoT Platform Architecture">
+  <p><em>SmartHome Server Architecture — Mutual-TLS MQTT transport, dual broker topology, simulated device fleets, and Home Assistant control plane</em></p>
+</div>
+
+## Thesis
 
 | Resource | Link |
 |----------|------|
-| 📖 **Read Online** | [![Read PDF](https://img.shields.io/badge/Read-PDF-red?logo=adobeacrobatreader)](docs/BT/Yuan_Weize_Bachelor_Thesis_latest.pdf) |
-| 📥 **Download Release** | [![Latest Release](https://img.shields.io/github/v/release/yuanweize/SmartHome_Server?label=Release&logo=github)](https://github.com/yuanweize/SmartHome_Server/releases/latest) |
-| 📋 Supervisor Report | [supervisor_report.pdf](docs/BT/Review/supervisor_report.pdf) |
-| 📋 Opponent Report | [opponent_report_Koller.pdf](docs/BT/Review/opponent_report_Koller.pdf) |
-| 📋 Defense Record | [Prubeh-obhajoby.pdf](docs/BT/Review/Prubeh-obhajoby.pdf) |
-| 🏛️ Official Archive | [CTU Digital Library (DSpace)](https://hdl.handle.net/10467/178631) |
+| **Read Online** | [![Read PDF](https://img.shields.io/badge/Read-PDF-red?logo=adobeacrobatreader)](docs/BT/Yuan_Weize_Bachelor_Thesis_latest.pdf) |
+| **Download Release** | [![Latest Release](https://img.shields.io/github/v/release/yuanweize/SmartHome_Server?label=Release&logo=github)](https://github.com/yuanweize/SmartHome_Server/releases/latest) |
+| Supervisor Report | [supervisor_report.pdf](docs/BT/Review/supervisor_report.pdf) |
+| Opponent Report | [opponent_report_Koller.pdf](docs/BT/Review/opponent_report_Koller.pdf) |
+| Defense Record | [Prubeh-obhajoby.pdf](docs/BT/Review/Prubeh-obhajoby.pdf) |
+| Official Archive | [CTU Digital Library (DSpace)](https://hdl.handle.net/10467/178631) |
 
 ## Repository Structure
 
@@ -75,6 +80,16 @@ cd broker/emqx && docker compose up -d
 | **HA Integration** | Auto-discovery of sensors, switches, and lights |
 | **Benchmarking** | TLS handshake latency measurement with statistical analysis |
 | **Scalability** | Multi-process workers for thousands of simulated devices |
+
+<div align="center">
+  <img src="docs/assets/dashboard.png" width="850" alt="Home Assistant Live Sensor Dashboard">
+  <p><em>Home Assistant unified dashboard visualizing real-time simulated & edge telemetry (temperature, humidity, radar fall detection, switches)</em></p>
+</div>
+
+<div align="center">
+  <img src="docs/assets/esp32_wiring.png" width="850" alt="ESP32 Sensor Interface Circuit">
+  <p><em>Physical edge validation — ESP32 hardware wiring with sensor peripherals and hardware fall detection radar</em></p>
+</div>
 
 ## Documentation
 

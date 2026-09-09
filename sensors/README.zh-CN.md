@@ -6,12 +6,12 @@
 
 ## 功能特性
 
-- 🔌 **多 Broker 支持** - 同时向多个 MQTT Broker 发布
-- 🏠 **Home Assistant Discovery** - 自动在 HA 中注册实体
-- 🎮 **可控执行器** - 通过 MQTT 命令控制开关/灯光
-- 🔐 **TLS/mTLS** - 支持文件路径或内联 PEM 证书
-- ⚡ **多进程扩展** - `--workers` 充分利用多核 CPU
-- 📊 **握手统计** - 论文级延迟测量与统计分析
+- **多 Broker 支持** - 同时向多个 MQTT Broker 发布
+- **Home Assistant Discovery** - 自动在 HA 中注册实体
+- **可控执行器** - 通过 MQTT 命令控制开关/灯光
+- **TLS/mTLS** - 支持文件路径或内联 PEM 证书
+- **多进程扩展** - `--workers` 充分利用多核 CPU
+- **握手统计** - 论文级延迟测量与统计分析
 
 ## 快速开始
 

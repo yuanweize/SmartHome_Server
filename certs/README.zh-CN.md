@@ -4,7 +4,7 @@
 
 本目录包含智能家居 IoT 系统的 TLS 证书。系统采用 **mTLS（双向 TLS）** 机制保护 MQTT Broker（EMQX）、边缘节点（ESP32/ESP32-S3）与控制器（Home Assistant）之间的通信安全。
 
-## ⚠️ 安全警告
+## 安全警告
 
 * **私钥文件**（`.key`）**严禁**提交至 Git 或公开分享
 * 确保本目录已添加至 `.gitignore`

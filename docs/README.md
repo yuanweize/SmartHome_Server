@@ -4,16 +4,16 @@ Language: **English** | [简体中文](README.zh-CN.md)
 
 This directory contains all thesis documentation, LaTeX sources, and supporting materials.
 
-## 📄 Thesis
+## Thesis
 
 | Resource | Link |
 |----------|------|
-| 📖 **Read Online** | [![Read PDF](https://img.shields.io/badge/Read-PDF-red?logo=adobeacrobatreader)](BT/Yuan_Weize_Bachelor_Thesis_latest.pdf) |
-| 📥 **Download Release** | [![Latest Release](https://img.shields.io/github/v/release/yuanweize/SmartHome_Server?label=Release&logo=github)](https://github.com/yuanweize/SmartHome_Server/releases/latest) |
-| 📋 Supervisor Report | [supervisor_report.pdf](BT/Review/supervisor_report.pdf) |
-| 📋 Opponent Report | [opponent_report_Koller.pdf](BT/Review/opponent_report_Koller.pdf) |
-| 📋 Defense Record | [Prubeh-obhajoby.pdf](BT/Review/Prubeh-obhajoby.pdf) |
-| 🏛️ Official Archive | [CTU Digital Library (DSpace)](https://hdl.handle.net/10467/178631) |
+| **Read Online** | [![Read PDF](https://img.shields.io/badge/Read-PDF-red?logo=adobeacrobatreader)](BT/Yuan_Weize_Bachelor_Thesis_latest.pdf) |
+| **Download Release** | [![Latest Release](https://img.shields.io/github/v/release/yuanweize/SmartHome_Server?label=Release&logo=github)](https://github.com/yuanweize/SmartHome_Server/releases/latest) |
+| Supervisor Report | [supervisor_report.pdf](BT/Review/supervisor_report.pdf) |
+| Opponent Report | [opponent_report_Koller.pdf](BT/Review/opponent_report_Koller.pdf) |
+| Defense Record | [Prubeh-obhajoby.pdf](BT/Review/Prubeh-obhajoby.pdf) |
+| Official Archive | [CTU Digital Library (DSpace)](https://hdl.handle.net/10467/178631) |
 
 ## Directory Structure
 

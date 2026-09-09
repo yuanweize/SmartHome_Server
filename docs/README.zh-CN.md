@@ -4,16 +4,16 @@
 
 本目录包含论文文档、LaTeX 源码及相关材料。
 
-## 📄 论文
+## 论文
 
 | 资源 | 链接 |
 |------|------|
-| 📖 **在线阅读** | [![Read PDF](https://img.shields.io/badge/Read-PDF-red?logo=adobeacrobatreader)](BT/Yuan_Weize_Bachelor_Thesis_latest.pdf) |
-| 📥 **下载 Release** | [![Latest Release](https://img.shields.io/github/v/release/yuanweize/SmartHome_Server?label=Release&logo=github)](https://github.com/yuanweize/SmartHome_Server/releases/latest) |
-| 📋 导师评审报告 | [supervisor_report.pdf](BT/Review/supervisor_report.pdf) |
-| 📋 对手评审报告 | [opponent_report_Koller.pdf](BT/Review/opponent_report_Koller.pdf) |
-| 📋 答辩记录 | [Prubeh-obhajoby.pdf](BT/Review/Prubeh-obhajoby.pdf) |
-| 🏛️ 官方存档 | [CTU 数字图书馆 (DSpace)](https://hdl.handle.net/10467/178631) |
+| **在线阅读** | [![Read PDF](https://img.shields.io/badge/Read-PDF-red?logo=adobeacrobatreader)](BT/Yuan_Weize_Bachelor_Thesis_latest.pdf) |
+| **下载 Release** | [![Latest Release](https://img.shields.io/github/v/release/yuanweize/SmartHome_Server?label=Release&logo=github)](https://github.com/yuanweize/SmartHome_Server/releases/latest) |
+| 导师评审报告 | [supervisor_report.pdf](BT/Review/supervisor_report.pdf) |
+| 对手评审报告 | [opponent_report_Koller.pdf](BT/Review/opponent_report_Koller.pdf) |
+| 答辩记录 | [Prubeh-obhajoby.pdf](BT/Review/Prubeh-obhajoby.pdf) |
+| 官方存档 | [CTU 数字图书馆 (DSpace)](https://hdl.handle.net/10467/178631) |
 
 ## 目录结构
 

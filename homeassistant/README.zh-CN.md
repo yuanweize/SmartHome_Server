@@ -18,8 +18,8 @@ Home Assistant 提供两种主要安装类型：
 
 | 类型 | Add-ons 支持 | 自动更新 | 推荐 |
 |------|-------------|----------|------|
-| **Home Assistant OS** | ✅ 支持 | ✅ 支持 | ✅ 大多数用户 |
-| **Home Assistant Container** | ❌ 不支持 | ❌ 手动 | 高级用户 |
+| **Home Assistant OS** | ✅ 支持 | 支持 | ✅ 大多数用户 |
+| **Home Assistant Container** | ❌ 不支持 | 手动 | 高级用户 |
 
 > **本项目使用 Home Assistant OS**，部署于 ESXi（OVA 镜像），以支持 Node-RED 等 Add-ons。
 

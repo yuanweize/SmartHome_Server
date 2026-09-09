@@ -6,16 +6,21 @@
 
 > **学术项目：** 本仓库为捷克理工大学电气工程学院学士论文《服务器与类 Unix 系统在智能家居传感器控制中的应用》的配套代码。
 
-## 📄 论文
+<div align="center">
+  <img src="docs/assets/architecture.png" width="850" alt="SmartHome IoT 平台系统架构">
+  <p><em>SmartHome Server 系统架构 — 双向 mTLS MQTT 传输、高可用 Broker 拓扑、大规模传感器模拟集群与 Home Assistant 控制中台</em></p>
+</div>
+
+## 论文
 
 | 资源 | 链接 |
 |------|------|
-| 📖 **在线阅读** | [![Read PDF](https://img.shields.io/badge/Read-PDF-red?logo=adobeacrobatreader)](docs/BT/Yuan_Weize_Bachelor_Thesis_latest.pdf) |
-| 📥 **下载 Release** | [![Latest Release](https://img.shields.io/github/v/release/yuanweize/SmartHome_Server?label=Release&logo=github)](https://github.com/yuanweize/SmartHome_Server/releases/latest) |
-| 📋 导师评审报告 | [supervisor_report.pdf](docs/BT/Review/supervisor_report.pdf) |
-| 📋 对手评审报告 | [opponent_report_Koller.pdf](docs/BT/Review/opponent_report_Koller.pdf) |
-| 📋 答辩记录 | [Prubeh-obhajoby.pdf](docs/BT/Review/Prubeh-obhajoby.pdf) |
-| 🏛️ 官方存档 | [CTU 数字图书馆 (DSpace)](https://hdl.handle.net/10467/178631) |
+| **在线阅读** | [![Read PDF](https://img.shields.io/badge/Read-PDF-red?logo=adobeacrobatreader)](docs/BT/Yuan_Weize_Bachelor_Thesis_latest.pdf) |
+| **下载 Release** | [![Latest Release](https://img.shields.io/github/v/release/yuanweize/SmartHome_Server?label=Release&logo=github)](https://github.com/yuanweize/SmartHome_Server/releases/latest) |
+| 导师评审报告 | [supervisor_report.pdf](docs/BT/Review/supervisor_report.pdf) |
+| 对手评审报告 | [opponent_report_Koller.pdf](docs/BT/Review/opponent_report_Koller.pdf) |
+| 答辩记录 | [Prubeh-obhajoby.pdf](docs/BT/Review/Prubeh-obhajoby.pdf) |
+| 官方存档 | [CTU 数字图书馆 (DSpace)](https://hdl.handle.net/10467/178631) |
 
 ## 仓库结构
 
@@ -75,6 +80,16 @@ cd broker/emqx && docker compose up -d
 | **HA 集成** | 传感器、开关、灯光的自动发现 |
 | **基准测试** | TLS 握手延迟测量及统计分析 |
 | **可扩展性** | 多进程模式支持数千台模拟设备 |
+
+<div align="center">
+  <img src="docs/assets/dashboard.png" width="850" alt="Home Assistant 统一监控控制台">
+  <p><em>Home Assistant 统一监控控制台 — 实时汇总呈现虚拟仿真与物理边缘遥测数据（温湿度漂移、雷达跌倒监测、执行器开关）</em></p>
+</div>
+
+<div align="center">
+  <img src="docs/assets/esp32_wiring.png" width="850" alt="ESP32 传感器外设引脚接线图">
+  <p><em>物理边缘硬件验证 — ESP32 传感器接线拓扑与毫米波雷达跌倒检测硬件电路</em></p>
+</div>
 
 ## 文档索引
 

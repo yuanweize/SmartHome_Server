@@ -18,8 +18,8 @@ Home Assistant offers two main installation types:
 
 | Type | Add-ons | Auto-updates | Recommended |
 |------|---------|--------------|-------------|
-| **Home Assistant OS** | ✅ Yes | ✅ Yes | ✅ Most users |
-| **Home Assistant Container** | ❌ No | ❌ Manual | Advanced users |
+| **Home Assistant OS** | ✅ Yes | Yes | ✅ Most users |
+| **Home Assistant Container** | ❌ No | Manual | Advanced users |
 
 > **This project uses Home Assistant OS** on ESXi (OVA image) to enable Add-ons like Node-RED.
 

@@ -6,12 +6,12 @@ A thesis-grade multi-broker MQTT smart-home simulator with mTLS support, designe
 
 ## Features
 
-- 🔌 **Multi-broker support** - Publish to multiple MQTT brokers simultaneously
-- 🏠 **Home Assistant Discovery** - Auto-register entities in HA
-- 🎮 **Controllable actuators** - Switch/light control via MQTT commands
-- 🔐 **TLS/mTLS** - File paths or inline PEM certificates
-- ⚡ **Multi-process scaling** - `--workers` for multi-core CPU utilization
-- 📊 **Handshake benchmark** - Thesis-grade latency measurements with statistics
+- **Multi-broker support** - Publish to multiple MQTT brokers simultaneously
+- **Home Assistant Discovery** - Auto-register entities in HA
+- **Controllable actuators** - Switch/light control via MQTT commands
+- **TLS/mTLS** - File paths or inline PEM certificates
+- **Multi-process scaling** - `--workers` for multi-core CPU utilization
+- **Handshake benchmark** - Thesis-grade latency measurements with statistics
 
 ## Quick Start
 

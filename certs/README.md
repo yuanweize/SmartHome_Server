@@ -5,7 +5,7 @@ Language: **English** | [简体中文](README.zh-CN.md)
 This directory contains TLS certificates for the Smart Home IoT system.
 The system uses **mTLS (Mutual TLS)** to secure communication between the MQTT broker (EMQX), edge nodes (ESP32/ESP32-S3), and the controller (Home Assistant).
 
-## ⚠️ Security Warning
+## Security Warning
 
 * **Private keys** (`.key` files) must **NEVER** be committed to Git or shared publicly.
 * Ensure this directory is listed in `.gitignore`.
