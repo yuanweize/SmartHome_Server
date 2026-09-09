@@ -87,18 +87,18 @@ cd broker/emqx && docker compose up -d
 </div>
 
 <div align="center">
-  <img src="docs/assets/fall_detection.png" width="850" alt="端侧实时跌倒检测流水线">
-  <p><em>端侧边缘智能验证 — 六轴 IMU 加速度与角速度多阶段跌倒识别流水线及告警联动</em></p>
+  <img src="docs/assets/fall_detection.png" width="850" alt="端到端跌倒检测闭环验证">
+  <p><em>端到端跌倒检测实测 — ESP32-S3 传感器融合运算（IMU + 陀螺仪双阈值判定）、Node-RED 自动化流水线与 iOS 临界告警推送</em></p>
 </div>
 
 <div align="center">
   <img src="docs/assets/esp32_wiring.png" width="850" alt="ESP32 传感器外设引脚接线图">
-  <p><em>物理边缘硬件验证 — ESP32 传感器硬件电路接线图（TCS34725 颜色识别、MQ-2 烟雾检测与状态指示）</em></p>
+  <p><em>ESP32 环境节点 — TCS34725 颜色传感器 (I2C)、MQ-2 烟雾传感器 (ADC)、SR602 人体红外与 RGB LED 执行器接线</em></p>
 </div>
 
 <div align="center">
   <img src="docs/assets/esp32s3_wiring.png" width="850" alt="ESP32-S3 边缘计算节点接线图">
-  <p><em>边缘计算核心节点 — ESP32-S3 硬件接线原理图（MPU-6050 六轴惯导、BMP280 环境监测与 KY-037 声音采样）</em></p>
+  <p><em>ESP32-S3 边缘计算节点 — MPU-6050 六轴惯导与 BMP280 共用 I2C 总线 (GPIO 4/5)、KY-037 声音传感器 ADC (GPIO 6) 接线</em></p>
 </div>
 
 ## 文档索引

@@ -87,18 +87,18 @@ cd broker/emqx && docker compose up -d
 </div>
 
 <div align="center">
-  <img src="docs/assets/fall_detection.png" width="850" alt="Edge Computing Real-Time Fall Detection Pipeline">
-  <p><em>Edge computing validation — Real-time multi-stage fall detection pipeline with continuous telemetry waveform & incident alert telemetry</em></p>
+  <img src="docs/assets/fall_detection.png" width="850" alt="Edge Computing Real-Time Fall Detection">
+  <p><em>End-to-end fall detection validation — ESP32-S3 sensor fusion (IMU + gyroscope threshold), Node-RED automation pipeline, and iOS critical alert push notification</em></p>
 </div>
 
 <div align="center">
   <img src="docs/assets/esp32_wiring.png" width="850" alt="ESP32 Sensor Interface Circuit">
-  <p><em>Physical edge validation — ESP32 hardware wiring schematic with color sensor, gas detector, and status telemetry</em></p>
+  <p><em>ESP32 environment node — TCS34725 color sensor (I2C), MQ-2 gas detector (ADC), SR602 PIR motion, and RGB LED actuation wiring</em></p>
 </div>
 
 <div align="center">
-  <img src="docs/assets/esp32s3_wiring.png" width="850" alt="ESP32-S3 Edge Node Circuit Schematic">
-  <p><em>Edge intelligence node — ESP32-S3 hardware wiring schematic featuring MPU-6050 6-axis IMU, BMP280, and acoustic peak detector</em></p>
+  <img src="docs/assets/esp32s3_wiring.png" width="850" alt="ESP32-S3 Edge Computing Node Wiring">
+  <p><em>ESP32-S3 edge computing node — MPU-6050 6-axis IMU and BMP280 (shared I2C bus GPIO 4/5), KY-037 acoustic ADC (GPIO 6) wiring</em></p>
 </div>
 
 ## Documentation
