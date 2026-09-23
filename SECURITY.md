@@ -22,4 +22,4 @@ If you discover a security vulnerability, certificate handling issue, or network
 1. **Do NOT report security issues via public GitHub issues.**
 2. Report privately via [GitHub Security Advisories](https://github.com/yuanweize/SmartHome_Server/security/advisories/new) or contact the maintainer directly at `yuanweize@users.noreply.github.com`.
 3. Provide details on the affected component (Broker, ESPHome firmware, or Home Assistant integration) and reproduction steps.
-4. We will acknowledge receipt within 48 hours.
+4. I aim to acknowledge valid security reports as soon as practical, investigate the root cause, and coordinate a patch.
