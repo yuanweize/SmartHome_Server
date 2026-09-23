@@ -13,8 +13,8 @@ venv/
 # VSCode
 .vscode/
 
-# GitHub metadata (user request: exclude .github)
-.github/
+# GitHub configuration
+!/.github/
 
 # Project-specific (secrets / local config)
 sensors/brokers.yml

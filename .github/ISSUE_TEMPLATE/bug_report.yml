@@ -1,0 +1,40 @@
+name: Bug Report
+description: Report a problem or misconfiguration in SmartHome_Server.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting an issue! **DO NOT include Wi-Fi passwords, private keys, or tokens in your report.**
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component Affected
+      options:
+        - Mosquitto Broker / mTLS
+        - Certificate Scripts (certs/)
+        - ESPHome Firmware Configuration
+        - Home Assistant Configuration
+        - Sensor Drivers / Python Scripts
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: Clear description of what went wrong.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: How can this issue be reproduced?
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Sanitized Logs
+      description: Relevant logs with credentials and IPs redacted.
+      render: shell

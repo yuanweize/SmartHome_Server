@@ -1,0 +1,16 @@
+name: Feature Request
+description: Propose an enhancement or new sensor integration for SmartHome_Server.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: Proposal
+      description: What feature or sensor integration would you like to add?
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Use Case & Benefit
+      description: Why would this be beneficial?
